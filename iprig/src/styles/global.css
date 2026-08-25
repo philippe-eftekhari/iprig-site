@@ -1,0 +1,846 @@
+/* ==========================================================================
+   IPRIG — FONDATIONS CSS
+   --------------------------------------------------------------------------
+   1. Polices
+   2. Design tokens
+   3. Reset
+   4. Typographie de base
+   5. Primitives de mise en page
+   6. Boutons et liens
+   7. Langage motion
+   ========================================================================== */
+
+/* ==========================================================================
+   1. POLICES — self-hébergées, sous-ensemble latin uniquement
+   --------------------------------------------------------------------------
+   Newsreader (Production Type, SIL OFL) — serif éditoriale, titres et citations
+   Instrument Sans (Rhode Island Type, SIL OFL) — sans-serif, corps et interface
+   Licences complètes : /fonts/LICENSE-*.txt
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Newsreader';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/fonts/newsreader-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Newsreader';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/fonts/newsreader-latin-wght-italic.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 700;
+  src: url('/fonts/instrument-sans-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ==========================================================================
+   2. DESIGN TOKENS
+   ========================================================================== */
+
+:root {
+  /* --- Couleurs ---------------------------------------------------------
+     Identité bleu / vert demandée par le client, traitée en tons profonds
+     et désaturés : ni bleu « logiciel d'entreprise », ni vert « application
+     écologique ». Le papier chaud donne le caractère éditorial. */
+
+  --color-paper: #f6f3ed; /* fond principal, blanc cassé chaud */
+  --color-paper-2: #efeae0; /* fond alterné, encarts */
+  --color-paper-3: #e5dfd2; /* papier foncé — fond du fallback « events » */
+
+  --color-ink: #14191b; /* texte principal */
+  --color-ink-soft: #3a4447; /* texte secondaire */
+  --color-muted: #5e6a6e; /* texte tertiaire, légendes — AA sur papier */
+
+  --color-navy: #0d2e4a; /* bleu profond — titres, liens, CTA */
+  --color-navy-deep: #071d30; /* fond des sections sombres */
+
+  --color-forest: #1c4438; /* vert profond institutionnel */
+  --color-forest-deep: #12312a;
+  --color-forest-bright: #7fb09c; /* vert lisible sur fond sombre */
+
+  --color-accent: #b58a4a; /* laiton — filets, chiffres, détails */
+  /* Laiton assombri — la seule teinte de laiton employée en TEXTE.
+     Mesuré, pas estimé : la valeur V2 (#8c6626) donnait 4,69:1 sur le papier
+     principal mais 4,33:1 sur le papier alterné — sous le seuil AA. Or les
+     surtitres dorés vivent surtout sur papier alterné (L'institut, Le
+     fondateur, en-têtes de pages), en 12 px gras : un corps qui ne bénéficie
+     d'aucune tolérance « grand texte ». Même teinte, même saturation, 5 % de
+     clarté en moins : 5,41 / 4,99 / 4,51 sur les trois papiers. */
+  --color-accent-ink: #805d23;
+  --color-accent-bright: #d8b67c; /* laiton clair — lisible sur fond sombre */
+
+  /* Couleurs de texte sur fond sombre */
+  --color-on-dark: #f6f3ed;
+  --color-on-dark-muted: #a8b8c0;
+
+  /* Trait clair employé sur fond bleu profond — trames et compositions
+     graphiques (voir MediaSlot). */
+  --color-navy-line: #9fb6c6;
+
+  /* Filets décoratifs */
+  --rule: color-mix(in srgb, var(--color-ink) 14%, transparent);
+  --rule-strong: color-mix(in srgb, var(--color-ink) 26%, transparent);
+  --rule-on-dark: color-mix(in srgb, var(--color-on-dark) 20%, transparent);
+
+  /* Bordures d'éléments interactifs.
+     Contrastées à ≥ 3:1 avec leur fond (WCAG 2.2, critère 1.4.11) :
+     la bordure d'un bouton est ce qui le désigne comme cliquable. */
+  --border-control: color-mix(in srgb, var(--color-navy) 60%, transparent);
+  --border-control-on-dark: color-mix(in srgb, var(--color-on-dark) 40%, transparent);
+
+  /* Sélection */
+  --color-selection: color-mix(in srgb, var(--color-accent) 32%, transparent);
+
+  /* --- Typographie ------------------------------------------------------ */
+  --font-serif: 'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Palatino,
+    Georgia, 'Times New Roman', serif;
+  --font-sans: 'Instrument Sans', 'Segoe UI', system-ui, -apple-system,
+    'Helvetica Neue', Arial, sans-serif;
+
+  /* Échelle fluide — une seule source, pas de valeurs arbitraires ailleurs */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: clamp(1rem, 0.97rem + 0.14vw, 1.0625rem);
+  --text-md: clamp(1.0625rem, 1rem + 0.28vw, 1.1875rem);
+  --text-lede: clamp(1.125rem, 1.03rem + 0.48vw, 1.375rem);
+  --text-h3: clamp(1.125rem, 1.05rem + 0.38vw, 1.3125rem);
+  --text-h2: clamp(1.625rem, 1.25rem + 1.7vw, 2.625rem);
+  --text-h1: clamp(1.875rem, 1.4rem + 2.1vw, 3rem);
+  /* Wordmark du masthead — le geste d'identité principal du site.
+
+     Il tient compte de la LARGEUR et de la HAUTEUR du viewport : sur un écran
+     large mais peu haut (portable 1366 × 768, téléphone en paysage), un
+     dimensionnement à la seule largeur donnait le wordmark à sa taille
+     maximale au-dessus d'espacements calibrés pour de grands écrans, et
+     l'action passait sous la ligne de flottaison.
+
+     Cette valeur est celle du TÉLÉPHONE ET DE LA TABLETTE. Elle fonctionne :
+     le mot occupe la ligne entière, ce qui est exactement l'effet recherché
+     sur une colonne unique. Elle n'a pas été touchée en V3.1.
+
+     La valeur de bureau, elle, est plus contenue — voir le bloc `62rem`
+     ci-dessous. */
+  --text-display: clamp(5rem, min(26vw, 32vh), 18rem);
+
+  --leading-tight: 1.08;
+  --leading-snug: 1.24;
+  --leading-normal: 1.42;
+  --leading-relaxed: 1.62;
+
+  --tracking-display: -0.03em;
+  --tracking-tight: -0.018em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.08em;
+  --tracking-eyebrow: 0.16em;
+
+  /* --- Espacements ------------------------------------------------------ */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.5rem;
+  --space-8: 3rem;
+  --space-9: 4rem;
+  --space-10: 5rem;
+  --space-11: 6rem;
+
+  /* --- Rythme vertical -----------------------------------------------
+     Quatre densités, et non une seule. Une page qui respire exactement
+     pareil du haut jusqu'en bas rend son système visible ; c'est cette
+     régularité qui donnait à la V1 son air de gabarit.
+
+       compacte   un bandeau, une ligne d'information
+       normale    une section de contenu ordinaire
+       large      une section de lecture, deux colonnes
+       immersive  une ouverture ou une clôture
+
+     Sur mobile, les bornes basses sont volontairement serrées : sur un
+     téléphone, un blanc de 88 px se traverse au doigt sans rien apprendre. */
+  --section-compact: clamp(2.5rem, 6vw, 5rem);
+  --section-y: clamp(3.25rem, 8vw, 7rem);
+  --section-y-lg: clamp(4rem, 11vw, 10rem);
+  --section-immersive: clamp(4.75rem, 13vw, 12rem);
+
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+
+  /* --- Largeurs --------------------------------------------------------- */
+  --container: 74rem;
+  --container-narrow: 44rem; /* colonne de lecture confortable */
+  --container-wide: 86rem;
+
+  /* --- Longueur de ligne ------------------------------------------------
+     ⚠ Piège : `1ch` vaut la largeur du chiffre « 0 », pas celle d'un
+     caractère moyen. Avec Instrument Sans, un « 0 » est large : `1ch` vaut
+     en réalité 1,4 à 1,5 caractère français. Une contrainte écrite « 62ch »
+     laisse donc passer 85 à 95 caractères par ligne — bien au-delà de la
+     fourchette confortable (50 à 75).
+
+     Mesuré au navigateur sur ce site, pas estimé :
+       48ch → 66 caractères à 19 px, 73 caractères à 13 px
+       52ch → 71 caractères à 19 px, 79 caractères à 13 px
+
+     D'où deux mesures seulement, et aucune valeur en `ch` ailleurs dans le
+     projet pour un bloc de lecture. */
+  --measure: 48ch; /* petits corps : notes, résumés, réponses */
+  --measure-wide: 52ch; /* corps de lecture, à partir de --text-md */
+
+  /* --- Bordures --------------------------------------------------------- */
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --border-hairline: 1px;
+
+  /* Aucun token d'ombre. Le relief de ce site vient des filets et des fonds,
+     jamais d'une élévation. Les deux ombres déclarées en V1 n'ont jamais été
+     employées ; les retirer retire aussi la tentation. */
+
+  /* --- Motion ----------------------------------------------------------- */
+  /* DEUX courbes, pas dix, et leurs noms disent à quoi elles servent.
+
+     --ease-ui         réactions d'interface : survol, focus, ouverture d'un
+                       accordéon, bascule d'un menu. Départ vif, arrivée nette.
+     --ease-editorial  révélations de lecture : titres, filets, images.
+                       Départ franc, arrivée longue et posée, sans rebond.
+
+     Toute nouvelle transition doit se ranger dans l'une des deux. */
+  --ease-ui: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Deux durées d'interface.
+
+     150 ms  ce qui doit paraître instantané : couleur, focus, enfoncement.
+     280 ms  ce qui doit se voir se faire : un filet qui se trace sous un
+             lien, une flèche qui avance, un accordéon qui s'ouvre.
+
+     La V2 employait 380 ms pour la seconde. Sur un soulignement de survol,
+     le trait finissait après que le regard soit déjà passé au lien suivant ;
+     et sur les CTA, la flèche mettait deux fois et demie plus de temps à
+     avancer de 3 px que le fond à changer de couleur — une même
+     micro-interaction jouée à deux tempos. */
+  --dur-fast: 150ms;
+  --dur: 280ms;
+
+  /* Durées du langage motion (voir section 7) */
+  --dur-title: 780ms;
+  --dur-rule: 620ms;
+  --dur-media: 880ms;
+  --dur-soft: 640ms;
+
+  /* Hauteur de l'en-tête — utilisée pour le scroll-padding des ancres */
+  --header-h: 4.25rem;
+
+  color-scheme: light;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --header-h: 4.75rem;
+  }
+}
+
+/* ---------------------------------------------- Masthead sur grand écran
+   À partir de 62rem, le hero passe en deux colonnes et le wordmark n'a plus
+   à tenir la ligne entière : il redevient un mot posé sur une page.
+
+   La V3 le laissait à 288 px sur tout écran d'au moins 900 px de haut. C'est
+   spectaculaire, mais il ne restait alors presque rien du premier écran pour
+   la promesse et l'action — en 1440 × 900 comme en 1366 × 768, les boutons
+   étaient coupés par la ligne de flottaison.
+
+   Quatre échelles ont été comparées (référence, −6 %, −9 %, −12 %) aux quatre
+   formats de contrôle. −9 % est la première où l'action est ENTIÈREMENT
+   visible avec de la marge sur les deux formats critiques, et la dernière où
+   le mot reste franchement dominant : à −12 %, le vide à droite du G
+   commence à se lire comme un trou.
+
+     1366 × 768   246 → 223 px   (−9,4 %)
+     1440 × 900   288 → 261 px   (−9,4 %)
+     1512 × 982   288 → 264 px   (−8,3 %)
+     1920 × 1080  288 → 264 px   (−8,3 %)
+
+   Seuls les deux termes qui gouvernent réellement ici changent — la hauteur
+   et le plafond. Le terme de largeur reste à 26vw : il ne l'emporte que sur
+   un écran étroit et haut, et le conserver rend le passage à 62rem continu
+   au lieu de produire un saut de 24 px. */
+@media (min-width: 62rem) {
+  :root {
+    --text-display: clamp(5rem, min(26vw, 29vh), 16.5rem);
+  }
+}
+
+/* ==========================================================================
+   3. RESET
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + var(--space-5));
+}
+
+body {
+  min-height: 100svh;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+}
+
+::selection {
+  background-color: var(--color-selection);
+}
+
+/* ==========================================================================
+   4. TYPOGRAPHIE DE BASE
+   ========================================================================== */
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+  color: var(--color-navy);
+}
+
+h1 {
+  font-size: var(--text-h1);
+  line-height: var(--leading-tight);
+}
+
+h2 {
+  font-size: var(--text-h2);
+  line-height: var(--leading-tight);
+}
+
+h3 {
+  font-size: var(--text-h3);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: var(--tracking-normal);
+  color: var(--color-ink);
+}
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+}
+
+strong {
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   5. PRIMITIVES DE MISE EN PAGE
+   ========================================================================== */
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.container--narrow {
+  max-width: calc(var(--container-narrow) + var(--gutter) * 2);
+}
+
+.container--wide {
+  max-width: var(--container-wide);
+}
+
+.section {
+  padding-block: var(--section-y);
+}
+
+.section--lg {
+  padding-block: var(--section-y-lg);
+}
+
+/* Sections sombres — utilisées avec parcimonie pour marquer le rythme */
+.section--dark {
+  background-color: var(--color-navy-deep);
+  color: var(--color-on-dark);
+}
+
+/* Une section sombre en clôture partage le fond du pied de page : sans cette
+   règle, leurs marges s'additionnent et créent un grand vide sans frontière
+   visible. */
+main > .section--dark:last-child {
+  padding-block-end: var(--space-8);
+}
+
+.section--dark :is(h1, h2, h3, h4) {
+  color: var(--color-on-dark);
+}
+
+.section--forest {
+  background-color: var(--color-forest-deep);
+  color: var(--color-on-dark);
+}
+
+.section--forest :is(h2, h3) {
+  color: var(--color-on-dark);
+}
+
+.section--paper-2 {
+  background-color: var(--color-paper-2);
+}
+
+/* Surtitre — petite capitale espacée, marqueur éditorial récurrent */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-accent-ink);
+  margin-bottom: var(--space-5);
+}
+
+.eyebrow::before {
+  content: '';
+  inline-size: var(--space-6);
+  block-size: 1px;
+  background-color: var(--color-accent);
+  flex: none;
+}
+
+.section--dark .eyebrow,
+.section--forest .eyebrow {
+  color: var(--color-accent-bright);
+}
+
+.section--dark .eyebrow::before,
+.section--forest .eyebrow::before {
+  background-color: var(--color-accent-bright);
+}
+
+/* Chapô */
+.lede {
+  font-size: var(--text-lede);
+  line-height: var(--leading-normal);
+  color: var(--color-ink-soft);
+  font-family: var(--font-serif);
+  letter-spacing: -0.005em;
+}
+
+.section--dark .lede,
+.section--forest .lede {
+  color: var(--color-on-dark-muted);
+}
+
+/* Corps de texte long */
+.prose p + p {
+  margin-top: var(--space-4);
+}
+
+.prose {
+  color: var(--color-ink-soft);
+  max-width: var(--measure-wide);
+}
+
+.section--dark .prose,
+.section--forest .prose {
+  color: var(--color-on-dark-muted);
+}
+
+/* Lien d'évitement */
+.skip-link {
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  inset-block-start: var(--space-4);
+  z-index: 200;
+  padding: var(--space-3) var(--space-5);
+  background-color: var(--color-navy-deep);
+  color: var(--color-on-dark);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transform: translateY(-200%);
+  transition: transform var(--dur-fast) var(--ease-ui);
+}
+
+/* `:focus` et non `:focus-visible` : un lien d'évitement doit apparaître dès
+   qu'il reçoit le focus, y compris programmatiquement. */
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* Réservé aux lecteurs d'écran */
+.sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   6. BOUTONS ET LIENS
+   ========================================================================== */
+
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent-ink);
+  outline-offset: 3px;
+  border-radius: var(--radius-xs);
+}
+
+.section--dark :where(a, button, summary):focus-visible,
+.section--forest :where(a, button, summary):focus-visible {
+  outline-color: var(--color-accent-bright);
+}
+
+.btn {
+  --btn-bg: var(--color-navy);
+  --btn-fg: var(--color-paper);
+  --btn-border: var(--color-navy);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  /* Cible tactile ≥ 44 px de haut */
+  min-block-size: 2.875rem;
+  padding: var(--space-3) var(--space-6);
+  background-color: var(--btn-bg);
+  color: var(--btn-fg);
+  border: var(--border-hairline) solid var(--btn-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-ui),
+    color var(--dur-fast) var(--ease-ui),
+    border-color var(--dur-fast) var(--ease-ui),
+    transform var(--dur-fast) var(--ease-ui);
+}
+
+.btn:hover {
+  --btn-bg: var(--color-forest);
+  --btn-border: var(--color-forest);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* Flèche du CTA — avance légèrement au survol */
+.btn__arrow {
+  transition: transform var(--dur) var(--ease-ui);
+  flex: none;
+}
+
+.btn:hover .btn__arrow {
+  transform: translateX(3px);
+}
+
+.btn--ghost {
+  --btn-bg: transparent;
+  --btn-fg: var(--color-navy);
+  --btn-border: var(--border-control);
+}
+
+.btn--ghost:hover {
+  --btn-bg: transparent;
+  --btn-fg: var(--color-forest);
+  --btn-border: var(--color-forest);
+}
+
+.btn--on-dark {
+  --btn-bg: var(--color-paper);
+  --btn-fg: var(--color-navy-deep);
+  --btn-border: var(--color-paper);
+}
+
+.btn--on-dark:hover {
+  --btn-bg: var(--color-accent-bright);
+  --btn-border: var(--color-accent-bright);
+  --btn-fg: var(--color-navy-deep);
+}
+
+.btn--ghost-on-dark {
+  --btn-bg: transparent;
+  --btn-fg: var(--color-on-dark);
+  --btn-border: var(--border-control-on-dark);
+}
+
+.btn--ghost-on-dark:hover {
+  --btn-bg: transparent;
+  --btn-fg: var(--color-accent-bright);
+  --btn-border: var(--color-accent-bright);
+}
+
+.btn--lg {
+  min-block-size: 3.25rem;
+  padding-inline: var(--space-7);
+  font-size: 0.875rem;
+}
+
+/* Lien de texte souligné à distance */
+.link {
+  color: var(--color-navy);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: var(--rule-strong);
+  transition: text-decoration-color var(--dur-fast) var(--ease-ui),
+    color var(--dur-fast) var(--ease-ui);
+}
+
+.link:hover {
+  color: var(--color-forest);
+  text-decoration-color: currentColor;
+}
+
+.section--dark .link,
+.section--forest .link {
+  color: var(--color-on-dark);
+}
+
+.section--dark .link:hover,
+.section--forest .link:hover {
+  color: var(--color-accent-bright);
+}
+
+/* Liste de liens autonomes (réseaux sociaux, canaux de contact).
+   Ces liens ne sont pas insérés dans une phrase : l'exception « inline » du
+   critère WCAG 2.2 2.5.8 ne s'applique pas, ils doivent donc offrir une cible
+   d'au moins 24 px de haut. */
+.link-list a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 1.5rem;
+}
+
+/* ==========================================================================
+   7. LANGAGE MOTION
+   --------------------------------------------------------------------------
+   Quatre comportements, pas un de plus. Le principe est la retenue : peu
+   d'éléments animés, mais chaque animation a une raison.
+
+     A — title  révélation d'un titre derrière un masque (montée verticale)
+     B — rule   filet qui se trace de la gauche vers la droite
+     C — media  image révélée par un volet + très léger recentrage d'échelle
+     D — soft   simple apparition en opacité, sans déplacement
+
+   Règles :
+     — les paragraphes courants ne s'animent pas ;
+     — les listes ne s'animent pas élément par élément ;
+     — une seule animation focale par moment de lecture ;
+     — uniquement des propriétés composées (transform, opacity, clip-path).
+
+   Déclenchement : un IntersectionObserver unique (voir BaseLayout.astro) qui
+   se désabonne après le premier passage. Les éléments marqués
+   `data-motion-now` sont révélés dès le chargement, en séquence (hero).
+   ========================================================================== */
+
+[data-motion] {
+  --motion-delay: 0ms;
+}
+
+/* --- A — TITRE ------------------------------------------------------------
+   Le titre monte derrière un masque. Le padding compense les jambages :
+   sans lui, `overflow: clip` couperait les descendantes (p, g, é).
+
+   ⚠ Le masque rogne au bord de la boîte de PADDING, qui suit l'interlignage.
+   Avec un interlignage normal (1,04 à 1,15 sur les titres de section), la
+   boîte de ligne couvre largement les capitales : rien n'est rogné en haut,
+   et c'est vérifié sur les six titres animés du site.
+
+   Un interlignage très serré, lui, comprime la boîte sous les glyphes et
+   ampute leurs empattements supérieurs. C'est le cas du masthead
+   (`line-height: 0.82`), qui ouvre donc sa propre marge haute — voir
+   `.hero__mark` dans Hero.astro. Toute nouvelle utilisation de ce geste sous
+   ~0,9 d'interlignage demande le même contrôle. */
+[data-motion='title'] {
+  display: block;
+  overflow: clip;
+  padding-block-end: 0.14em;
+  margin-block-end: -0.14em;
+}
+
+[data-motion='title'] .motion-inner {
+  display: block;
+  transform: translateY(106%);
+  transition: transform var(--dur-title) var(--ease-editorial) var(--motion-delay);
+}
+
+[data-motion='title'].is-in .motion-inner {
+  transform: none;
+}
+
+/* --- B — FILET ------------------------------------------------------------ */
+[data-motion='rule'] {
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform var(--dur-rule) var(--ease-editorial) var(--motion-delay);
+}
+
+[data-motion='rule'].is-in {
+  transform: scaleX(1);
+}
+
+/* --- C — MÉDIA -----------------------------------------------------------
+   Volet qui descend, doublé d'un très léger recentrage d'échelle interne.
+   Aucun zoom agressif, aucun parallax.
+
+   ⚠ Le masque porte sur `.motion-clip`, JAMAIS sur l'élément observé.
+   Un élément entièrement masqué par `clip-path` a une aire d'intersection
+   nulle : l'IntersectionObserver ne le voit jamais entrer dans le viewport,
+   il ne serait donc jamais révélé. L'élément observé doit rester visible. */
+[data-motion='media'] .motion-clip {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path var(--dur-media) var(--ease-editorial) var(--motion-delay);
+}
+
+[data-motion='media'].is-in .motion-clip {
+  clip-path: inset(0 0 0 0);
+}
+
+[data-motion='media'] .motion-scale {
+  transform: scale(1.02);
+  transition: transform calc(var(--dur-media) + 300ms) var(--ease-editorial)
+    var(--motion-delay);
+}
+
+[data-motion='media'].is-in .motion-scale {
+  transform: none;
+}
+
+/* --- D — DOUX ------------------------------------------------------------- */
+[data-motion='soft'] {
+  opacity: 0;
+  transition: opacity var(--dur-soft) var(--ease-editorial) var(--motion-delay);
+}
+
+[data-motion='soft'].is-in {
+  opacity: 1;
+}
+
+/* --- Sécurités ------------------------------------------------------------
+   Sans JavaScript, ou en mouvement réduit, tout est visible immédiatement.
+   Aucune information ne dépend d'une animation. */
+.no-js [data-motion],
+.no-js [data-motion='soft'],
+.no-js [data-motion='media'],
+.no-js [data-motion='rule'] {
+  opacity: 1;
+  transform: none;
+  clip-path: none;
+}
+
+.no-js [data-motion='title'] .motion-inner,
+.no-js [data-motion='media'] .motion-scale {
+  transform: none;
+}
+
+.no-js [data-motion='media'] .motion-clip {
+  clip-path: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  [data-motion] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+
+  [data-motion='title'] .motion-inner,
+  [data-motion='media'] .motion-scale {
+    transform: none !important;
+  }
+
+  [data-motion='media'] .motion-clip {
+    clip-path: none !important;
+  }
+}

@@ -1,0 +1,176 @@
+---
+/**
+ * CTA de clôture — affiche typographique.
+ *
+ * C'est la dernière page du site : elle peut être vaste. Le prix n'est plus
+ * rangé dans un petit panneau tarifaire, il devient l'élément graphique
+ * principal de la composition.
+ *
+ * L'opposé exact du bandeau intermédiaire (CtaBand), qui est compact et
+ * horizontal. Les deux blocs de conversion ne partagent ni leur grille, ni
+ * leur densité, ni leur échelle.
+ *
+ * Utilisé aussi en clôture des pages secondaires : c'est la signature de fin
+ * du site.
+ */
+import Arrow from './Arrow.astro';
+import { offer } from '../data/site';
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  /** Récapitulatif en une phrase. Volontairement court. */
+  intro: string;
+}
+
+const { eyebrow = 'Dernière étape', title, intro } = Astro.props;
+---
+
+<section class="poster section--dark">
+  <div class="container container--wide">
+    <p class="poster__label">{eyebrow}</p>
+
+    <h2 class="poster__title" data-motion="title">
+      <span class="motion-inner">{title}</span>
+    </h2>
+
+    {/* Le prix comme composition, pas comme étiquette tarifaire. */}
+    <p class="poster__price">
+      <span class="poster__amount">{offer.priceDisplay}</span>
+      <span class="poster__terms">
+        <span class="poster__period">{offer.pricePeriod}</span>
+        <span class="poster__commit">{offer.commitment}</span>
+      </span>
+    </p>
+
+    <span class="poster__rule" aria-hidden="true" data-motion="rule"></span>
+
+    <div class="poster__foot">
+      <p class="poster__intro">{intro}</p>
+
+      <div class="poster__action">
+        <a
+          class="btn btn--on-dark btn--lg"
+          href={offer.patreonUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {offer.ctaPrimaryLong}
+          <Arrow />
+          <span class="sr-only"> (nouvelle fenêtre)</span>
+        </a>
+        {/* TODO CLIENT : valider la formulation exacte du prix. */}
+        <p class="poster__fineprint">{offer.priceDetail}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .poster {
+    /* Section « immersive » : le rythme vertical le plus large du site. */
+    padding-block: var(--section-immersive);
+  }
+
+  .poster__label {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--color-accent-bright);
+  }
+
+  .poster__title {
+    margin-block-start: var(--space-5);
+    max-inline-size: 14ch;
+    font-size: clamp(2.25rem, 1.4rem + 3.6vw, 4.25rem);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--color-on-dark);
+  }
+
+  /* ------------------------------------------------------------- Le prix */
+  .poster__price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    margin-block-start: var(--space-8);
+  }
+
+  .poster__amount {
+    font-family: var(--font-serif);
+    /* Le plus grand caractère de la page après le masthead. */
+    font-size: clamp(5rem, 3rem + 11vw, 12rem);
+    font-weight: 500;
+    line-height: 0.78;
+    letter-spacing: -0.04em;
+    color: var(--color-on-dark);
+  }
+
+  .poster__terms {
+    display: grid;
+    gap: var(--space-2);
+    padding-block-end: 0.4em;
+  }
+
+  .poster__period {
+    font-size: var(--text-md);
+    color: var(--color-on-dark-muted);
+  }
+
+  .poster__commit {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--color-accent-bright);
+  }
+
+  .poster__rule {
+    display: block;
+    block-size: 1px;
+    inline-size: 100%;
+    margin-block: var(--space-7) var(--space-6);
+    background-color: var(--rule-on-dark);
+    transform-origin: 0 50%;
+  }
+
+  /* -------------------------------------------------------------- Le pied */
+  .poster__foot {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .poster__intro {
+    max-inline-size: 40ch;
+    font-family: var(--font-serif);
+    font-size: var(--text-lede);
+    line-height: var(--leading-normal);
+    color: var(--color-on-dark-muted);
+  }
+
+  .poster__fineprint {
+    margin-block-start: var(--space-4);
+    max-inline-size: 34ch;
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    color: var(--color-on-dark-muted);
+  }
+
+  @media (min-width: 62rem) {
+    .poster__foot {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--space-9);
+      align-items: end;
+    }
+
+    .poster__action {
+      text-align: end;
+    }
+
+    .poster__fineprint {
+      margin-inline-start: auto;
+    }
+  }
+</style>

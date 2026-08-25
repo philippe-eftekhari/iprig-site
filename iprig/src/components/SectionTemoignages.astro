@@ -1,0 +1,100 @@
+---
+/**
+ * Témoignages.
+ *
+ * La section ne s’affiche QUE si des témoignages réels ont été ajoutés dans
+ * src/data/temoignages.ts. Tant que le tableau est vide, rien n’est rendu :
+ * ni bloc vide, ni faux témoignage, ni « exemple » plausible.
+ *
+ * TODO CLIENT : 3 à 6 témoignages réels d’étudiants, avec leur accord.
+ */
+import { temoignages, hasTemoignages } from '../data/temoignages';
+---
+
+{
+  hasTemoignages && (
+    <section class="temoignages section section--lg section--paper-2" id="temoignages">
+      <div class="container container--wide">
+        <div class="temoignages__head">
+          <p class="eyebrow">Ils sont passés par là</p>
+          <h2 class="temoignages__title">Ce qu’en disent les membres</h2>
+        </div>
+
+        <ul class="temoignages__list">
+          {temoignages.map((t) => (
+            <li class="temoignage">
+              <blockquote class="temoignage__quote">
+                <p>{t.texte}</p>
+              </blockquote>
+              <footer class="temoignage__author">
+                <span class="temoignage__name">{t.prenom}</span>
+                <span class="temoignage__meta">
+                  {t.formation} · {t.annee}
+                </span>
+              </footer>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .temoignages__head {
+    max-inline-size: 40rem;
+    margin-block-end: var(--space-8);
+  }
+
+  .temoignages__list {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .temoignage {
+    padding-block-start: var(--space-5);
+    border-block-start: 2px solid var(--color-forest);
+  }
+
+  .temoignage__quote {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--color-ink);
+  }
+
+  .temoignage__quote p::before {
+    content: '« ';
+    color: var(--color-accent-ink);
+  }
+
+  .temoignage__quote p::after {
+    content: ' »';
+    color: var(--color-accent-ink);
+  }
+
+  .temoignage__author {
+    margin-block-start: var(--space-4);
+    font-size: var(--text-sm);
+  }
+
+  .temoignage__name {
+    display: block;
+    font-weight: 600;
+    color: var(--color-navy);
+  }
+
+  .temoignage__meta {
+    display: block;
+    margin-block-start: var(--space-1);
+    color: var(--color-muted);
+  }
+
+  @media (min-width: 48rem) {
+    .temoignages__list {
+      grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+      gap: var(--space-7) var(--space-6);
+    }
+  }
+</style>

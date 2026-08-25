@@ -1,0 +1,98 @@
+# ============================================================================
+#  IPRIG — configuration Apache / LiteSpeed (Hostinger)
+# ----------------------------------------------------------------------------
+#  Ce fichier est dans `public/` : il est donc copié automatiquement dans
+#  `dist/` au build, et doit se retrouver à la racine de `public_html/`.
+#
+#  Il gère : HTTPS forcé, URL canonique sans www, URL propres sans `.html`,
+#  page 404, compression, cache et en-têtes de sécurité.
+# ============================================================================
+
+RewriteEngine On
+
+# ---------------------------------------------------------------- HTTPS
+# Redirection permanente vers HTTPS.
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]
+
+# ------------------------------------------------------- Version canonique
+# Une seule version indexée : sans www, cohérente avec les balises canonical.
+# Inverser cette règle si le choix retenu est finalement « avec www ».
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^(.*)$ https://%1/$1 [L,R=301]
+
+# ------------------------------------------------------------ URL propres
+# /index.html -> /
+RewriteCond %{THE_REQUEST} \s/index\.html[\s?] [NC]
+RewriteRule ^ / [L,R=301]
+
+# /programme.html -> /programme
+RewriteCond %{THE_REQUEST} \s/(.+)\.html[\s?] [NC]
+RewriteRule ^ /%1 [L,R=301]
+
+# /programme sert dist/programme.html sans changer l'URL affichée.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ /$1.html [L]
+
+# ------------------------------------------------------------------- 404
+ErrorDocument 404 /404.html
+
+# ----------------------------------------------------------- Compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# ----------------------------------------------------------------- Cache
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # Assets versionnés par le build (hash dans le nom) : cache long.
+  ExpiresByType text/css                "access plus 1 year"
+  ExpiresByType application/javascript  "access plus 1 year"
+  ExpiresByType font/woff2              "access plus 1 year"
+  ExpiresByType image/svg+xml           "access plus 1 month"
+  ExpiresByType image/png               "access plus 1 month"
+  ExpiresByType image/jpeg              "access plus 1 month"
+  ExpiresByType image/webp              "access plus 1 month"
+  ExpiresByType image/avif              "access plus 1 month"
+
+  # Le HTML doit pouvoir être mis à jour immédiatement.
+  ExpiresByType text/html               "access plus 0 seconds"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+
+  # ------------------------------------------------------------ Sécurité
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+</IfModule>
+
+# --------------------------------------------------------- Types de MIME
+<IfModule mod_mime.c>
+  AddType font/woff2 .woff2
+  AddType image/svg+xml .svg
+  AddType image/avif .avif
+</IfModule>
+
+# ----------------------------------------------- Fichiers jamais servis
+# Ceinture et bretelles : rien de sensible ne doit être exposé même si un
+# fichier était transféré par erreur dans public_html.
+<FilesMatch "^\.(env|git|htaccess|htpasswd)|\.(bak|config|sql|log|ini)$">
+  Require all denied
+</FilesMatch>
+
+# Listing de répertoire désactivé.
+Options -Indexes

@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "iprig",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "iprig", "--", "--port", "4321"],
+      "port": 4321
+    },
+    {
+      "name": "iprig-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "--prefix", "iprig", "--", "--port", "4321"],
+      "port": 4321
+    }
+  ]
+}

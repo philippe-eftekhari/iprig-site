@@ -1,0 +1,325 @@
+---
+/**
+ * /contact
+ *
+ * V2 : les panneaux de la V1 — trois cartes côte à côte — laissent place à
+ * une liste éditoriale. Chaque canal est une ligne : intitulé à gauche,
+ * information au centre, action à droite, séparés par des filets. C'était la
+ * partie du site la plus proche d'un template ; c'est maintenant une page
+ * d'annuaire.
+ *
+ * Pas de formulaire : aucun back-end n'est prévu pour cette V1, et un
+ * formulaire qui n'envoie rien est pire que pas de formulaire du tout.
+ * Le site ne collecte donc aucune donnée personnelle.
+ *
+ * Les canaux dont l'URL n'est pas fournie sont automatiquement masqués.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Arrow from '../components/Arrow.astro';
+import {
+  offer,
+  contact,
+  socialsIprig,
+  socialsKevanExplique,
+} from '../data/site';
+
+const iprigLinks = socialsIprig.filter((s) => s.url !== null);
+const kevanLinks = socialsKevanExplique.filter((s) => s.url !== null);
+const hasDirectChannel = contact.email !== null || iprigLinks.length > 0;
+---
+
+<BaseLayout
+  title="Contact"
+  description="Contacter l’IPRIG : adhésion, questions sur le programme et sur le fonctionnement de l’accompagnement."
+  path="/contact"
+>
+  <PageHeader
+    title="Écrire à l’IPRIG"
+    lede="Une question sur l’accompagnement, le programme ou l’adhésion ? Voici par où passer."
+  />
+
+  <section class="section" aria-labelledby="canaux-title">
+    <div class="container container--wide">
+      <h2 id="canaux-title" class="sr-only">Canaux de contact</h2>
+
+      <ul class="canaux">
+        {/* ------------------------------------------------------ Adhésion */}
+        <li class="canal canal--principal">
+          <h3 class="canal__label">Rejoindre</h3>
+
+          <div class="canal__body">
+            <p class="canal__nom">Patreon</p>
+            <p class="canal__texte">
+              L’adhésion se fait directement sur Patreon. C’est également là que
+              se trouvent les contenus réservés aux membres et les rediffusions
+              des séances.
+            </p>
+            <p class="canal__meta">
+              {offer.priceDisplay} {offer.pricePeriod} · {offer.commitment}
+            </p>
+          </div>
+
+          <a
+            class="canal__action"
+            href={offer.patreonUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>{offer.ctaPrimary}</span>
+            <Arrow />
+            <span class="sr-only"> (sur Patreon, nouvelle fenêtre)</span>
+          </a>
+        </li>
+
+        {/* -------------------------------------------------------- Écrire */}
+        <li class="canal">
+          <h3 class="canal__label">Poser une question</h3>
+
+          <div class="canal__body">
+            {
+              contact.email ? (
+                <>
+                  <p class="canal__nom">{contact.email}</p>
+                  <p class="canal__texte">
+                    Pour toute question sur le programme ou l’accompagnement.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p class="canal__nom canal__nom--attente">Adresse à venir</p>
+                  <p class="canal__texte">{contact.fallbackNote}</p>
+                </>
+              )
+            }
+            {
+              /* TODO CLIENT : adresse e-mail officielle de l'IPRIG. Une fois
+                 renseignée dans src/data/site.ts (`contact.email`), elle
+                 s'affiche automatiquement ici et dans le pied de page. */
+            }
+          </div>
+
+          {
+            contact.email && (
+              <a class="canal__action" href={`mailto:${contact.email}`}>
+                <span>Écrire</span>
+                <Arrow />
+              </a>
+            )
+          }
+        </li>
+
+        {/* ------------------------------------------------------- Réseaux */}
+        {
+          iprigLinks.length > 0 && (
+            <li class="canal">
+              <h3 class="canal__label">Suivre l’IPRIG</h3>
+              <div class="canal__body">
+                <ul class="canal__liens link-list">
+                  {iprigLinks.map((s) => (
+                    <li>
+                      <a
+                        class="link"
+                        href={s.url!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {s.label}
+                        <span class="sr-only"> (nouvelle fenêtre)</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          )
+        }
+
+        {
+          kevanLinks.length > 0 && (
+            <li class="canal">
+              <h3 class="canal__label">Suivre Kevan Explique</h3>
+              <div class="canal__body">
+                <p class="canal__texte">
+                  Les analyses de géopolitique et de relations internationales
+                  publiées en accès libre.
+                </p>
+                <ul class="canal__liens link-list">
+                  {kevanLinks.map((s) => (
+                    <li>
+                      <a
+                        class="link"
+                        href={s.url!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {s.label}
+                        <span class="sr-only"> (nouvelle fenêtre)</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          )
+        }
+      </ul>
+
+      {
+        !hasDirectChannel && (
+          <p class="contact__pending">
+            Les coordonnées directes de l’IPRIG seront ajoutées ici prochainement.
+          </p>
+        )
+      }
+
+      <p class="contact__privacy">
+        Ce site ne comporte aucun formulaire et ne collecte aucune donnée
+        personnelle. Voir la{' '}
+        <a class="link" href="/politique-confidentialite">
+          politique de confidentialité
+        </a>
+        .
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ================================================= Liste des canaux === */
+  .canaux {
+    border-block-start: var(--border-hairline) solid var(--rule-strong);
+  }
+
+  .canal {
+    display: grid;
+    gap: var(--space-4);
+    padding-block: var(--space-6);
+    border-block-end: var(--border-hairline) solid var(--rule);
+  }
+
+  .canal__label {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .canal__nom {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.125rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-navy);
+  }
+
+  /* Pas d'italique ici : elle obligerait la page à télécharger une seconde
+     fonte (63 Ko) pour un libellé provisoire de trois mots. */
+  .canal__nom--attente {
+    color: var(--color-muted);
+  }
+
+  .canal__texte {
+    margin-block-start: var(--space-3);
+    max-inline-size: 52ch;
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--color-ink-soft);
+  }
+
+  .canal__meta {
+    margin-block-start: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .canal__liens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin-block-start: var(--space-4);
+    font-size: var(--text-sm);
+  }
+
+  /* Action : un souligné qui se dessine, pas un bouton. À cet endroit,
+     l'intitulé et l'information portent déjà l'essentiel. */
+  .canal__action {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    justify-self: start;
+    min-block-size: 2.75rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-navy);
+    text-decoration: none;
+  }
+
+  .canal__action > span:first-child {
+    position: relative;
+  }
+
+  .canal__action > span:first-child::after {
+    content: '';
+    position: absolute;
+    inset-block-end: -0.35em;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: 1px;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform var(--dur) var(--ease-ui);
+  }
+
+  .canal__action:hover > span:first-child::after,
+  .canal__action:focus-visible > span:first-child::after {
+    transform: scaleX(1);
+  }
+
+  /* Le canal principal est plus haut : c'est l'action de la page. */
+  .canal--principal {
+    padding-block: var(--space-7) var(--space-8);
+  }
+
+  .canal--principal .canal__nom {
+    font-size: clamp(1.75rem, 1.3rem + 1.9vw, 2.5rem);
+  }
+
+  .contact__pending,
+  .contact__privacy {
+    max-inline-size: 62ch;
+    margin-block-start: var(--space-7);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--color-muted);
+  }
+
+  .contact__privacy {
+    padding-block-start: var(--space-5);
+    border-block-start: var(--border-hairline) solid var(--rule);
+  }
+
+  /* Ligne d'annuaire : intitulé | information | action. */
+  @media (min-width: 62rem) {
+    .canal {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 7fr) auto;
+      column-gap: var(--space-8);
+      align-items: start;
+    }
+
+    .canal__label {
+      padding-block-start: 0.55em;
+    }
+
+    .canal__action {
+      align-self: center;
+    }
+  }
+</style>

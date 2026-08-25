@@ -1,0 +1,386 @@
+---
+/**
+ * Hero — première « double-page » du site.
+ *
+ * Composition en deux temps :
+ *   1. un MASTHEAD pleine largeur : surtitre, wordmark IPRIG, filet,
+ *      dénomination. C'est le bloc d'identité, il n'a pas de colonne.
+ *   2. l'ARTICLE qui s'ouvre dessous en deux colonnes asymétriques :
+ *      promesse + texte + action à gauche, photographie à droite.
+ *
+ * Le <h1> contient le sigle ET la dénomination complète : un lecteur d'écran
+ * annonce « IPRIG, Institut de préparation aux relations internationales et à
+ * la géopolitique ». Le filet qui les sépare est décoratif.
+ *
+ * Chorégraphie d'ouverture (`data-motion-now`) : surtitre → wordmark → filet
+ * → dénomination → promesse → média → action. Dernier élément révélé à
+ * ~1,2 s ; la page reste utilisable pendant toute la séquence.
+ */
+import MediaSlot from './MediaSlot.astro';
+import Arrow from './Arrow.astro';
+import { site, offer } from '../data/site';
+---
+
+<section class="hero">
+  <div class="container container--wide">
+    {/* ------------------------------------------------------- MASTHEAD */}
+    <p class="eyebrow hero__eyebrow" data-motion="soft" data-motion-now>
+      Préparation &amp; accompagnement
+    </p>
+
+    <h1 class="hero__title">
+      <span class="hero__mark" data-motion="title" data-motion-now data-motion-delay="60">
+        <span class="motion-inner">IPRIG</span>
+      </span>
+
+      <span
+        class="hero__rule"
+        aria-hidden="true"
+        data-motion="rule"
+        data-motion-now
+        data-motion-delay="380"></span>
+
+      <span class="hero__full" data-motion="soft" data-motion-now data-motion-delay="460">
+        {site.fullName}
+      </span>
+    </h1>
+
+    {/* -------------------------------------------------------- ARTICLE */}
+    <div class="hero__article">
+      <div class="hero__text">
+        {/* TODO CLIENT : slogan définitif — celui-ci est provisoire (src/data/site.ts). */}
+        <p class="hero__tagline" data-motion="soft" data-motion-now data-motion-delay="460">
+          {site.tagline}
+        </p>
+
+        <p class="hero__intro" data-motion="soft" data-motion-now data-motion-delay="600">
+          {site.intro}
+        </p>
+
+        <div class="hero__actions" data-motion="soft" data-motion-now data-motion-delay="600">
+          <a
+            class="btn btn--lg"
+            href={offer.patreonUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {offer.ctaPrimary}
+            <Arrow />
+            <span class="sr-only"> (sur Patreon, nouvelle fenêtre)</span>
+          </a>
+          <a class="btn btn--lg btn--ghost" href="#institut">
+            {offer.ctaSecondary}
+          </a>
+        </div>
+
+        <div class="hero__meta" data-motion="soft" data-motion-now data-motion-delay="600">
+          <p class="hero__price">
+            <strong>{offer.priceDisplay}</strong>
+            <span>{offer.pricePeriod}</span>
+          </p>
+          <p class="hero__terms">
+            {offer.commitment} · Adhésion sur Patreon
+          </p>
+        </div>
+      </div>
+
+      <div class="hero__media">
+        {/* TODO CLIENT : photographie principale — portrait professionnel de
+            Kevan Gafaïti en situation, ou photo d'une session IPRIG.
+            Format vertical, cadrage large. */}
+        <MediaSlot
+          fallback="hero"
+          ratio="tall"
+          mobileRatio="wide"
+          alt="Photographie principale de l’IPRIG"
+          caption="Photographie principale"
+          motionDelay={520}
+          motionNow
+        />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    padding-block: clamp(var(--space-6), 5vw, var(--space-9))
+      clamp(var(--space-7), 8vw, var(--space-11));
+    overflow: hidden;
+  }
+
+  /* Voile de couleur très léger : donne de la profondeur au papier
+     sans dégradé voyant. */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset-block-start: -30%;
+    inset-inline-end: -10%;
+    inline-size: 55%;
+    block-size: 85%;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--color-forest) 6%, transparent),
+      transparent
+    );
+    pointer-events: none;
+  }
+
+  .hero .container {
+    position: relative;
+  }
+
+  /* ================================================== MASTHEAD ======== */
+  .hero__eyebrow {
+    margin-block-end: var(--space-4);
+  }
+
+  .hero__title {
+    margin: 0;
+    display: block;
+  }
+
+  .hero__mark {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: var(--text-display);
+    font-weight: 500;
+    line-height: 0.82;
+    letter-spacing: -0.015em;
+    color: var(--color-navy);
+    /* Aligne optiquement la barre du I sur la marge de gauche. */
+    margin-inline-start: -0.03em;
+
+    /* ------------------------------------------- Marge haute du masque
+       Le masque du reveal (`[data-motion='title']`, section 7 de global.css)
+       rogne au bord de la boîte de PADDING. Cette boîte suit l'interlignage,
+       et `line-height: 0.82` la comprime bien en deçà des glyphes : mesuré au
+       pixel, les empattements supérieurs du I, du P, du R et l'overshoot du G
+       dépassaient de 19 px au-dessus du bord, soit 0,066 em — et étaient
+       coupés à plat, animation terminée.
+
+       0.07em est la plus petite valeur testée qui les couvre entièrement
+       (0.03 et 0.05 laissent le rognage). La marge négative de même valeur
+       annule l'effet sur la mise en page : le masthead ne bouge pas d'un
+       pixel, seule la fenêtre du masque s'ouvre vers le haut.
+
+       ⚠ Correction LOCALE, et elle doit le rester : les six autres titres
+       animés du site ont un interlignage normal et ne sont pas rognés
+       (vérifié). Un titre qui descendrait sous ~0.9 d'interlignage aurait
+       besoin du même traitement. */
+    padding-block-start: 0.07em;
+    margin-block-start: -0.07em;
+  }
+
+  /* Filet de masthead : il court sur toute la largeur, sous le wordmark.
+     C'est le geste qui fait basculer le hero du côté de la revue. */
+  .hero__rule {
+    display: block;
+    block-size: 1px;
+    inline-size: 100%;
+    margin-block: var(--space-4) var(--space-3);
+    background-color: var(--color-navy);
+  }
+
+  .hero__full {
+    display: block;
+    max-inline-size: 34ch;
+    font-family: var(--font-serif);
+    font-size: var(--text-h3);
+    font-weight: 400;
+    line-height: 1.34;
+    letter-spacing: 0;
+    color: var(--color-ink-soft);
+  }
+
+  /* =================================================== ARTICLE ======== */
+  .hero__article {
+    display: grid;
+    gap: var(--space-7);
+    margin-block-start: var(--space-7);
+  }
+
+  .hero__tagline {
+    max-inline-size: 18ch;
+    font-family: var(--font-serif);
+    font-size: clamp(1.625rem, 1.1rem + 2.2vw, 2.5rem);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.16;
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-forest);
+    text-wrap: balance;
+  }
+
+  .hero__intro {
+    margin-block-start: var(--space-5);
+    max-inline-size: 46ch;
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+    color: var(--color-ink-soft);
+    text-wrap: pretty;
+  }
+
+  /* --------------------------------------------------------- Actions */
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-block-start: var(--space-7);
+  }
+
+  .hero__actions .btn {
+    flex: 1 1 auto;
+    min-inline-size: 13rem;
+  }
+
+  /* ------------------------------------------------------- Bandeau prix */
+  .hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-5);
+    margin-block-start: var(--space-6);
+    padding-block-start: var(--space-5);
+    border-block-start: var(--border-hairline) solid var(--rule);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .hero__price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    flex: none;
+  }
+
+  .hero__price strong {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--color-navy);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .hero__terms {
+    /* Le losange sépare le prix des conditions, sans jamais se retrouver
+       seul en début de ligne : il fait partie de ce bloc de texte. */
+    position: relative;
+    padding-inline-start: var(--space-5);
+  }
+
+  .hero__terms::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0.55em;
+    inline-size: 4px;
+    block-size: 4px;
+    background-color: var(--color-accent);
+    transform: rotate(45deg);
+  }
+
+  /* Sous ~410 px, prix et conditions passent sur deux lignes : le losange
+     n'a plus rien à séparer et devient une puce décorative flottant dans la
+     marge. Un marqueur IPRIG guide, structure ou identifie — il ne décore
+     pas. Ici, l'interligne suffit. */
+  @media (max-width: 26rem) {
+    .hero__terms {
+      padding-inline-start: 0;
+    }
+
+    .hero__terms::before {
+      content: none;
+    }
+  }
+
+  /* ----------------------------------------------------------- Média */
+  .hero__media {
+    /* Sur mobile, la photographie passe après l'action : elle ne doit pas
+       repousser le CTA hors de l'écran. */
+    max-inline-size: 21rem;
+  }
+
+  @media (min-width: 48rem) {
+    .hero__actions .btn {
+      flex: 0 0 auto;
+    }
+
+    /* Toujours une seule colonne ici, mais beaucoup plus large que sur
+       téléphone : l'emplacement photo suit, sinon il flotte à gauche d'un
+       vide. */
+    .hero__media {
+      max-inline-size: 32rem;
+    }
+  }
+
+  /* Grille asymétrique : le texte domine, la photographie tient sa place. */
+  @media (min-width: 62rem) {
+    .hero__article {
+      grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
+      gap: var(--space-9);
+      align-items: start;
+      margin-block-start: var(--space-7);
+    }
+
+    .hero__media {
+      max-inline-size: none;
+      /* Décalage vertical : la photographie ne s'aligne pas sur le texte,
+         elle descend légèrement. Rupture discrète, volontaire. */
+      margin-block-start: var(--space-4);
+    }
+
+    .hero__full {
+      max-inline-size: 40ch;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .hero__article {
+      grid-template-columns: minmax(0, 60fr) minmax(0, 40fr);
+      gap: var(--space-10);
+    }
+  }
+
+  /* ------------------------------------------- Écrans larges mais peu hauts
+     Portables 1366 × 768, 1280 × 800, 1440 × 810… Le masthead se réduit déjà
+     seul (voir `--text-display`, sensible à la hauteur du viewport) ; il reste
+     à resserrer la respiration, calibrée pour des écrans de 900 px et plus.
+
+     Objectif : que le premier écran porte le sigle, la dénomination, la
+     promesse ET l'action. Rien n'est retiré, rien ne change de nature — les
+     intervalles descendent d'un cran dans la même échelle d'espacements.
+
+     Même seuil que le `sticky` des colonnes de lecture : 50rem. */
+  @media (min-width: 62rem) and (max-height: 50rem) {
+    .hero {
+      padding-block: var(--space-5) var(--space-8);
+    }
+
+    .hero__rule {
+      margin-block: var(--space-3) var(--space-2);
+    }
+
+    .hero__article {
+      margin-block-start: var(--space-5);
+    }
+
+    .hero__tagline {
+      font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
+    }
+
+    .hero__intro {
+      margin-block-start: var(--space-4);
+    }
+
+    .hero__actions {
+      margin-block-start: var(--space-5);
+    }
+
+    .hero__meta {
+      margin-block-start: var(--space-5);
+      padding-block-start: var(--space-4);
+    }
+  }
+</style>

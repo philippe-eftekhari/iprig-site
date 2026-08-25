@@ -1,0 +1,243 @@
+---
+/**
+ * /programme — présentation développée du programme.
+ * Reprend les mêmes composants que la page d’accueil : aucun contenu dupliqué.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import SessionsList from '../components/SessionsList.astro';
+import Fonctionnement from '../components/Fonctionnement.astro';
+import CtaPoster from '../components/CtaPoster.astro';
+import MediaSlot from '../components/MediaSlot.astro';
+import { volets, certificatsDisponibles } from '../data/programme';
+---
+
+<BaseLayout
+  title="Programme"
+  description="Sessions de méthodologie, événements, immersion et rediffusions : le contenu de l’accompagnement IPRIG et son fonctionnement."
+  path="/programme"
+>
+  <PageHeader
+    eyebrow="Programme & expériences"
+    title="Ce que comprend l’accompagnement"
+    lede="L’adhésion donne accès à quatre volets complémentaires. Ils fonctionnent ensemble : les séances donnent les méthodes, les événements ouvrent le milieu, les rediffusions permettent de revenir sur ce qui a été dit."
+  />
+
+  {/* ------------------------------------------------------- Les volets */}
+  <section class="section" aria-labelledby="volets-title">
+    <div class="container container--wide">
+      <h2 id="volets-title" class="sr-only">Les quatre volets</h2>
+
+      <ol class="volets">
+        {
+          volets.map((v) => (
+            <li class="volet">
+              <div class="volet__head">
+                <span class="volet__numeral" aria-hidden="true">
+                  {v.numeral}
+                </span>
+                <h3 class="volet__title">{v.title}</h3>
+              </div>
+              <div class="volet__content">
+                <p class="volet__lede">{v.lede}</p>
+                <ul class="volet__points">
+                  {v.points.map((p) => (
+                    <li>{p}</li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  {/* ------------------------------------------------------ Les séances */}
+  <section class="section section--lg section--paper-2" aria-labelledby="seances-title">
+    <div class="container container--wide">
+      <div class="seances__grid">
+        <div class="seances__head">
+          <p class="eyebrow">Les séances</p>
+          <h2 id="seances-title" class="seances__title">
+            Des sujets précis, traités en profondeur
+          </h2>
+          <p class="lede seances__lede">
+            Chaque séance part d’une difficulté réelle rencontrée par les
+            étudiants et se termine par un temps de questions.
+          </p>
+
+          <div class="seances__media">
+            {/* TODO CLIENT : photo d’une séance ou d’un événement IPRIG. */}
+            <MediaSlot
+              fallback="events"
+              ratio="landscape"
+              alt="Séance de l’IPRIG"
+              caption="Séance ou événement IPRIG"
+            />
+          </div>
+        </div>
+
+        <div class="seances__list">
+          <SessionsList />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ---------------------------------------------------- Fonctionnement */}
+  <section class="section" aria-labelledby="fonctionnement-title">
+    <div class="container container--wide">
+      <h2 id="fonctionnement-title" class="fonctionnement-title">
+        Rejoindre, en pratique
+      </h2>
+      <Fonctionnement />
+
+      {
+        !certificatsDisponibles && (
+          <p class="disclaimer">
+            L’IPRIG est une structure d’accompagnement et de préparation. Elle
+            ne délivre ni diplôme, ni certification reconnue par l’État, et ne
+            se substitue pas à une formation universitaire.
+          </p>
+        )
+      }
+      {
+        /* TODO CLIENT : des formations spécialisées sont envisagées à partir de
+           2027. Elles ne seront ajoutées ici qu’une fois réellement disponibles,
+           et leur statut exact devra être validé (certifiante ou non). */
+      }
+    </div>
+  </section>
+
+  <CtaPoster
+    eyebrow="Rejoindre"
+    title="Une seule formule"
+    intro="Aucune durée minimale : l’accès à l’ensemble du programme, aux événements et aux rediffusions est immédiat."
+  />
+</BaseLayout>
+
+<style>
+  /* ------------------------------------------------------------ Volets */
+  .volets {
+    display: grid;
+    gap: 0;
+    border-block-start: var(--border-hairline) solid var(--rule);
+  }
+
+  .volet {
+    display: grid;
+    gap: var(--space-4);
+    padding-block: var(--space-7);
+    border-block-end: var(--border-hairline) solid var(--rule);
+  }
+
+  .volet__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+  }
+
+  .volet__numeral {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    color: var(--color-accent-ink);
+    flex: none;
+    inline-size: 2rem;
+  }
+
+  .volet__title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.125rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-navy);
+  }
+
+  .volet__lede {
+    max-inline-size: 54ch;
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--color-ink-soft);
+  }
+
+  .volet__points {
+    display: grid;
+    gap: var(--space-2);
+    margin-block-start: var(--space-5);
+    font-size: var(--text-sm);
+  }
+
+  .volet__points li {
+    position: relative;
+    padding-inline-start: var(--space-5);
+    line-height: 1.45;
+    color: var(--color-ink-soft);
+  }
+
+  .volet__points li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0.62em;
+    inline-size: 10px;
+    block-size: 1px;
+    background-color: var(--color-forest);
+  }
+
+  /* ----------------------------------------------------------- Séances */
+  .seances__grid {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .seances__title {
+    max-inline-size: 18ch;
+  }
+
+  .seances__lede {
+    margin-block-start: var(--space-4);
+  }
+
+  .seances__media {
+    margin-block-start: var(--space-7);
+  }
+
+  /* ---------------------------------------------------- Fonctionnement */
+  .fonctionnement-title {
+    max-inline-size: 18ch;
+    margin-block-end: var(--space-7);
+  }
+
+  .disclaimer {
+    max-inline-size: var(--measure);
+    margin-block-start: var(--space-8);
+    padding-block-start: var(--space-5);
+    border-block-start: var(--border-hairline) solid var(--rule);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--color-muted);
+  }
+
+  @media (min-width: 48rem) {
+    .volet {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--space-7);
+      align-items: start;
+    }
+  }
+
+  @media (min-width: 62rem) {
+    .volet {
+      padding-block: var(--space-8);
+    }
+
+    .seances__grid {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+      gap: var(--space-9);
+      align-items: start;
+    }
+  }
+</style>

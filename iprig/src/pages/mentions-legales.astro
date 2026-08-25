@@ -1,0 +1,169 @@
+---
+/**
+ * /mentions-legales — squelette.
+ *
+ * ⚠ TODO CLIENT : informations légales complètes.
+ * Tant que `legal.editor` est `null` (src/data/site.ts), la page affiche
+ * une mention « en cours de finalisation » plutôt qu’une information inventée,
+ * et reste exclue de l’indexation et du sitemap.
+ *
+ * À fournir : dénomination de l’éditeur, forme juridique, adresse du siège,
+ * numéro SIRET ou RCS, nom du directeur de la publication, et le cas échéant
+ * numéro de TVA intracommunautaire.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { site, legal } from '../data/site';
+
+const isComplete = legal.editor !== null;
+---
+
+<BaseLayout
+  title="Mentions légales"
+  description="Mentions légales du site iprig.fr : éditeur, hébergeur, propriété intellectuelle, nature de l’activité de l’IPRIG et modalités d’adhésion."
+  path="/mentions-legales"
+  noindex={!isComplete}
+>
+  <PageHeader eyebrow="Informations légales" title="Mentions légales" />
+
+  <section class="section">
+    <div class="container container--narrow legal">
+      {
+        !isComplete && (
+          <p class="legal__pending">
+            Les mentions légales de l’IPRIG sont en cours de finalisation et
+            seront publiées ici avant la mise en ligne définitive du site.
+          </p>
+        )
+      }
+
+      <h2>Éditeur du site</h2>
+      {
+        isComplete ? (
+          <ul class="legal__list">
+            <li>
+              <span>Éditeur</span>
+              {legal.editor}
+            </li>
+            {legal.legalForm && (
+              <li>
+                <span>Forme juridique</span>
+                {legal.legalForm}
+              </li>
+            )}
+            {legal.address && (
+              <li>
+                <span>Siège</span>
+                {legal.address}
+              </li>
+            )}
+            {legal.siret && (
+              <li>
+                <span>SIRET</span>
+                {legal.siret}
+              </li>
+            )}
+            {legal.publicationDirector && (
+              <li>
+                <span>Directeur de la publication</span>
+                {legal.publicationDirector}
+              </li>
+            )}
+          </ul>
+        ) : (
+          <p class="legal__todo">
+            Information à compléter : dénomination de l’éditeur, forme
+            juridique, adresse du siège, numéro d’immatriculation et directeur
+            de la publication.
+          </p>
+        )
+      }
+
+      <h2>Hébergement</h2>
+      <p>
+        Le site est hébergé par {legal.host.name}, {legal.host.address}.
+      </p>
+
+      <h2>Propriété intellectuelle</h2>
+      <p>
+        L’ensemble des contenus présents sur {site.url} — textes, éléments
+        graphiques et mise en forme — est protégé par le droit d’auteur.
+        Toute reproduction ou représentation, totale ou partielle, sans
+        autorisation préalable est interdite.
+      </p>
+
+      <h2>Nature de l’activité</h2>
+      <p>
+        L’IPRIG est une structure d’accompagnement et de préparation. Elle ne
+        délivre ni diplôme, ni certification reconnue par l’État, et ne se
+        substitue pas à une formation universitaire.
+      </p>
+
+      <h2>Adhésion et paiement</h2>
+      <p>
+        L’adhésion à l’IPRIG s’effectue via la plateforme Patreon, qui gère
+        l’abonnement, les paiements et la résiliation. Les conditions générales
+        de Patreon s’appliquent à ces opérations.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Les modalités de contact sont indiquées sur la{' '}
+        <a class="link" href="/contact">page contact</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal h2 {
+    margin-block: var(--space-8) var(--space-4);
+    font-size: var(--text-h3);
+    font-family: var(--font-serif);
+    font-weight: 500;
+    color: var(--color-navy);
+  }
+
+  .legal h2:first-of-type {
+    margin-block-start: 0;
+  }
+
+  .legal p {
+    max-inline-size: 62ch;
+    color: var(--color-ink-soft);
+  }
+
+  .legal__pending {
+    padding: var(--space-4) var(--space-5);
+    margin-block-end: var(--space-8);
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    border-inline-start: 2px solid var(--color-accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: var(--text-sm);
+  }
+
+  .legal__todo {
+    font-style: italic;
+    color: var(--color-muted);
+  }
+
+  .legal__list {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .legal__list li {
+    display: grid;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+  }
+
+  .legal__list span {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+</style>

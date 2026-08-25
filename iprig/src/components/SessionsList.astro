@@ -1,0 +1,160 @@
+---
+/**
+ * Liste des séances.
+ *
+ * Le programme définitif n’a pas encore été communiqué : tant que
+ * `programmeIsProvisional` vaut `true` (src/data/programme.ts), un avertissement
+ * clair indique au visiteur que ces séances sont données à titre indicatif.
+ * Aucune séance n’est présentée comme un engagement contractuel.
+ */
+import { sessions, programmeIsProvisional, programmeNote } from '../data/programme';
+
+interface Props {
+  /**
+   * Nombre de séances affichées. La page d'accueil n'en montre qu'un extrait
+   * représentatif et renvoie vers /programme, qui présente l'intégralité :
+   * aucune information n'est perdue, la page d'accueil reste une synthèse.
+   */
+  limit?: number;
+  /** Masquer l'avertissement « programme indicatif » (déjà affiché ailleurs). */
+  hideNote?: boolean;
+}
+
+const { limit, hideNote = false } = Astro.props;
+const visibles = limit ? sessions.slice(0, limit) : sessions;
+---
+
+<div class="sessions">
+  {
+    programmeIsProvisional && !hideNote && (
+      <p class="sessions__note">
+        <span class="sessions__note-mark" aria-hidden="true" />
+        {programmeNote}
+      </p>
+    )
+  }
+
+  {/* TODO CLIENT : remplacer par le programme IPRIG 2026-2027 définitif
+      (src/data/programme.ts → tableau `sessions`), puis passer
+      `programmeIsProvisional` à false. */}
+
+  <ul class="sessions__list">
+    {
+      visibles.map((s, i) => (
+        <li class="session">
+          <span class="session__num" aria-hidden="true">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <div class="session__body">
+            <h3 class="session__title">{s.title}</h3>
+            <p class="session__summary">{s.summary}</p>
+          </div>
+          <span class="session__cat">{s.category}</span>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  /* ------------------------------------------------------ Avertissement */
+  .sessions__note {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    max-inline-size: 60ch;
+    margin-block-end: var(--space-7);
+    padding: var(--space-4) var(--space-5);
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    border-inline-start: 2px solid var(--color-accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--color-ink-soft);
+  }
+
+  .sessions__note-mark {
+    inline-size: 6px;
+    block-size: 6px;
+    flex: none;
+    margin-block-start: 0.5em;
+    background-color: var(--color-accent-ink);
+    transform: rotate(45deg);
+  }
+
+  /* -------------------------------------------------------- Les séances */
+  .sessions__list {
+    border-block-start: var(--border-hairline) solid var(--rule);
+  }
+
+  .session {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    grid-template-areas:
+      'num  cat'
+      'num  body';
+    column-gap: var(--space-4);
+    align-items: start;
+    padding-block: var(--space-5);
+    border-block-end: var(--border-hairline) solid var(--rule);
+    transition: background-color var(--dur-fast) var(--ease-ui);
+  }
+
+  .session__num {
+    grid-area: num;
+    font-family: var(--font-serif);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    letter-spacing: 0.08em;
+    color: var(--color-accent-ink);
+  }
+
+  .session__body {
+    grid-area: body;
+  }
+
+  .session__title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.125rem, 1.05rem + 0.5vw, 1.375rem);
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-navy);
+    text-wrap: balance;
+  }
+
+  .session__summary {
+    margin-block-start: var(--space-2);
+    max-inline-size: var(--measure);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--color-ink-soft);
+  }
+
+  .session__cat {
+    grid-area: cat;
+    justify-self: start;
+    margin-block-end: var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--color-forest);
+  }
+
+  @media (min-width: 48rem) {
+    .session {
+      grid-template-columns: 2.75rem minmax(0, 1fr) 9rem;
+      grid-template-areas: 'num body cat';
+      column-gap: var(--space-5);
+      padding-block: var(--space-6);
+      align-items: baseline;
+    }
+
+    .session__cat {
+      justify-self: end;
+      margin-block-end: 0;
+      text-align: end;
+    }
+  }
+</style>

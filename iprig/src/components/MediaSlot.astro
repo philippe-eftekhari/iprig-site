@@ -1,0 +1,424 @@
+---
+/**
+ * ============================================================================
+ *  MediaSlot — emplacement photographique
+ * ============================================================================
+ *  Un seul composant pour les deux états :
+ *
+ *   1. UNE PHOTO EXISTE  → `src` est fourni, l'image est optimisée par Astro
+ *                          (formats modernes, tailles multiples, lazy).
+ *   2. PAS ENCORE DE PHOTO → un fallback éditorial tient la place, dessiné
+ *                          en CSS et en typographie. Chaque emplacement a
+ *                          le SIEN : rien ne se répète d'une section à l'autre.
+ *
+ *  ---------------------------------------------------------------------------
+ *  INTÉGRER UNE VRAIE PHOTO
+ *  ---------------------------------------------------------------------------
+ *    1. déposer le fichier dans `src/assets/kevan/`, `src/assets/events/`
+ *       ou `src/assets/images/` ;
+ *    2. l'importer dans la page ou le composant :
+ *
+ *         import portrait from '../assets/kevan/portrait.jpg';
+ *
+ *    3. le passer au composant :
+ *
+ *         <MediaSlot src={portrait} alt="Kevan Gafaïti" ratio="portrait" />
+ *
+ *  Le fallback disparaît tout seul. Aucune autre modification n'est requise :
+ *  le cadre, le format, la légende et l'animation restent identiques.
+ *
+ *  ---------------------------------------------------------------------------
+ *  AVANT MISE EN PRODUCTION
+ *  ---------------------------------------------------------------------------
+ *  Passer `showPendingMediaLabels` à `false` dans `src/data/site.ts` :
+ *  les mentions « photographie à venir » disparaissent sans décaler la page.
+ * ============================================================================
+ */
+import { Image } from 'astro:assets';
+import { showPendingMediaLabels } from '../data/site';
+
+interface Props {
+  /** Image importée. Si absente, le fallback éditorial s'affiche. */
+  src?: ImageMetadata;
+  /** Description de l'image. Obligatoire dès qu'une vraie photo est fournie. */
+  alt?: string;
+  ratio?: 'portrait' | 'landscape' | 'square' | 'tall' | 'wide';
+  /**
+   * Format employé sous 48rem. Sur un téléphone, une image en format vertical
+   * occupe presque tout l'écran et repousse le contenu suivant : les
+   * emplacements passent donc en format horizontal sur petit écran.
+   */
+  mobileRatio?: 'portrait' | 'landscape' | 'square' | 'tall' | 'wide';
+  /** Quel fallback dessiner tant qu'aucune photo n'est disponible. */
+  fallback?: 'hero' | 'founder' | 'programme' | 'events';
+  /** Légende affichée sous l'image. */
+  caption?: string;
+  /** Cadrage de l'image réelle (ex. `50% 25%`). */
+  objectPosition?: string;
+  /** Charge l'image immédiatement — réservé au média au-dessus de la ligne de flottaison. */
+  priority?: boolean;
+  /** Retard de la révélation, en millisecondes. */
+  motionDelay?: number;
+  /** Révéler dès le chargement plutôt qu'à l'entrée dans le viewport. */
+  motionNow?: boolean;
+  class?: string;
+}
+
+const {
+  src,
+  alt = '',
+  ratio = 'landscape',
+  mobileRatio,
+  fallback = 'hero',
+  caption,
+  objectPosition,
+  priority = false,
+  motionDelay,
+  motionNow = false,
+  class: className = '',
+} = Astro.props;
+
+/** Mention temporaire, retirée d'un seul interrupteur avant production. */
+const pendingLabel =
+  !src && showPendingMediaLabels ? 'photographie à venir' : null;
+---
+
+{/* `data-motion` est porté par la figure, qui reste visible ; le masque
+    s'applique au cadre via `.motion-clip`. Voir la note dans global.css :
+    observer un élément entièrement masqué le rendrait indétectable. */}
+<figure
+  class={`slot slot--${ratio} slot--${fallback} ${mobileRatio ? `slot--m-${mobileRatio}` : ''} ${className}`}
+  data-motion="media"
+  data-motion-delay={motionDelay}
+  data-motion-now={motionNow ? '' : undefined}
+>
+  <div class="slot__frame motion-clip">
+    <div class="motion-scale slot__inner">
+      {
+        src ? (
+          <Image
+            src={src}
+            alt={alt}
+            widths={[420, 720, 1080, 1440]}
+            sizes="(max-width: 62rem) 100vw, 45vw"
+            loading={priority ? 'eager' : 'lazy'}
+            decoding={priority ? 'sync' : 'async'}
+            fetchpriority={priority ? 'high' : 'auto'}
+            style={objectPosition ? `object-position:${objectPosition}` : undefined}
+            class="slot__img"
+          />
+        ) : (
+          /* ---------------------------------------------------------------
+             TODO CLIENT : emplacement photographique en attente.
+             Composition provisoire, dessinée en CSS et en typographie.
+             --------------------------------------------------------------- */
+          <div class="slot__fallback" aria-hidden="true">
+            {fallback === 'hero' && (
+              <>
+                <span class="fb-crop" />
+                <span class="fb-h" />
+                <span class="fb-v" />
+                <span class="fb-mark" />
+              </>
+            )}
+
+            {fallback === 'founder' && (
+              <>
+                <span class="fb-initials">KG</span>
+                <span class="fb-base" />
+              </>
+            )}
+
+            {fallback === 'programme' && (
+              <>
+                <span class="fb-num">01</span>
+                <span class="fb-word">Sessions</span>
+                <span class="fb-base" />
+              </>
+            )}
+
+            {fallback === 'events' && (
+              <>
+                <span class="fb-box fb-box--1" />
+                <span class="fb-box fb-box--2" />
+                <span class="fb-mark" />
+              </>
+            )}
+          </div>
+        )
+      }
+    </div>
+  </div>
+
+  {
+    (caption || pendingLabel) && (
+      <figcaption class="slot__caption">
+        {caption}
+        {caption && pendingLabel && <span class="slot__sep"> — </span>}
+        {pendingLabel && <span class="slot__pending">{pendingLabel}</span>}
+      </figcaption>
+    )
+  }
+</figure>
+
+<style>
+  .slot {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .slot__frame {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--fb-bg);
+  }
+
+  .slot__inner {
+    position: absolute;
+    inset: 0;
+  }
+
+  .slot__img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  /* --- Formats ---------------------------------------------------------- */
+  .slot--landscape .slot__frame {
+    aspect-ratio: 4 / 3;
+  }
+  .slot--wide .slot__frame {
+    aspect-ratio: 16 / 9;
+  }
+  .slot--portrait .slot__frame {
+    aspect-ratio: 4 / 5;
+  }
+  .slot--square .slot__frame {
+    aspect-ratio: 1 / 1;
+  }
+  .slot--tall .slot__frame {
+    aspect-ratio: 3 / 4;
+  }
+
+  /* Format spécifique aux petits écrans — prioritaire sous 48rem. */
+  /* Le format « mobile » s'applique tant que la mise en page tient sur UNE
+     colonne — c'est-à-dire jusqu'à 62rem, le point où le hero, les séances et
+     la section fondateur passent en deux colonnes. En dessous, un format
+     vertical occupe presque toute la largeur disponible et repousse le
+     contenu suivant : la raison d'être de ce basculement. La borne était
+     posée à 48rem, ce qui laissait une bande de 768 à 991 px où un cadre
+     étroit et haut restait collé à gauche d'une colonne très large. */
+  @media (max-width: 61.99rem) {
+    .slot--m-landscape .slot__frame {
+      aspect-ratio: 4 / 3;
+    }
+    .slot--m-wide .slot__frame {
+      aspect-ratio: 16 / 9;
+    }
+    .slot--m-square .slot__frame {
+      aspect-ratio: 1 / 1;
+    }
+    .slot--m-portrait .slot__frame {
+      aspect-ratio: 4 / 5;
+    }
+    .slot--m-tall .slot__frame {
+      aspect-ratio: 3 / 4;
+    }
+  }
+
+  /* --- Légende ---------------------------------------------------------- */
+  .slot__caption {
+    display: block;
+    font-size: var(--text-xs);
+    line-height: 1.45;
+    letter-spacing: 0.02em;
+    color: var(--color-muted);
+  }
+
+  .slot__pending {
+    font-style: italic;
+  }
+
+  /* La légende accompagne l'image plutôt que de la précéder. */
+  .slot[data-motion='media'] .slot__caption {
+    opacity: 0;
+    transition: opacity var(--dur-soft) var(--ease-editorial)
+      calc(var(--motion-delay) + 200ms);
+  }
+
+  .slot[data-motion='media'].is-in .slot__caption {
+    opacity: 1;
+  }
+
+  /* Sans JavaScript ou en mouvement réduit, la légende est là d'emblée. */
+  :global(.no-js) .slot[data-motion='media'] .slot__caption {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slot[data-motion='media'] .slot__caption {
+      opacity: 1;
+    }
+  }
+
+  :global(.section--dark) .slot__caption,
+  :global(.section--forest) .slot__caption {
+    color: var(--color-on-dark-muted);
+  }
+
+  /* ======================================================================
+     FALLBACKS ÉDITORIAUX — provisoires
+     Chaque emplacement a sa propre composition : aucun motif ne se répète.
+     ====================================================================== */
+
+  .slot__fallback {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* --- HERO : repère de cadrage ------------------------------------------
+     Champ marine + cadre intérieur + lignes de tiers. C'est le vocabulaire
+     du cadrage photographique : la composition annonce qu'une image viendra
+     ici, sans jamais se faire passer pour une image. */
+  .slot--hero {
+    --fb-bg: var(--color-navy-deep);
+    --fb-line: color-mix(in srgb, var(--color-navy-line) 26%, transparent);
+    --fb-accent: var(--color-accent-bright);
+  }
+
+  .fb-crop {
+    position: absolute;
+    inset: 7%;
+    border: 1px solid var(--fb-line);
+  }
+
+  .fb-h,
+  .fb-v {
+    position: absolute;
+    background-color: var(--fb-line);
+  }
+
+  /* Ligne de tiers horizontale */
+  .fb-h {
+    inset-block-start: 62%;
+    inset-inline: 7%;
+    block-size: 1px;
+  }
+
+  /* Ligne de tiers verticale */
+  .fb-v {
+    inset-block: 7%;
+    inset-inline-start: 38%;
+    inline-size: 1px;
+  }
+
+  /* Repère laiton posé à l'intersection */
+  .fb-mark {
+    position: absolute;
+    inset-block-start: 62%;
+    inset-inline-start: 38%;
+    inline-size: 10px;
+    block-size: 10px;
+    margin-block-start: -5px;
+    margin-inline-start: -5px;
+    background-color: var(--fb-accent);
+    transform: rotate(45deg);
+  }
+
+  /* --- FONDATEUR : initiales en très grand, une ligne de sol ------------- */
+  .slot--founder {
+    --fb-bg: var(--color-navy-deep);
+    --fb-line: color-mix(in srgb, var(--color-navy-line) 30%, transparent);
+    --fb-accent: var(--color-accent-bright);
+  }
+
+  .fb-initials {
+    position: absolute;
+    inset-block-end: 16%;
+    inset-inline-start: 8%;
+    font-family: var(--font-serif);
+    font-size: clamp(4rem, 9vw, 10rem);
+    font-weight: 400;
+    line-height: 0.78;
+    letter-spacing: -0.02em;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--fb-line);
+  }
+
+  .fb-base {
+    position: absolute;
+    inset-block-end: 12%;
+    inset-inline: 8%;
+    block-size: 1px;
+    background-color: var(--fb-accent);
+    opacity: 0.5;
+  }
+
+  /* --- PROGRAMME : composition typographique 01 / Sessions --------------- */
+  .slot--programme {
+    --fb-bg: var(--color-forest-deep);
+    --fb-line: color-mix(in srgb, var(--color-forest-bright) 40%, transparent);
+    --fb-accent: var(--color-accent-bright);
+  }
+
+  .fb-num {
+    position: absolute;
+    inset-block-start: 12%;
+    inset-inline-start: 8%;
+    font-family: var(--font-serif);
+    font-size: clamp(3rem, 7vw, 7rem);
+    line-height: 0.8;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--fb-line);
+  }
+
+  .fb-word {
+    position: absolute;
+    inset-block-end: 20%;
+    inset-inline-start: 8%;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--fb-accent);
+  }
+
+  /* --- ÉVÉNEMENTS : deux surfaces décalées, un repère ------------------- */
+  .slot--events {
+    --fb-bg: var(--color-paper-3);
+    --fb-line: color-mix(in srgb, var(--color-navy) 22%, transparent);
+    --fb-accent: var(--color-accent-ink);
+  }
+
+  .fb-box {
+    position: absolute;
+    border: 1px solid var(--fb-line);
+  }
+
+  .fb-box--1 {
+    inset-block-start: 14%;
+    inset-inline-start: 10%;
+    inline-size: 52%;
+    block-size: 54%;
+  }
+
+  .fb-box--2 {
+    inset-block-end: 14%;
+    inset-inline-end: 10%;
+    inline-size: 44%;
+    block-size: 46%;
+    background-color: color-mix(in srgb, var(--color-navy) 5%, transparent);
+  }
+
+  .slot--events .fb-mark {
+    inset-block-start: 14%;
+    inset-inline-start: auto;
+    inset-inline-end: 10%;
+    margin: 0;
+    background-color: var(--fb-accent);
+  }
+</style>

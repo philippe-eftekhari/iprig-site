@@ -1,0 +1,24 @@
+# Fins de ligne : LF dans le dépôt ET dans la copie de travail.
+#
+# `eol=lf` est explicite parce que Git for Windows installe
+# `core.autocrlf = true` au niveau système : sans cette ligne, tous les
+# fichiers du projet seraient réécrits en CRLF au prochain checkout, alors
+# qu'ils sont en LF aujourd'hui. Cela ne casserait rien, mais ferait
+# apparaître l'intégralité du dépôt comme modifiée.
+* text=auto eol=lf
+
+# ⚠ EXCEPTION : le lanceur double-clic EXIGE des fins de ligne CRLF.
+# `cmd.exe` refuse un .bat en fins de ligne Unix — il s'arrête sur la
+# première instruction. Cette règle garantit le CRLF au clonage quelle que
+# soit la configuration `core.autocrlf` de la personne qui clone.
+*.bat text eol=crlf
+
+# Binaires — ne jamais tenter la moindre conversion.
+*.woff2 binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.webp  binary
+*.avif  binary
+*.ico   binary
+*.pdf   binary

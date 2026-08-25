@@ -1,0 +1,265 @@
+---
+/**
+ * Section fondateur — page d'accueil.
+ *
+ * V2 :
+ *   — la photographie occupe une vraie colonne (≈ 42 %) et n'est plus fixée :
+ *     quand le portrait définitif arrivera, il deviendra l'élément dominant
+ *     de la section sans rien changer d'autre ;
+ *   — le bloc « Kevan Explique » perd son fond et son cadre : filet + texte ;
+ *   — le contenu est resserré. La biographie développée vit sur
+ *     /kevan-gafaiti — la page d'accueil pose la crédibilité, elle ne la
+ *     déroule pas.
+ *
+ * ⚠ TODO CLIENT : validation finale de la biographie et des intitulés
+ * académiques avant mise en production (src/data/kevan.ts).
+ */
+import MediaSlot from './MediaSlot.astro';
+import Arrow from './Arrow.astro';
+import { kevan, kevanExplique } from '../data/kevan';
+import { communitySize, communitySizeLabel, socialsKevanExplique } from '../data/site';
+
+/** Les plateformes ne deviennent des liens que lorsqu'une URL est fournie. */
+const kevanLinks = socialsKevanExplique.filter((s) => s.url !== null);
+
+/**
+ * Repères typographiques affichés sous le portrait. Uniquement des éléments
+ * déjà validés dans src/data/kevan.ts — rien n'est ajouté ici.
+ */
+const reperes = [kevan.institutions[0], ...kevan.researchAreas.slice(0, 2)];
+---
+
+<section class="fondateur section section--lg section--paper-2" id="fondateur">
+  <div class="container container--wide">
+    <div class="fondateur__grid">
+      <div class="fondateur__media">
+        {/* TODO CLIENT : portrait professionnel de Kevan Gafaïti.
+            Format vertical, fond sobre, cadrage buste. */}
+        <MediaSlot
+          fallback="founder"
+          ratio="portrait"
+          mobileRatio="landscape"
+          alt="Kevan Gafaïti"
+          caption="Portrait de Kevan Gafaïti"
+        />
+
+        <ul class="fondateur__reperes">
+          {reperes.map((r) => <li>{r}</li>)}
+        </ul>
+      </div>
+
+      <div class="fondateur__text">
+        <p class="eyebrow">Le fondateur</p>
+
+        <h2 class="fondateur__name" data-motion="title">
+          <span class="motion-inner">{kevan.name}</span>
+        </h2>
+
+        <ul class="fondateur__titles">
+          {kevan.titles.map((t) => <li>{t}</li>)}
+        </ul>
+
+        <p class="fondateur__lede">{kevan.lede}</p>
+
+        <p class="fondateur__more">
+          <a class="btn btn--ghost" href="/kevan-gafaiti">
+            Découvrir le parcours de Kevan Gafaïti
+            <Arrow />
+          </a>
+        </p>
+
+        {/* ------------------------------------------------ Kevan Explique */}
+        <div class="explique">
+          <h3 class="explique__title">{kevanExplique.name}</h3>
+
+          <div class="explique__meta">
+            {
+              communitySize && (
+                <p class="explique__community">
+                  {/* TODO CLIENT : vérifier le nombre actuel avant mise en ligne. */}
+                  <strong>{communitySize}</strong>
+                  <span>{communitySizeLabel}</span>
+                </p>
+              )
+            }
+
+            {
+              /* Tant qu'aucune URL n'est fournie, les plateformes sont citées
+                 en toutes lettres plutôt qu'affichées comme des liens : un
+                 faux lien est pire qu'une mention en texte. */
+              kevanLinks.length > 0 ? (
+                <ul class="explique__platforms link-list">
+                  {kevanLinks.map((s) => (
+                    <li>
+                      <a
+                        class="link"
+                        href={s.url!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {s.label}
+                        <span class="sr-only"> (nouvelle fenêtre)</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="explique__platforms-text">
+                  Présent sur {kevanExplique.platforms.join(', ')}.
+                </p>
+              )
+            }
+          </div>
+          {
+            /* TODO CLIENT : URL des comptes Kevan Explique. Une fois renseignées
+               dans src/data/site.ts, les plateformes deviennent des liens. */
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .fondateur__grid {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .fondateur__media {
+    max-inline-size: 22rem;
+  }
+
+  @media (min-width: 48rem) {
+    .fondateur__media {
+      max-inline-size: 30rem;
+    }
+  }
+
+  /* Repères sous le portrait : une liste typographique, pas des étiquettes.
+     Filets fins, petites capitales, rien d'autre. */
+  .fondateur__reperes {
+    margin-block-start: var(--space-5);
+    border-block-start: var(--border-hairline) solid var(--rule);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .fondateur__reperes li {
+    padding-block: var(--space-3);
+    border-block-end: var(--border-hairline) solid var(--rule);
+  }
+
+  .fondateur__name {
+    margin-block-start: var(--space-1);
+    font-size: clamp(2.25rem, 1.5rem + 3vw, 3.75rem);
+    line-height: 1;
+    letter-spacing: -0.025em;
+  }
+
+  .fondateur__titles {
+    display: grid;
+    gap: var(--space-1);
+    margin-block-start: var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--color-forest);
+    font-weight: 500;
+  }
+
+  .fondateur__titles li {
+    position: relative;
+    padding-inline-start: var(--space-5);
+    line-height: 1.45;
+  }
+
+  .fondateur__titles li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0.62em;
+    inline-size: 10px;
+    block-size: 1px;
+    background-color: var(--color-forest);
+  }
+
+  .fondateur__lede {
+    margin-block-start: var(--space-6);
+    max-inline-size: 46ch;
+    font-family: var(--font-serif);
+    font-size: var(--text-lede);
+    line-height: var(--leading-normal);
+    color: var(--color-ink);
+  }
+
+  .fondateur__more {
+    margin-block-start: var(--space-7);
+  }
+
+  /* ------------------------------------------------------ Kevan Explique
+     Plus de fond ni de cadre : un filet suffit à marquer l'aparté. */
+  .explique {
+    margin-block-start: var(--space-8);
+    padding-block-start: var(--space-6);
+    border-block-start: var(--border-hairline) solid var(--rule-strong);
+  }
+
+  .explique__title {
+    font-family: var(--font-serif);
+    font-size: 1.375rem;
+    font-weight: 500;
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-navy);
+  }
+
+  .explique__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-3) var(--space-7);
+    margin-block-start: var(--space-4);
+  }
+
+  .explique__community {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .explique__community strong {
+    font-family: var(--font-serif);
+    font-size: 1.625rem;
+    font-weight: 500;
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-forest);
+  }
+
+  .explique__platforms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .explique__platforms-text {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  @media (min-width: 62rem) {
+    /* Rapport 42/58 : la photographie tient une vraie colonne. */
+    .fondateur__grid {
+      grid-template-columns: minmax(0, 40fr) minmax(0, 60fr);
+      gap: var(--space-10);
+      align-items: start;
+    }
+
+    .fondateur__media {
+      max-inline-size: none;
+    }
+  }
+</style>

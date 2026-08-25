@@ -1,0 +1,116 @@
+---
+/**
+ * Métadonnées de la page : title, description, canonical, Open Graph,
+ * Twitter card et données structurées.
+ *
+ * Le JSON-LD ne décrit que des informations réelles et visibles sur le site.
+ * Aucune note, aucun avis, aucune accréditation, aucun prix promotionnel :
+ * ces données n’existent pas et ne doivent pas être déclarées.
+ */
+import { site, offer } from '../data/site';
+import { kevan } from '../data/kevan';
+
+interface Props {
+  /** Titre de la page, sans le suffixe « | IPRIG ». */
+  title?: string;
+  description?: string;
+  /** Chemin de la page, ex. `/programme`. */
+  path: string;
+  /** Exclure la page de l’indexation (pages légales incomplètes). */
+  noindex?: boolean;
+  /** Inclure les données structurées Organization / WebSite / Person. */
+  includeOrganizationSchema?: boolean;
+}
+
+const {
+  title,
+  description = site.seo.description,
+  path,
+  noindex = false,
+  includeOrganizationSchema = false,
+} = Astro.props;
+
+const fullTitle = title
+  ? site.seo.titleTemplate.replace('%s', title)
+  : site.seo.defaultTitle;
+
+const canonical = new URL(path, site.url).href;
+const ogImage = new URL(site.seo.ogImage, site.url).href;
+
+/**
+ * Données structurées — chaque champ correspond à une information affichée
+ * sur le site et confirmée par le client.
+ */
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${site.url}/#organization`,
+      name: site.name,
+      alternateName: site.fullName,
+      url: site.url,
+      description: site.seo.description,
+      founder: { '@id': `${site.url}/#kevan-gafaiti` },
+      // Aucune adresse, aucun téléphone, aucun identifiant légal :
+      // ces informations ne sont pas encore fournies (voir CONTENT_TODO.md).
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${site.url}/#website`,
+      url: site.url,
+      name: site.name,
+      inLanguage: 'fr-FR',
+      publisher: { '@id': `${site.url}/#organization` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${site.url}/#kevan-gafaiti`,
+      name: kevan.name,
+      jobTitle: kevan.titles,
+      url: `${site.url}/kevan-gafaiti`,
+      knowsAbout: kevan.researchAreas,
+      alumniOf: {
+        '@type': 'CollegeOrUniversity',
+        name: kevan.academic.doctorate.institution,
+      },
+    },
+  ],
+};
+---
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+{noindex && <meta name="robots" content="noindex, follow" />}
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:locale" content="fr_FR" />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:type" content={site.seo.ogImageType} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={`${site.name} — ${site.fullName}`} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+{
+  includeOrganizationSchema && (
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(schema)}
+    />
+  )
+}
+
+{/* Lien de conversion principal, déclaré une seule fois pour les préconnexions */}
+<link rel="preconnect" href={new URL(offer.patreonUrl).origin} crossorigin />

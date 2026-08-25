@@ -1,0 +1,191 @@
+---
+/**
+ * Foire aux questions.
+ * Accordéon natif <details>/<summary> : accessible au clavier et aux lecteurs
+ * d’écran sans une seule ligne de JavaScript.
+ */
+import { faq } from '../data/faq';
+---
+
+<section class="faq section section--lg" id="faq">
+  <div class="container container--wide">
+    <div class="faq__grid">
+      <div class="faq__head">
+        <h2 class="faq__title" data-motion="title">
+          <span class="motion-inner">Ce qu’il faut savoir avant de rejoindre</span>
+        </h2>
+        <p class="faq__lede">
+          Une réponse manque&#8239;? La page contact indique par où passer.
+        </p>
+      </div>
+
+      <div class="faq__list">
+        {
+          faq.map((item) => (
+            <details class="qa" name="faq">
+              <summary class="qa__question">
+                <span>{item.question}</span>
+                <span class="qa__icon" aria-hidden="true">
+                  <span />
+                  <span />
+                </span>
+              </summary>
+              <div class="qa__answer">
+                {item.answer.map((p) => (
+                  <p>{p}</p>
+                ))}
+              </div>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq {
+    background-color: var(--color-paper-2);
+  }
+
+  .faq__grid {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .faq__title {
+    max-inline-size: 15ch;
+    font-size: clamp(1.875rem, 1.3rem + 2.4vw, 3rem);
+    line-height: 1.04;
+  }
+
+  .faq__lede {
+    margin-block-start: var(--space-5);
+    max-inline-size: 34ch;
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--color-ink-soft);
+  }
+
+  .faq__list {
+    border-block-start: var(--border-hairline) solid var(--rule);
+  }
+
+  .qa {
+    border-block-end: var(--border-hairline) solid var(--rule);
+  }
+
+  .qa__question {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-5);
+    /* Cible tactile confortable */
+    min-block-size: 3.25rem;
+    padding-block: var(--space-5);
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-serif);
+    font-size: clamp(1.0625rem, 1rem + 0.4vw, 1.25rem);
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-navy);
+    transition: color var(--dur-fast) var(--ease-ui);
+  }
+
+  .qa__question::-webkit-details-marker {
+    display: none;
+  }
+
+  .qa__question:hover {
+    color: var(--color-forest);
+  }
+
+  /* Au doigt, `:hover` ne se déclenche pas — et l'accordéon est le seul
+     élément du site dont le résultat reste sur place. Il lui faut donc un
+     retour tactile explicite. */
+  .qa__question:active {
+    color: var(--color-accent-ink);
+  }
+
+  /* Signe + qui devient − à l’ouverture */
+  .qa__icon {
+    position: relative;
+    flex: none;
+    inline-size: 14px;
+    block-size: 14px;
+    margin-block-start: 0.3em;
+  }
+
+  .qa__icon span {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    inline-size: 14px;
+    block-size: 1.5px;
+    background-color: var(--color-accent-ink);
+    transition: transform var(--dur) var(--ease-ui);
+  }
+
+  .qa__icon span:last-child {
+    transform: rotate(90deg);
+  }
+
+  .qa[open] .qa__icon span:last-child {
+    transform: rotate(0deg);
+  }
+
+  .qa__answer {
+    padding-block-end: var(--space-6);
+    max-inline-size: var(--measure);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--color-ink-soft);
+  }
+
+  .qa__answer p + p {
+    margin-block-start: var(--space-3);
+  }
+
+  /* Ouverture animée là où c’est supporté ; ailleurs, ouverture instantanée. */
+  @supports selector(details::details-content) {
+    .qa::details-content {
+      block-size: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition:
+        block-size var(--dur) var(--ease-ui),
+        content-visibility var(--dur) allow-discrete,
+        opacity var(--dur) var(--ease-ui);
+      interpolate-size: allow-keywords;
+    }
+
+    .qa[open]::details-content {
+      block-size: auto;
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    @supports selector(details::details-content) {
+      .qa::details-content {
+        transition: none;
+      }
+    }
+  }
+
+  @media (min-width: 62rem) {
+    .faq__grid {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+      gap: var(--space-10);
+      align-items: start;
+    }
+
+    .faq__head {
+      position: sticky;
+      inset-block-start: calc(var(--header-h) + var(--space-6));
+    }
+  }
+</style>

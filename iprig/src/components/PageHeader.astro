@@ -1,0 +1,43 @@
+---
+/**
+ * En-tête éditorial des pages secondaires.
+ * Un seul <h1> par page : c’est celui-ci.
+ */
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lede?: string;
+  /** Fond alterné, pour varier le rythme d’une page à l’autre. */
+  tone?: 'paper' | 'paper-2';
+}
+
+const { eyebrow, title, lede, tone = 'paper-2' } = Astro.props;
+---
+
+<section class={`pagehead ${tone === 'paper-2' ? 'section--paper-2' : ''}`}>
+  <div class="container container--wide">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <h1 class="pagehead__title">{title}</h1>
+    {lede && <p class="lede pagehead__lede">{lede}</p>}
+  </div>
+</section>
+
+<style>
+  .pagehead {
+    padding-block: clamp(var(--space-8), 7vw, var(--space-11))
+      clamp(var(--space-7), 6vw, var(--space-9));
+    border-block-end: var(--border-hairline) solid var(--rule);
+  }
+
+  .pagehead__title {
+    max-inline-size: 20ch;
+    font-size: clamp(2.125rem, 1.5rem + 3vw, 3.75rem);
+    line-height: 1.05;
+  }
+
+  .pagehead__lede {
+    margin-block-start: var(--space-5);
+    max-inline-size: 52ch;
+  }
+</style>

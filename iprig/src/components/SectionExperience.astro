@@ -1,0 +1,215 @@
+---
+/**
+ * « Programme & expériences » — les quatre volets de l'accompagnement.
+ *
+ * V2 : la grille 2 × 2 est remplacée par une série de chapitres numérotés.
+ * Une grille de quatre cases se lisait comme une liste de fonctionnalités ;
+ * une suite de chapitres se lit comme un programme. Le premier chapitre est
+ * traité en ouverture — titre plus grand, plus d'air — les suivants sont plus
+ * serrés : c'est cette inégalité qui donne son rythme à la section.
+ *
+ * Motion : un seul geste pour toute la section — le titre monte derrière son
+ * masque. Les chapitres n'apparaissent pas un par un.
+ *
+ * Pas de surtitre ici : le titre suffit, et l'enchaînement de surtitres dorés
+ * d'une section à l'autre rendait la recette visible.
+ */
+import { volets } from '../data/programme';
+import { offer } from '../data/site';
+import Arrow from './Arrow.astro';
+---
+
+<section class="experience section section--lg section--dark" id="experience">
+  <div class="container container--wide">
+    <header class="experience__head">
+      <h2 class="experience__title" data-motion="title">
+        <span class="motion-inner">
+          Quatre formes d’accompagnement, une seule adhésion
+        </span>
+      </h2>
+      <p class="experience__lede">
+        L’IPRIG ne se résume pas à un calendrier de séances. L’adhésion donne
+        accès à un ensemble cohérent : travailler ses méthodes, rencontrer le
+        milieu, saisir les occasions qui se présentent et revenir sur ce qui a
+        été dit.
+      </p>
+    </header>
+
+    <ol class="chapitres">
+      {
+        volets.map((v) => (
+          <li class="chapitre">
+            <span class="chapitre__num" aria-hidden="true">
+              {v.numeral}
+            </span>
+            <div class="chapitre__body">
+              <h3 class="chapitre__title">{v.title}</h3>
+              <p class="chapitre__lede">{v.lede}</p>
+              <ul class="chapitre__points">
+                {v.points.map((p) => (
+                  <li>{p}</li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="experience__more">
+      <a class="btn btn--ghost-on-dark" href="/programme">
+        {offer.ctaProgramme}
+        <Arrow />
+      </a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .experience__head {
+    max-inline-size: 44rem;
+    margin-block-end: var(--space-7);
+  }
+
+  .experience__title {
+    max-inline-size: 17ch;
+    font-size: clamp(1.875rem, 1.3rem + 2.4vw, 3rem);
+    line-height: 1.04;
+    color: var(--color-on-dark);
+  }
+
+  .experience__lede {
+    margin-block-start: var(--space-5);
+    max-inline-size: 52ch;
+    font-family: var(--font-serif);
+    font-size: var(--text-lede);
+    line-height: var(--leading-normal);
+    color: var(--color-on-dark-muted);
+  }
+
+  /* ==================================================== Les chapitres === */
+  .chapitres {
+    border-block-start: var(--border-hairline) solid var(--rule-on-dark);
+  }
+
+  .chapitre {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    column-gap: var(--space-4);
+    /* Même règle que les numéros de « L'institut » : le chiffre romain
+       s'assoit sur la ligne de base de son titre. */
+    align-items: baseline;
+    padding-block: var(--space-6);
+    border-block-end: var(--border-hairline) solid var(--rule-on-dark);
+  }
+
+  /* Chiffre romain : élément graphique, pas une puce d'interface. */
+  .chapitre__num {
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    line-height: 1.15;
+    letter-spacing: 0.1em;
+    color: var(--color-accent-bright);
+  }
+
+  .chapitre__title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-on-dark);
+  }
+
+  .chapitre__lede {
+    margin-block-start: var(--space-3);
+    max-inline-size: 48ch;
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--color-on-dark-muted);
+  }
+
+  .chapitre__points {
+    display: grid;
+    gap: var(--space-2);
+    margin-block-start: var(--space-5);
+    font-size: var(--text-sm);
+  }
+
+  .chapitre__points li {
+    position: relative;
+    padding-inline-start: var(--space-5);
+    line-height: 1.45;
+    color: var(--color-on-dark-muted);
+  }
+
+  .chapitre__points li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0.62em;
+    inline-size: 9px;
+    block-size: 1px;
+    background-color: var(--color-forest-bright);
+  }
+
+  .experience__more {
+    margin-block-start: var(--space-8);
+  }
+
+  /* ---- Chapitre d'ouverture -------------------------------------------- */
+  .chapitre:first-child {
+    padding-block: var(--space-7) var(--space-8);
+  }
+
+  .chapitre:first-child .chapitre__title {
+    font-size: clamp(1.75rem, 1.3rem + 1.9vw, 2.75rem);
+  }
+
+  .chapitre:first-child .chapitre__lede {
+    margin-block-start: var(--space-4);
+    max-inline-size: 44ch;
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    color: var(--color-on-dark);
+  }
+
+  @media (min-width: 48rem) {
+    .chapitre {
+      grid-template-columns: 4rem minmax(0, 1fr);
+      column-gap: var(--space-6);
+      padding-block: var(--space-7);
+    }
+
+    .chapitre__num {
+      font-size: 1.375rem;
+    }
+
+    /* Deux colonnes pour les points : la section reste compacte et la liste
+       garde l'allure d'un programme plutôt que d'une liste à puces. */
+    .chapitre__points {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-2) var(--space-7);
+    }
+
+    .chapitre:first-child {
+      padding-block: var(--space-8) var(--space-9);
+    }
+  }
+
+  @media (min-width: 62rem) {
+    .chapitre {
+      grid-template-columns: 5rem minmax(0, 1fr);
+    }
+
+    .chapitre__num {
+      font-size: 1.625rem;
+    }
+
+    /* Le corps du chapitre ne court pas jusqu'au bord : une marge de
+       respiration reste libre à droite, comme dans une revue. */
+    .chapitre__body {
+      max-inline-size: 52rem;
+    }
+  }
+</style>

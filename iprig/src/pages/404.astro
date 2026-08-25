@@ -1,0 +1,123 @@
+---
+/**
+ * Page 404.
+ * Astro génère `dist/404.html` ; le `.htaccess` déployé sur Hostinger la
+ * déclare via `ErrorDocument 404 /404.html` (voir DEPLOY_HOSTINGER.md).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Arrow from '../components/Arrow.astro';
+import { mainNav } from '../data/navigation';
+---
+
+<BaseLayout
+  title="Page introuvable"
+  description="La page demandée n’existe pas ou a été déplacée."
+  path="/404"
+  noindex
+>
+  <section class="notfound section section--lg">
+    <div class="container container--wide">
+      <p class="eyebrow">Erreur 404</p>
+      <h1 class="notfound__title">Cette page n’existe pas</h1>
+      <p class="lede notfound__lede">
+        L’adresse demandée est peut-être erronée, ou la page a été déplacée.
+        Voici les pages du site.
+      </p>
+
+      <ul class="notfound__list">
+        {
+          mainNav.map((item, i) => (
+            <li class="notfound__item">
+              <a class="notfound__link" href={item.href}>
+                <span class="notfound__index" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span class="notfound__label">
+                  {item.label}
+                  {item.description && (
+                    <span class="notfound__desc">{item.description}</span>
+                  )}
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="notfound__home">
+        <a class="btn" href="/">
+          Retour à l’accueil
+          <Arrow />
+        </a>
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound__title {
+    max-inline-size: 16ch;
+    font-size: clamp(2.125rem, 1.5rem + 3vw, 3.5rem);
+    line-height: 1.05;
+  }
+
+  .notfound__lede {
+    margin-block-start: var(--space-5);
+    max-inline-size: 46ch;
+  }
+
+  .notfound__list {
+    margin-block-start: var(--space-8);
+    border-block-start: var(--border-hairline) solid var(--rule);
+    max-inline-size: 44rem;
+  }
+
+  .notfound__item {
+    border-block-end: var(--border-hairline) solid var(--rule);
+  }
+
+  .notfound__link {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    min-block-size: 3rem;
+    padding-block: var(--space-4);
+    text-decoration: none;
+    color: var(--color-navy);
+    transition: color var(--dur-fast) var(--ease-ui);
+  }
+
+  .notfound__link:hover {
+    color: var(--color-forest);
+  }
+
+  .notfound__index {
+    flex: none;
+    inline-size: 2rem;
+    font-family: var(--font-serif);
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    color: var(--color-accent-ink);
+  }
+
+  .notfound__label {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    line-height: 1.2;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .notfound__desc {
+    display: block;
+    margin-block-start: var(--space-1);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    letter-spacing: 0;
+    color: var(--color-muted);
+  }
+
+  .notfound__home {
+    margin-block-start: var(--space-8);
+  }
+</style>

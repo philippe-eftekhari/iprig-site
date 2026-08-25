@@ -1,0 +1,178 @@
+---
+/**
+ * Aperçu du programme sur la page d'accueil.
+ *
+ * V2 : la page d'accueil ne montre plus que quatre séances représentatives et
+ * renvoie vers /programme, qui conserve l'intégralité. Aucune information
+ * n'est perdue — la page d'accueil redevient une synthèse éditoriale.
+ *
+ * La photographie reste en colonne fixe : elle accompagne la lecture de la
+ * liste au lieu de s'afficher une fois et de disparaître.
+ */
+import SessionsList from './SessionsList.astro';
+import Fonctionnement from './Fonctionnement.astro';
+import MediaSlot from './MediaSlot.astro';
+import Arrow from './Arrow.astro';
+import { sessions } from '../data/programme';
+
+/** Extrait montré sur la page d'accueil. */
+const APERCU = 4;
+const reste = Math.max(sessions.length - APERCU, 0);
+---
+
+<section class="programme section section--lg" id="programme">
+  <div class="container container--wide">
+    <div class="programme__head">
+      <h2 class="programme__title" data-motion="title">
+        <span class="motion-inner">
+          Des séances qui répondent à des questions concrètes
+        </span>
+      </h2>
+      <p class="programme__lede">
+        Méthodologie universitaire, construction du parcours, préparation des
+        candidatures : chaque séance traite d’un sujet précis, et laisse la
+        place aux questions des membres.
+      </p>
+    </div>
+
+    <div class="programme__grid">
+      <div class="programme__sessions">
+        <SessionsList limit={APERCU} />
+
+        <p class="programme__more">
+          <a class="programme__link" href="/programme">
+            Découvrir tout le programme
+            {reste > 0 && <span class="programme__count"> ({reste} autres séances)</span>}
+            <Arrow />
+          </a>
+        </p>
+      </div>
+
+      <aside class="programme__aside">
+        {/* TODO CLIENT : photo d’une session IPRIG — salle, écran, échanges
+            avec les étudiants. Format vertical. */}
+        <MediaSlot
+          fallback="programme"
+          ratio="portrait"
+          mobileRatio="wide"
+          alt="Session de l’IPRIG"
+          caption="Session IPRIG"
+        />
+      </aside>
+    </div>
+
+    <div class="programme__how">
+      <Fonctionnement />
+    </div>
+  </div>
+</section>
+
+<style>
+  /* En-tête sur deux colonnes, calqué sur le rapport 7/4 du contenu qui
+     suit. Les autres sections ouvrent sur une colonne unique : c'est cette
+     différence qui empêche les en-têtes de se ressembler tous. */
+  .programme__head {
+    display: grid;
+    gap: var(--space-5);
+    margin-block-end: var(--space-7);
+    padding-block-end: var(--space-6);
+    border-block-end: var(--border-hairline) solid var(--rule);
+  }
+
+  .programme__title {
+    max-inline-size: 19ch;
+    font-size: clamp(1.875rem, 1.3rem + 2.4vw, 3rem);
+    line-height: 1.04;
+  }
+
+  .programme__lede {
+    max-inline-size: 50ch;
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+    color: var(--color-ink-soft);
+  }
+
+  .programme__grid {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  /* Lien de renvoi : souligné qui se dessine au survol, pas un bouton.
+     À cet endroit, une action secondaire ne doit pas concurrencer le CTA. */
+  .programme__more {
+    margin-block-start: var(--space-6);
+  }
+
+  .programme__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-block-size: 2.75rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-navy);
+    text-decoration: none;
+    position: relative;
+  }
+
+  .programme__link::after {
+    content: '';
+    position: absolute;
+    inset-block-end: 0.6rem;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: 1px;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform var(--dur) var(--ease-ui);
+  }
+
+  .programme__link:hover::after,
+  .programme__link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  .programme__count {
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+
+  .programme__aside {
+    max-inline-size: 20rem;
+  }
+
+  @media (min-width: 48rem) {
+    .programme__aside {
+      max-inline-size: 30rem;
+    }
+  }
+
+  .programme__how {
+    margin-block-start: var(--space-8);
+  }
+
+  @media (min-width: 62rem) {
+    .programme__head {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+      gap: var(--space-9);
+      align-items: end;
+    }
+
+    /* Rapport 7/4 : la liste domine, la photographie tient la marge. */
+    .programme__grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+      gap: var(--space-9);
+      align-items: start;
+    }
+
+    .programme__aside {
+      max-inline-size: none;
+      position: sticky;
+      inset-block-start: calc(var(--header-h) + var(--space-6));
+    }
+  }
+</style>

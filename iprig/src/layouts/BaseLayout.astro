@@ -1,0 +1,157 @@
+---
+/**
+ * Gabarit unique du site. Toutes les pages passent par lui.
+ * Il gère : <head>, langue, métadonnées, polices, skip link,
+ * en-tête, pied de page et l’observateur de révélation au scroll.
+ */
+import '../styles/global.css';
+import Seo from '../components/Seo.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Chemin de la page, ex. `/programme`. Sert au canonical et à l’OG. */
+  path: string;
+  noindex?: boolean;
+  includeOrganizationSchema?: boolean;
+  /**
+   * Précharge la Newsreader italique (63 Ko). À n’activer que sur les pages
+   * qui affichent de l’italique au-dessus de la ligne de flottaison —
+   * aujourd’hui, le slogan du hero de la page d’accueil.
+   */
+  preloadItalic?: boolean;
+}
+
+const {
+  title,
+  description,
+  path,
+  noindex = false,
+  includeOrganizationSchema = false,
+  preloadItalic = false,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang={site.lang} class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/* Une balise <meta> ne peut pas lire une variable CSS : cette valeur doit
+        rester synchronisée avec `--color-navy-deep` dans global.css. */}
+    <meta name="theme-color" content="#071d30" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    {/* Polices critiques : préchargées pour éviter un décalage de texte. */}
+    <link
+      rel="preload"
+      href="/fonts/newsreader-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/instrument-sans-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    {
+      preloadItalic && (
+        <link
+          rel="preload"
+          href="/fonts/newsreader-latin-wght-italic.woff2"
+          as="font"
+          type="font/woff2"
+          crossorigin
+        />
+      )
+    }
+
+    <Seo
+      title={title}
+      description={description}
+      path={path}
+      noindex={noindex}
+      includeOrganizationSchema={includeOrganizationSchema}
+    />
+
+    {/* Retire `no-js` avant le premier rendu : évite tout clignotement. */}
+    <script is:inline>
+      document.documentElement.classList.remove('no-js');
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#contenu">Aller au contenu principal</a>
+
+    <Header path={path} />
+
+    <main id="contenu">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <script>
+      /**
+       * Pilotage du langage motion (voir la section 7 de global.css).
+       *
+       * Deux régimes :
+       *   — `data-motion-now` : révélé dès le chargement, en séquence.
+       *     Sert à la chorégraphie d'ouverture du hero.
+       *   — sinon : révélé à l'entrée dans le viewport, une seule fois.
+       *
+       * Un seul IntersectionObserver, désabonnement immédiat après passage :
+       * aucun calcul pendant le défilement.
+       */
+      const all = document.querySelectorAll<HTMLElement>('[data-motion]');
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /** Applique le retard déclaré puis déclenche la révélation. */
+      const reveal = (el: HTMLElement) => {
+        const delay = el.dataset.motionDelay;
+        if (delay) el.style.setProperty('--motion-delay', `${delay}ms`);
+        el.classList.add('is-in');
+      };
+
+      if (reduced || !('IntersectionObserver' in window)) {
+        all.forEach((el) => el.classList.add('is-in'));
+      } else {
+        /* Le masque des titres et le volet des images MASQUENT du contenu.
+           Si quoi que ce soit échouait ici, ce contenu resterait invisible :
+           on retombe donc sur « tout afficher » à la moindre erreur. */
+        try {
+          const differes: HTMLElement[] = [];
+
+          for (const el of all) {
+            if (el.hasAttribute('data-motion-now')) reveal(el);
+            else differes.push(el);
+          }
+
+          const observer = new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                if (!entry.isIntersecting) continue;
+                reveal(entry.target as HTMLElement);
+                observer.unobserve(entry.target);
+              }
+            },
+            { rootMargin: '0px 0px -10% 0px', threshold: 0.1 },
+          );
+
+          differes.forEach((el) => observer.observe(el));
+        } catch {
+          all.forEach((el) => el.classList.add('is-in'));
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+---
+/**
+ * Page d'accueil — grande page verticale.
+ *
+ * Parcours du visiteur :
+ *   hero (qu'est-ce que c'est) → l'institut (ce que ça apporte)
+ *   → l'expérience (ce qu'on y fait) → les séances (concrètement)
+ *   → BANDEAU DE CONVERSION → le fondateur (crédibilité) → les repères
+ *   → questions → AFFICHE DE CLÔTURE.
+ *
+ * Rythme des fonds et des densités — c'est ce qui empêche la page de se lire
+ * comme une suite de composants :
+ *
+ *   hero        papier        aéré
+ *   institut    papier alt    dense (deux colonnes)
+ *   expérience  marine        aéré  (chapitres)
+ *   séances     papier        dense (liste)
+ *   bandeau     vert          COMPACT — une seule ligne
+ *   fondateur   papier alt    aéré
+ *   repères     papier        très aéré (grands chiffres)
+ *   questions   papier alt    dense
+ *   clôture     marine        IMMERSIF — affiche typographique
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import SectionInstitut from '../components/SectionInstitut.astro';
+import SectionExperience from '../components/SectionExperience.astro';
+import SectionProgramme from '../components/SectionProgramme.astro';
+import CtaBand from '../components/CtaBand.astro';
+import CtaPoster from '../components/CtaPoster.astro';
+import SectionFondateur from '../components/SectionFondateur.astro';
+import SectionStats from '../components/SectionStats.astro';
+import SectionTemoignages from '../components/SectionTemoignages.astro';
+import SectionFaq from '../components/SectionFaq.astro';
+---
+
+{/* `preloadItalic` : le slogan du hero est composé en italique, au-dessus de la
+    ligne de flottaison — on évite ainsi un changement de police visible. */}
+<BaseLayout path="/" includeOrganizationSchema preloadItalic>
+  <Hero />
+  <SectionInstitut />
+  <SectionExperience />
+  <SectionProgramme />
+
+  {/* Conversion, premier passage : le visiteur sait maintenant ce qu'est
+      l'IPRIG, ce qu'il apporte et comment il fonctionne. Bandeau compact. */}
+  <CtaBand id="rejoindre" />
+
+  <SectionFondateur />
+  <SectionStats />
+  <SectionTemoignages />
+  <SectionFaq />
+
+  {/* Conversion, clôture : affiche typographique. */}
+  <CtaPoster
+    title="Prêt à commencer ?"
+    intro="L’adhésion se fait sur Patreon, en quelques minutes. Sessions, événements, contenus réservés et rediffusions sont accessibles immédiatement — et vous pouvez l’interrompre quand vous le souhaitez."
+  />
+</BaseLayout>

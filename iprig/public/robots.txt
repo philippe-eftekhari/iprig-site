@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Pages légales incomplètes : exclues tant qu'elles ne sont pas finalisées.
+Disallow: /mentions-legales
+Disallow: /politique-confidentialite
+
+Sitemap: https://iprig.fr/sitemap-index.xml

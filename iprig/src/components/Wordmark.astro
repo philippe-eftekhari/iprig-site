@@ -1,0 +1,89 @@
+---
+/**
+ * Wordmark IPRIG — marque typographique temporaire.
+ *
+ * TODO CLIENT : intégrer le logo IPRIG définitif.
+ * Marche à suivre lorsque le fichier sera fourni :
+ *   1. déposer le logo dans `src/assets/brand/iprig-logo.svg` ;
+ *   2. décommenter le bloc <Image /> ci-dessous ;
+ *   3. supprimer le bloc `.wordmark__type`.
+ * Aucune autre modification n’est nécessaire : ce composant est utilisé
+ * dans l’en-tête, le pied de page et l’image de partage social.
+ */
+
+interface Props {
+  /** Adapte les couleurs au fond. */
+  tone?: 'ink' | 'light';
+  /** Taille du sigle. */
+  size?: 'sm' | 'md' | 'lg';
+  /** `true` sur la page d’accueil, où le wordmark de l’en-tête n’est pas un titre. */
+  class?: string;
+}
+
+const { tone = 'ink', size = 'md', class: className = '' } = Astro.props;
+---
+
+<span class={`wordmark wordmark--${tone} wordmark--${size} ${className}`}>
+  <span class="wordmark__mark" aria-hidden="true"></span>
+  <span class="wordmark__type">IPRIG</span>
+</span>
+
+{/*
+  Remplacement par le logo définitif :
+
+  import iprigLogo from '../assets/brand/iprig-logo.svg';
+  import { Image } from 'astro:assets';
+  <Image src={iprigLogo} alt="IPRIG" width={120} height={32} />
+*/}
+
+<style>
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .wordmark__mark {
+    inline-size: 0.34em;
+    block-size: 0.34em;
+    flex: none;
+    background-color: var(--color-accent);
+    transform: rotate(45deg);
+  }
+
+  .wordmark--ink {
+    color: var(--color-navy);
+  }
+
+  .wordmark--light {
+    color: var(--color-paper);
+  }
+
+  .wordmark--light .wordmark__mark {
+    background-color: var(--color-accent-bright);
+  }
+
+  .wordmark--sm {
+    font-size: 1.0625rem;
+  }
+
+  .wordmark--md {
+    font-size: 1.3125rem;
+  }
+
+  .wordmark--lg {
+    font-size: 1.75rem;
+  }
+
+  @media (min-width: 48rem) {
+    .wordmark--md {
+      font-size: 1.4375rem;
+    }
+  }
+</style>

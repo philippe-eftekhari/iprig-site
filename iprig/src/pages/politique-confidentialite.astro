@@ -1,0 +1,117 @@
+---
+/**
+ * /politique-confidentialite — squelette.
+ *
+ * État réel du site en V1 : aucun formulaire, aucun compte, aucun analytics,
+ * aucun cookie déposé par le site. Cette page le dit, sans promettre plus.
+ *
+ * ⚠ TODO CLIENT : à faire relire, et à compléter avec l’identité du
+ * responsable de traitement une fois les informations légales fournies.
+ * Cette page doit être mise à jour si un outil de mesure d’audience,
+ * un formulaire ou une newsletter sont ajoutés plus tard.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { legal } from '../data/site';
+
+const isComplete = legal.editor !== null;
+---
+
+<BaseLayout
+  title="Politique de confidentialité"
+  description="Politique de confidentialité de l’IPRIG : ce site ne collecte aucune donnée personnelle, ne dépose aucun cookie et n’utilise aucun outil de mesure d’audience."
+  path="/politique-confidentialite"
+  noindex={!isComplete}
+>
+  <PageHeader
+    eyebrow="Données personnelles"
+    title="Politique de confidentialité"
+  />
+
+  <section class="section">
+    <div class="container container--narrow legal">
+      {
+        !isComplete && (
+          <p class="legal__pending">
+            Cette page est en cours de finalisation. Elle sera complétée avec
+            l’identité du responsable de traitement avant la mise en ligne
+            définitive du site.
+          </p>
+        )
+      }
+
+      <h2>Ce que ce site collecte</h2>
+      <p>
+        Le site iprig.fr est un site statique de présentation. Il ne comporte
+        aucun formulaire, aucun espace membre et aucun système d’inscription.
+        Il ne collecte donc aucune donnée personnelle directement.
+      </p>
+
+      <h2>Cookies et mesure d’audience</h2>
+      <p>
+        Aucun cookie n’est déposé par ce site. Aucun outil de mesure d’audience,
+        de suivi publicitaire ou de profilage n’y est installé. Aucune bannière
+        de consentement n’est donc nécessaire.
+      </p>
+
+      <h2>Liens vers des services externes</h2>
+      <p>
+        Le site renvoie vers Patreon, qui gère l’adhésion, les paiements et
+        l’accès aux contenus réservés aux membres. À partir du moment où vous
+        quittez ce site pour Patreon, ce sont la politique de confidentialité et
+        les conditions d’utilisation de Patreon qui s’appliquent.
+      </p>
+
+      <h2>Hébergement et journaux serveur</h2>
+      <p>
+        Le site est hébergé par {legal.host.name}, {legal.host.address}.
+        Comme tout hébergeur, il peut conserver des journaux de connexion
+        techniques à des fins de sécurité et de bon fonctionnement du service.
+      </p>
+
+      <h2>Vos droits</h2>
+      <p>
+        Conformément au Règlement général sur la protection des données, vous
+        disposez de droits d’accès, de rectification, d’effacement, de
+        limitation et d’opposition sur les données vous concernant. Ce site ne
+        traitant aucune donnée personnelle, ces demandes concernent les données
+        détenues par Patreon et doivent être adressées à cette plateforme.
+      </p>
+
+      <h2>Modification de cette politique</h2>
+      <p>
+        Cette page sera mise à jour si le site évolue, en particulier si un
+        formulaire de contact, une lettre d’information ou un outil de mesure
+        d’audience venaient à être ajoutés.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal h2 {
+    margin-block: var(--space-8) var(--space-4);
+    font-size: var(--text-h3);
+    font-family: var(--font-serif);
+    font-weight: 500;
+    color: var(--color-navy);
+  }
+
+  .legal h2:first-of-type {
+    margin-block-start: 0;
+  }
+
+  .legal p {
+    max-inline-size: 62ch;
+    color: var(--color-ink-soft);
+  }
+
+  .legal__pending {
+    padding: var(--space-4) var(--space-5);
+    margin-block-end: var(--space-8);
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    border-inline-start: 2px solid var(--color-accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: var(--text-sm);
+  }
+</style>

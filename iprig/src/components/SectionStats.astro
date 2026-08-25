@@ -1,0 +1,162 @@
+---
+/**
+ * Repères chiffrés.
+ *
+ * V2 : les trois colonnes identiques laissent place à une hiérarchie.
+ * Le premier repère est traité en grand — le chiffre devient un élément
+ * typographique à part entière — les deux suivants l'accompagnent, plus
+ * petits, séparés par des filets. Trois colonnes égales étaient propres mais
+ * ne disaient rien : ici, la composition indique ce qui compte le plus.
+ *
+ * L'ordre du tableau `stats` (src/data/site.ts) détermine la hiérarchie :
+ * la première entrée est le repère principal.
+ *
+ * ⚠ TODO CLIENT : valider les chiffres avant la mise en production.
+ * Aucun taux de réussite, aucun nombre d'admissions et aucune note de
+ * satisfaction n'est affiché : ces données n'ont pas été communiquées.
+ *
+ * Pas de compteur animé : les chiffres sont lisibles immédiatement.
+ */
+import { stats } from '../data/site';
+
+const [principal, ...secondaires] = stats;
+---
+
+{
+  principal && (
+    <section class="reperes" aria-labelledby="reperes-title">
+      <div class="container container--wide">
+        <h2 id="reperes-title" class="reperes__label">
+          En quelques repères
+        </h2>
+
+        <dl class="reperes__grid">
+          <div class="repere repere--principal">
+            <dt class="repere__value">{principal.value}</dt>
+            <dd class="repere__label">
+              {principal.label}
+              {principal.note && <span class="repere__note">{principal.note}</span>}
+            </dd>
+          </div>
+
+          {secondaires.map((s) => (
+            <div class="repere">
+              <dt class="repere__value">{s.value}</dt>
+              <dd class="repere__label">
+                {s.label}
+                {s.note && <span class="repere__note">{s.note}</span>}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .reperes {
+    background-color: var(--color-paper);
+    /* Section « aérée » : c'est la respiration de la page.
+
+       Respiration asymétrique, et volontairement : la section s'ouvre au
+       large pour trancher avec la densité du portrait qui précède, mais elle
+       n'a rien à refermer en bas — le changement de fond de la section
+       suivante s'en charge. Un blanc identique en haut et en bas laissait
+       croire, sous les trois chiffres, qu'il manquait quelque chose. */
+    padding-block: var(--section-y-lg) var(--section-y);
+  }
+
+  /* Étiquette de rubrique, sans le surtitre à filet employé ailleurs :
+     à cet endroit, ce sont les chiffres qui ouvrent la section. */
+  .reperes__label {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--color-muted);
+    padding-block-end: var(--space-5);
+    border-block-end: var(--border-hairline) solid var(--rule);
+    margin-block-end: var(--space-8);
+  }
+
+  .reperes__grid {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .repere__value {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
+    font-weight: 500;
+    line-height: 0.94;
+    letter-spacing: -0.03em;
+    color: var(--color-navy);
+    text-wrap: balance;
+  }
+
+  .repere__label {
+    margin-block-start: var(--space-4);
+    max-inline-size: 24ch;
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    color: var(--color-ink-soft);
+  }
+
+  .repere__note {
+    display: block;
+    margin-block-start: var(--space-1);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+  }
+
+  /* Les deux repères secondaires accompagnent, ils n'annoncent pas : ils
+     passent en encre douce. Le bleu profond redevient ainsi le signal du
+     seul chiffre qui compte, au lieu d'être la couleur par défaut des
+     trois. */
+  .repere:not(.repere--principal) .repere__value {
+    color: var(--color-ink-soft);
+  }
+
+  /* Le repère principal est nettement plus grand : c'est lui qui porte la
+     preuve, les deux autres la complètent. */
+  .repere--principal .repere__value {
+    font-size: clamp(2.75rem, 1.6rem + 5.4vw, 6rem);
+    line-height: 0.88;
+    max-inline-size: 8ch;
+  }
+
+  .repere--principal .repere__label {
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    color: var(--color-ink);
+  }
+
+  @media (min-width: 48rem) {
+    /* Rapport 6/3/3 : un dominant, deux secondaires. */
+    .reperes__grid {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 3fr) minmax(0, 3fr);
+      gap: var(--space-7);
+      /* `stretch` : les filets verticaux courent sur toute la hauteur de la
+         rangée au lieu de s’arrêter sous le texte le plus court. */
+      align-items: stretch;
+    }
+
+    /* Filets verticaux : ils séparent sans encadrer. */
+    .repere + .repere {
+      padding-inline-start: var(--space-7);
+      border-inline-start: var(--border-hairline) solid var(--rule);
+    }
+  }
+
+  @media (min-width: 62rem) {
+    .reperes__grid {
+      gap: var(--space-9);
+    }
+
+    .repere + .repere {
+      padding-inline-start: var(--space-9);
+    }
+  }
+</style>

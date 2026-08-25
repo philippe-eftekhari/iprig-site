@@ -1,0 +1,22 @@
+# build
+dist/
+.astro/
+
+# dependances
+node_modules/
+
+# secrets et environnement — ne JAMAIS versionner d'identifiants Hostinger/FTP
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# systeme
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+
+# tests visuels
+screenshots/
