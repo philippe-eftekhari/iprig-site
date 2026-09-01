@@ -1,0 +1,120 @@
+---
+/**
+ * Formulaire de préinscription aux certificats.
+ *
+ * ⚠ PRÉINSCRIPTION, PAS INSCRIPTION. Aucun paiement, aucun panier, aucun
+ * engagement. Le message de confirmation dit « demande envoyée », jamais
+ * « inscription confirmée » : c'est la même distinction côté texte et côté
+ * serveur.
+ *
+ * Les cases à cocher sont dessinées à partir de `openCertificates`
+ * (src/data/certificats.ts) — la même source que le catalogue affiché plus
+ * haut sur la page, et que la validation serveur. Ajouter un certificat au
+ * fichier de données l'ajoute simultanément aux trois endroits ; il n'existe
+ * aucune liste à mettre à jour à la main.
+ */
+import Form from './Form.astro';
+import { contact } from '../data/site';
+import { openCertificates, teachers, preinscription } from '../data/certificats';
+
+/**
+ * ⚠ PAS `preinscription` : la section qui accueille ce formulaire porte déjà
+ * cet identifiant, qui sert d'ancre au pied de page et à l'affiche de clôture
+ * (`/certificats#preinscription`). Deux éléments partageant un `id` rendent le
+ * document invalide et cassent la résolution des `for` / `aria-*`.
+ */
+const ID = 'preinscription-form';
+
+const nomEnseignant = (teacherId: string) =>
+  teachers.find((t) => t.id === teacherId)?.name ?? '';
+---
+
+<Form
+  id={ID}
+  action={contact.endpoints.preinscription}
+  submitLabel={preinscription.submit}
+  successMessage={preinscription.success}
+  ariaLabel="Se préinscrire à un certificat"
+>
+  <div class="field">
+    <label class="field__label" for={`${ID}-nom`}>Nom et prénom</label>
+    <input
+      class="field__control"
+      type="text"
+      id={`${ID}-nom`}
+      name="nom"
+      required
+      minlength="2"
+      maxlength="120"
+      autocomplete="name"
+    />
+  </div>
+
+  <div class="field">
+    <label class="field__label" for={`${ID}-email`}>Adresse email</label>
+    <input
+      class="field__control"
+      type="email"
+      id={`${ID}-email`}
+      name="email"
+      required
+      maxlength="254"
+      autocomplete="email"
+      inputmode="email"
+      spellcheck="false"
+      placeholder="prenom.nom@exemple.fr"
+    />
+  </div>
+
+  {/* « Au moins une case cochée » ne s'exprime pas en HTML natif :
+      `data-required-group` transmet le message d'erreur au script de la coque,
+      et le serveur refait la vérification de son côté. */}
+  <fieldset
+    class="choices"
+    data-required-group="Merci de sélectionner au moins un certificat."
+  >
+    <legend class="choices__legend">Certificat(s) souhaité(s)</legend>
+
+    <ul class="choices__list">
+      {
+        openCertificates.map((c) => (
+          <li class="choice">
+            <label class="choice__label" for={`${ID}-${c.id}`}>
+              <input
+                class="choice__box"
+                type="checkbox"
+                id={`${ID}-${c.id}`}
+                name="certificats[]"
+                value={c.id}
+              />
+              <span>
+                <span class="choice__title">{c.title}</span>
+                <span class="choice__meta">{nomEnseignant(c.teacherId)}</span>
+              </span>
+            </label>
+          </li>
+        ))
+      }
+    </ul>
+  </fieldset>
+
+  <div class="field">
+    <label class="field__label" for={`${ID}-message`}>
+      Message <span class="field__optional">(facultatif)</span>
+    </label>
+    <textarea
+      class="field__control"
+      id={`${ID}-message`}
+      name="message"
+      maxlength="3000"
+      aria-describedby={`${ID}-message-hint`}></textarea>
+    <p class="field__hint" id={`${ID}-message-hint`}>
+      Ces informations servent uniquement à vous recontacter au sujet des
+      certificats. Voir la{' '}
+      <a class="link" href="/politique-confidentialite">
+        politique de confidentialité
+      </a>
+      .
+    </p>
+  </div>
+</Form>

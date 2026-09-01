@@ -1,0 +1,73 @@
+---
+/**
+ * Formulaire « Écrire à l'IPRIG ».
+ *
+ * Trois champs, pas un de plus : on ne demande que ce dont on a besoin pour
+ * répondre. Ni téléphone, ni civilité, ni « comment nous avez-vous connus » —
+ * chaque champ supplémentaire est une donnée personnelle de plus à justifier,
+ * à conserver et à protéger.
+ *
+ * La destination des messages n'apparaît nulle part dans cette page : elle est
+ * lue par PHP dans un fichier de configuration hors dépôt.
+ */
+import Form from './Form.astro';
+import { contact } from '../data/site';
+
+const ID = 'contact';
+---
+
+<Form
+  id={ID}
+  action={contact.endpoints.message}
+  submitLabel="Envoyer"
+  successMessage="Votre message a bien été envoyé."
+  ariaLabel="Écrire à l’IPRIG"
+>
+  <div class="field">
+    <label class="field__label" for={`${ID}-email`}>Votre email</label>
+    <input
+      class="field__control"
+      type="email"
+      id={`${ID}-email`}
+      name="email"
+      required
+      maxlength="254"
+      autocomplete="email"
+      inputmode="email"
+      spellcheck="false"
+      placeholder="prenom.nom@exemple.fr"
+    />
+  </div>
+
+  <div class="field">
+    <label class="field__label" for={`${ID}-objet`}>Objet</label>
+    <input
+      class="field__control"
+      type="text"
+      id={`${ID}-objet`}
+      name="objet"
+      required
+      maxlength="150"
+      placeholder="Une question sur le programme"
+    />
+  </div>
+
+  <div class="field">
+    <label class="field__label" for={`${ID}-message`}>Message</label>
+    <textarea
+      class="field__control"
+      id={`${ID}-message`}
+      name="message"
+      required
+      minlength="10"
+      maxlength="5000"
+      aria-describedby={`${ID}-message-hint`}></textarea>
+    <p class="field__hint" id={`${ID}-message-hint`}>
+      Ces informations servent uniquement à répondre à votre demande. Voir la{' '}
+      <a class="link" href="/politique-confidentialite">
+        politique de confidentialité
+      </a>
+      .
+    </p>
+  </div>
+</Form>

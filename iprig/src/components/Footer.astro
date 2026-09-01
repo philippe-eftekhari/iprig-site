@@ -1,22 +1,19 @@
 ---
 /**
  * Pied de page institutionnel.
- * Les liens sociaux dont l’URL vaut `null` sont automatiquement masqués :
- * aucun lien mort, aucun compte inventé.
+ *
+ * Les liens sociaux viennent de `socialLinks` (src/data/site.ts) via
+ * `SocialLinks` : une URL corrigée dans le fichier de données l'est ici aussi.
+ * Une plateforme sans URL n'est jamais rendue — aucun lien mort.
+ *
+ * ⚠ Aucune adresse e-mail n'est publiée : la page Contact porte un formulaire,
+ * dont la destination reste côté serveur.
  */
 import Wordmark from './Wordmark.astro';
+import SocialLinks from './SocialLinks.astro';
 import { mainNav, footerNav } from '../data/navigation';
-import {
-  site,
-  offer,
-  contact,
-  legal,
-  socialsIprig,
-  socialsKevanExplique,
-} from '../data/site';
-
-const iprigLinks = socialsIprig.filter((s) => s.url !== null);
-const kevanLinks = socialsKevanExplique.filter((s) => s.url !== null);
+import { site, offer, legal } from '../data/site';
+import { kevanExplique } from '../data/kevan';
 ---
 
 <footer class="footer">
@@ -71,69 +68,30 @@ const kevanLinks = socialsKevanExplique.filter((s) => s.url !== null);
               {offer.priceDisplay} {offer.pricePeriod}
             </li>
             <li class="footer__meta">{offer.commitment}</li>
+            <li>
+              <a class="footer__link" href="/certificats">Certificats</a>
+            </li>
           </ul>
         </div>
 
         <div class="footer__col">
           <h2 class="footer__title">Contact</h2>
           <ul class="footer__list">
-            {
-              contact.email && (
-                <li>
-                  <a class="footer__link" href={`mailto:${contact.email}`}>
-                    {contact.email}
-                  </a>
-                </li>
-              )
-            }
-            {
-              iprigLinks.map((s) => (
-                <li>
-                  <a
-                    class="footer__link"
-                    href={s.url!}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {s.label}
-                    <span class="sr-only"> (nouvelle fenêtre)</span>
-                  </a>
-                </li>
-              ))
-            }
             <li>
-              <a class="footer__link" href="/contact">Page contact</a>
+              <a class="footer__link" href="/contact">Écrire à l’IPRIG</a>
+            </li>
+            <li>
+              <a class="footer__link" href="/certificats#preinscription">
+                Préinscription aux certificats
+              </a>
             </li>
           </ul>
-          {
-            /* TODO CLIENT : e-mail officiel, Instagram IPRIG, LinkedIn IPRIG.
-               Les liens apparaîtront automatiquement une fois renseignés
-               dans src/data/site.ts. */
-          }
         </div>
 
-        {
-          kevanLinks.length > 0 && (
-            <div class="footer__col">
-              <h2 class="footer__title">Kevan Explique</h2>
-              <ul class="footer__list">
-                {kevanLinks.map((s) => (
-                  <li>
-                    <a
-                      class="footer__link"
-                      href={s.url!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {s.label}
-                      <span class="sr-only"> (nouvelle fenêtre)</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )
-        }
+        <div class="footer__col">
+          <h2 class="footer__title">{kevanExplique.name}</h2>
+          <SocialLinks class="footer__socials" />
+        </div>
       </div>
     </div>
 
@@ -223,6 +181,13 @@ const kevanLinks = socialsKevanExplique.filter((s) => s.url !== null);
 
   .footer__meta {
     color: var(--color-on-dark-muted);
+  }
+
+  /* Les liens sociaux sont plus serrés que les colonnes de navigation :
+     ce sont des glyphes accompagnés d'un mot, pas des entrées de menu. */
+  .footer__socials {
+    gap: 0 var(--space-4);
+    color: var(--color-on-dark);
   }
 
   .footer__bottom {

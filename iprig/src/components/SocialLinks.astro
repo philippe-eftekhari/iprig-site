@@ -1,0 +1,195 @@
+---
+/**
+ * ============================================================================
+ *  Liens sociaux — affichage unique pour tout le site
+ * ============================================================================
+ *  La liste vient de `socialLinks` (src/data/site.ts) : accueil, page Kevan
+ *  Gafaïti, page contact et pied de page affichent donc exactement les mêmes
+ *  comptes. Une URL corrigée dans le fichier de données l'est partout.
+ *
+ *  Une plateforme dont l'URL vaut `null` n'est JAMAIS rendue comme un lien.
+ *  Elle apparaît, si `showPending` est activé, comme une simple mention
+ *  textuelle : un lien mort coûte plus cher qu'une plateforme absente.
+ *
+ *  Les glyphes sont dessinés en `currentColor` : ils prennent la couleur du
+ *  texte environnant et fonctionnent donc aussi bien sur papier que sur fond
+ *  marine, sans variante à maintenir.
+ * ============================================================================
+ */
+import { activeSocialLinks, pendingSocialLinks, type SocialId } from '../data/site';
+
+interface Props {
+  /** `labels` : icône + nom. `icons` : icône seule, nom réservé aux lecteurs d'écran. */
+  variant?: 'labels' | 'icons';
+  /** Afficher la mention des plateformes dont l'URL n'est pas encore fournie. */
+  showPending?: boolean;
+  class?: string;
+}
+
+const { variant = 'labels', showPending = false, class: className = '' } = Astro.props;
+
+/**
+ * Chemins des glyphes, sur une grille 24 × 24.
+ * TODO : une plateforme ajoutée à `socialLinks` sans entrée ici s'affiche
+ * avec un losange générique — visible, mais à compléter.
+ */
+const ICONS: Partial<Record<SocialId, string>> = {
+  instagram:
+    'M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.3-1.46.72-2.13 1.38C1.35 2.68.94 3.35.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13.67.67 1.34 1.08 2.13 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.79-.3 1.46-.71 2.13-1.38.67-.67 1.08-1.34 1.38-2.13.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91-.3-.79-.71-1.46-1.38-2.13C21.32 1.35 20.65.94 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zM12 16a4 4 0 110-8 4 4 0 010 8zm7.85-10.41a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z',
+  youtube:
+    'M23.5 6.19a3.02 3.02 0 00-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 00.5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 002.12 2.14c1.87.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 002.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z',
+  tiktok:
+    'M12.53.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z',
+  twitch:
+    'M11.57 4.71h1.72v5.15h-1.72zm4.72 0H18v5.15h-1.71zM6 0L1.71 4.29v15.42h5.15V24l4.28-4.29h3.43L22.29 12V0zm14.57 11.14l-3.43 3.43h-3.43l-3 3v-3H6.86V1.71h13.71z',
+  linkedin:
+    'M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.47-.9 1.63-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 110-4.13 2.06 2.06 0 010 4.13zm1.78 13.02H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z',
+  spotify:
+    'M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.52 17.34c-.24.36-.66.48-1.02.24-2.82-1.74-6.36-2.1-10.56-1.14-.42.12-.78-.18-.9-.54-.12-.42.18-.78.54-.9 4.56-1.02 8.52-.6 11.64 1.32.42.18.48.66.3 1.02zm1.44-3.3c-.3.42-.84.6-1.26.3-3.24-1.98-8.16-2.58-11.94-1.38-.48.12-1.02-.12-1.14-.6-.12-.48.12-1.02.6-1.14 4.32-1.32 9.72-.66 13.44 1.62.36.18.54.78.24 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.3c-.6.18-1.2-.18-1.38-.72-.18-.6.18-1.2.72-1.38 4.26-1.26 11.28-1.02 15.72 1.62.54.3.72 1.02.42 1.56-.3.42-1.02.6-1.56.3z',
+  /* Apple Podcasts — anneau, tête, corps fuselé. L'anneau est creusé par le
+     sens de rotation inverse du cercle intérieur (règle « nonzero ») : aucune
+     propriété `fill-rule` à poser sur le <path>, comme les autres glyphes. */
+  applePodcasts:
+    'M12 0a12 12 0 1 0 0 24 12 12 0 1 0 0-24zm0 2.2a9.8 9.8 0 1 1 0 19.6 9.8 9.8 0 1 1 0-19.6zM12 6.3a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 1 0 0-4.2zM12 11.6c-1.55 0-2.7.85-2.7 2.1 0 .5.1 1.35.25 2.4.15 1.05.3 1.9.42 2.4.2.85.75 1.4 2.03 1.4s1.83-.55 2.03-1.4c.12-.5.27-1.35.42-2.4.15-1.05.25-1.9.25-2.4 0-1.25-1.15-2.1-2.7-2.1z',
+};
+---
+
+{
+  activeSocialLinks.length > 0 && (
+    <ul class={`socials socials--${variant} ${className}`}>
+      {activeSocialLinks.map((s) => (
+        <li>
+          <a
+            class="socials__link"
+            href={s.url!}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {ICONS[s.id] ? (
+              <svg
+                class="socials__icon"
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d={ICONS[s.id]} fill="currentColor" />
+              </svg>
+            ) : (
+              <span class="socials__dot" aria-hidden="true" />
+            )}
+
+            {variant === 'labels' ? (
+              <span class="socials__label">{s.label}</span>
+            ) : (
+              <span class="sr-only">{s.label}</span>
+            )}
+            <span class="sr-only"> (nouvelle fenêtre)</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+{
+  /* Plateformes annoncées dont l'adresse n'a pas encore été communiquée.
+     Mention textuelle, jamais un lien : `href="#"` est proscrit. */
+  showPending && pendingSocialLinks.length > 0 && (
+    <p class="socials__pending">
+      {pendingSocialLinks.map((s) => s.label).join(', ')}
+      <span class="socials__pending-note"> — lien à venir</span>
+    </p>
+  )
+}
+
+<style>
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .socials--icons {
+    gap: var(--space-2);
+  }
+
+  .socials__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    /* Cible tactile : 44 px de haut même quand le glyphe n'en fait que 18. */
+    min-block-size: 2.75rem;
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-ui);
+  }
+
+  .socials--icons .socials__link {
+    justify-content: center;
+    inline-size: 2.75rem;
+  }
+
+  .socials__icon {
+    flex: none;
+    opacity: 0.7;
+    transition: opacity var(--dur-fast) var(--ease-ui);
+  }
+
+  .socials__dot {
+    inline-size: 6px;
+    block-size: 6px;
+    flex: none;
+    background-color: currentColor;
+    transform: rotate(45deg);
+    opacity: 0.6;
+  }
+
+  /* Le filet sous le libellé reprend le geste des liens du site : il se trace
+     au survol, il n'apparaît pas d'un coup. */
+  .socials__label {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0 1px;
+    padding-block-end: 2px;
+    transition: background-size var(--dur) var(--ease-ui);
+  }
+
+  .socials__link:hover {
+    color: var(--color-forest);
+  }
+
+  .socials__link:hover .socials__icon {
+    opacity: 1;
+  }
+
+  .socials__link:hover .socials__label {
+    background-size: 100% 1px;
+  }
+
+  .section--dark .socials__link:hover,
+  .section--forest .socials__link:hover,
+  .footer .socials__link:hover {
+    color: var(--color-accent-bright);
+  }
+
+  .socials__pending {
+    margin-block-start: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .socials__pending-note {
+    font-style: italic;
+  }
+
+  .section--dark .socials__pending,
+  .footer .socials__pending {
+    color: var(--color-on-dark-muted);
+  }
+</style>

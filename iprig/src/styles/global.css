@@ -95,6 +95,11 @@
      graphiques (voir MediaSlot). */
   --color-navy-line: #9fb6c6;
 
+  /* Rouge brique — le SEUL rouge du site, réservé aux erreurs de formulaire.
+     Choisi dans la même famille sourde que le laiton et le vert : un rouge vif
+     ferait tache sur ce papier. Contraste sur --color-paper : 6,3:1. */
+  --color-error: #8f2f24;
+
   /* Filets décoratifs */
   --rule: color-mix(in srgb, var(--color-ink) 14%, transparent);
   --rule-strong: color-mix(in srgb, var(--color-ink) 26%, transparent);
@@ -512,6 +517,51 @@ main > .section--dark:last-child {
   color: var(--color-on-dark-muted);
 }
 
+/* ---------------------------------------------------------- Justification
+   Un bloc de prose justifié donne au site son bord droit de revue. Mais la
+   justification n'est un gain que si la colonne est assez large : en dessous,
+   le navigateur étire les espaces pour combler la ligne et fabrique des trous
+   et des « rivières » verticales, exactement ce qu'on cherchait à éviter.
+
+   La règle est donc conditionnelle :
+
+     — sous 48rem (téléphone, petite tablette) : alignement naturel. Les
+       colonnes y font 40 à 45 signes, bien trop peu pour justifier ;
+     — au-delà : justification, avec césure automatique. Sans `hyphens`, le
+       français — dont les mots sont longs — produit précisément les trous
+       qu'on veut éviter. La césure est le prix d'entrée de la justification.
+
+   À réserver aux VRAIS paragraphes. Ne jamais poser cette classe sur un
+   bouton, un prix, une étiquette, une puce ou un micro-texte : une ligne
+   courte justifiée se transforme en mot-espace-mot-espace-mot. */
+.justify {
+  hanging-punctuation: first last;
+}
+
+@media (min-width: 75rem) {
+  .justify,
+  .justify > p {
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+    /* Là où le navigateur SAIT couper le français, ces limites bornent la
+       césure. Les valeurs de la V4.0 (6 3 3) autorisaient encore la coupe des
+       mots courts : « doc-teur », sur sept lettres, se lit comme une faute de
+       composition alors que le mot tient sur une ligne.
+
+       V4.1 : dix signes minimum dans le mot, quatre de chaque côté de la
+       coupure. Un mot de moins de dix lettres n'est donc plus jamais coupé —
+       « docteur », « diplôme », « réussite » restent entiers. Les mots longs,
+       eux, gardent leurs points de coupe : c'est ce qui empêche la
+       justification de creuser des rivières dans une colonne de 52 signes.
+
+       Ne pas monter plus haut : moins d'occasions de couper, ce sont des
+       espaces plus étirés — le défaut qu'on cherchait justement à éviter.
+       Ignoré par les navigateurs sans dictionnaire — sans effet de bord. */
+    hyphenate-limit-chars: 10 4 4;
+  }
+}
+
 /* Lien d'évitement */
 .skip-link {
   position: absolute;
@@ -687,6 +737,162 @@ main > .section--dark:last-child {
   display: inline-flex;
   align-items: center;
   min-block-size: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   6 bis. CHAMPS DE FORMULAIRE                                    (V4)
+   --------------------------------------------------------------------------
+   Deux formulaires seulement sur le site : « Écrire à l'IPRIG » et la
+   préinscription aux certificats. Ils partagent ces classes — un champ ne
+   doit pas se dessiner deux fois.
+
+   Parti pris : un cadre d'un cheveu, des angles vifs, un fond transparent.
+   Un champ arrondi et grisé ferait basculer la page du côté du formulaire
+   d'application ; ici, il reste du papier avec un filet autour.
+   -------------------------------------------------------------------------- */
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.field__label {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+/* « facultatif » se lit dans le libellé, pas dans un astérisque à déchiffrer :
+   un champ non marqué est donc obligatoire, ce qui est le cas le plus
+   fréquent et le plus court à lire. */
+.field__optional {
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--color-muted);
+}
+
+.field__control {
+  inline-size: 100%;
+  padding: 0.75rem 0.875rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--color-ink);
+  background-color: color-mix(in srgb, var(--color-paper) 55%, #fff);
+  border: var(--border-hairline) solid var(--rule-strong);
+  border-radius: var(--radius-sm);
+  transition:
+    border-color var(--dur-fast) var(--ease-ui),
+    background-color var(--dur-fast) var(--ease-ui);
+}
+
+.field__control::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
+
+.field__control:hover {
+  border-color: var(--border-control);
+}
+
+.field__control:focus-visible {
+  border-color: var(--color-navy);
+  background-color: #fff;
+}
+
+/* Le navigateur signale un champ invalide dès qu'il a été quitté. `:user-invalid`
+   ne se déclenche pas au chargement, contrairement à `:invalid` : un champ
+   obligatoire encore vierge n'est pas signalé en rouge avant d'avoir servi. */
+.field__control:user-invalid {
+  border-color: var(--color-error);
+}
+
+textarea.field__control {
+  min-block-size: 9rem;
+  resize: vertical;
+}
+
+.field__hint {
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+/* ---------------------------------------------------- Groupe de cases ---
+   Sélection multiple. `fieldset` et `legend` sont conservés : c'est le seul
+   balisage qui annonce « ces cases forment une question » à un lecteur
+   d'écran. Leur mise en forme par défaut est neutralisée. */
+.choices {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-inline-size: 0;
+}
+
+.choices__legend {
+  padding: 0;
+  margin-block-end: var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.choices__list {
+  display: grid;
+  gap: 0;
+  border-block-start: var(--border-hairline) solid var(--rule);
+}
+
+.choice {
+  border-block-end: var(--border-hairline) solid var(--rule);
+}
+
+.choice__label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  /* Toute la ligne est cliquable, et haute d'au moins 44 px au pouce. */
+  padding-block: var(--space-3);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-ui);
+}
+
+.choice__label:hover {
+  background-color: color-mix(in srgb, var(--color-navy) 4%, transparent);
+}
+
+/* 24 px exactement — le minimum du critère WCAG 2.2 « taille de cible »
+   (2.5.8). La ligne entière est cliquable grâce au <label>, mais le contrôle
+   lui-même doit tenir la mesure : c'est lui que vise un doigt qui cherche la
+   case, et c'est lui qu'un audit mesure. */
+.choice__box {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  margin-block-start: 0.05em;
+  flex: none;
+  accent-color: var(--color-navy);
+}
+
+.choice__title {
+  display: block;
+  font-size: var(--text-base);
+  line-height: 1.4;
+  color: var(--color-ink);
+}
+
+.choice__meta {
+  display: block;
+  margin-block-start: 2px;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
 }
 
 /* ==========================================================================

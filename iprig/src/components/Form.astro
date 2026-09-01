@@ -1,0 +1,300 @@
+---
+/**
+ * ============================================================================
+ *  Coque de formulaire — commune au contact et à la préinscription
+ * ============================================================================
+ *  Elle porte tout ce qui ne doit exister qu'une seule fois :
+ *
+ *    — la balise <form> et son action serveur ;
+ *    — le pot de miel et l'horodatage anti-robot ;
+ *    — la zone d'état (`role="status"`, `aria-live="polite"`) ;
+ *    — le bouton d'envoi et sa protection contre le double clic ;
+ *    — le script d'envoi.
+ *
+ *  Les champs eux-mêmes arrivent par le `<slot />` : chaque formulaire ne
+ *  décrit que ce qui lui est propre.
+ *
+ *  ---------------------------------------------------------------------------
+ *  FONCTIONNE SANS JAVASCRIPT
+ *  ---------------------------------------------------------------------------
+ *  Le formulaire est un vrai <form method="post"> : sans JavaScript, le
+ *  navigateur l'envoie nativement et le serveur répond par une page de
+ *  confirmation. Avec JavaScript, l'envoi se fait en arrière-plan et la
+ *  réponse s'affiche sur place, sans quitter la page.
+ *
+ *  ---------------------------------------------------------------------------
+ *  L'ADRESSE DE DESTINATION N'EST PAS ICI
+ *  ---------------------------------------------------------------------------
+ *  `action` pointe vers un point d'entrée du même domaine. La boîte qui reçoit
+ *  les messages est lue par PHP dans un fichier de configuration hors dépôt :
+ *  elle n'apparaît jamais dans le HTML servi.
+ * ============================================================================
+ */
+
+interface Props {
+  /** Identifiant du formulaire, préfixe de tous les identifiants de champs. */
+  id: string;
+  /** Point d'entrée serveur. Toujours une URL relative du même domaine. */
+  action: string;
+  /** Libellé du bouton d'envoi. */
+  submitLabel: string;
+  /** Message affiché après un envoi réussi. */
+  successMessage: string;
+  /** Description du formulaire pour les lecteurs d'écran. */
+  ariaLabel: string;
+}
+
+const { id, action, submitLabel, successMessage, ariaLabel } = Astro.props;
+---
+
+<form
+  class="form"
+  id={id}
+  action={action}
+  method="post"
+  data-form
+  data-success={successMessage}
+  aria-label={ariaLabel}
+>
+  {/* ------------------------------------------------------- Zone d'état
+      Vide au chargement : une région `aria-live` qui contient déjà du texte
+      ne l'annonce pas quand il change. Elle est renseignée par le script. */}
+  <p class="form__status" id={`${id}-status`} role="status" aria-live="polite" tabindex="-1"></p>
+
+  <div class="form__fields">
+    <slot />
+  </div>
+
+  {/* -------------------------------------------------- Gardes anti-robot
+      `website` est un pot de miel : invisible à l'écran, retiré de l'ordre
+      de tabulation et masqué aux lecteurs d'écran. Un humain ne le voit
+      jamais ; un robot qui remplit tous les champs le remplit. Le serveur
+      répond alors « envoyé » sans rien envoyer.
+
+      `_t` reçoit l'heure du chargement de la page. Un formulaire renvoyé en
+      moins de deux secondes n'a pas été rempli par un humain. Il reste vide
+      sans JavaScript : le serveur ignore alors ce contrôle. */}
+  <div class="form__trap" aria-hidden="true">
+    <label for={`${id}-website`}>Ne pas remplir</label>
+    <input
+      type="text"
+      id={`${id}-website`}
+      name="website"
+      tabindex="-1"
+      autocomplete="off"
+    />
+  </div>
+  <input type="hidden" name="_t" value="" data-timestamp />
+
+  <div class="form__actions">
+    <button class="btn btn--lg form__submit" type="submit" data-submit>
+      <span data-submit-label>{submitLabel}</span>
+      <svg
+        class="btn__arrow"
+        width="14"
+        height="10"
+        viewBox="0 0 14 10"
+        fill="none"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M1 5h11.5M8.5 1l4 4-4 4"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linecap="square"></path>
+      </svg>
+    </button>
+  </div>
+</form>
+
+<script>
+  /**
+   * Envoi des formulaires en arrière-plan.
+   *
+   * Un seul script pour les deux formulaires du site : il s'attache à tout
+   * élément portant `data-form`. Si quoi que ce soit échoue ici, le
+   * formulaire reste un <form> ordinaire et l'envoi natif prend le relais.
+   */
+  const forms = document.querySelectorAll<HTMLFormElement>('[data-form]');
+
+  for (const form of forms) {
+    const status = form.querySelector<HTMLElement>('.form__status');
+    const submit = form.querySelector<HTMLButtonElement>('[data-submit]');
+    const label = form.querySelector<HTMLElement>('[data-submit-label]');
+    const stamp = form.querySelector<HTMLInputElement>('[data-timestamp]');
+    if (!status || !submit || !label) continue;
+
+    const initialLabel = label.textContent ?? '';
+
+    /* Horodatage de chargement : le serveur s'en sert pour écarter les envois
+       instantanés. Posé ici et non au build — une page statique est mise en
+       cache, sa date de génération ne dirait rien. */
+    if (stamp) stamp.value = String(Math.floor(Date.now() / 1000));
+
+    /** Affiche un message et y amène le focus, pour qu'il soit annoncé. */
+    const show = (message: string, kind: 'ok' | 'error') => {
+      status.textContent = message;
+      status.classList.toggle('form__status--ok', kind === 'ok');
+      status.classList.toggle('form__status--error', kind === 'error');
+      status.focus();
+    };
+
+    const clear = () => {
+      status.textContent = '';
+      status.classList.remove('form__status--ok', 'form__status--error');
+    };
+
+    form.addEventListener('submit', async (event) => {
+      /* Groupe de cases à cocher : « au moins une » ne s'exprime pas en HTML.
+         Le serveur le vérifie aussi — ce contrôle n'est là que pour éviter un
+         aller-retour réseau inutile. */
+      const groupe = form.querySelector<HTMLElement>('[data-required-group]');
+      if (groupe) {
+        const coches = groupe.querySelectorAll('input[type="checkbox"]:checked');
+        if (coches.length === 0) {
+          event.preventDefault();
+          show(groupe.dataset.requiredGroup || 'Merci de faire un choix.', 'error');
+          groupe.querySelector<HTMLInputElement>('input[type="checkbox"]')?.focus();
+          return;
+        }
+      }
+
+      /* Validation native : messages localisés par le navigateur, annoncés
+         correctement, et identiques à ceux de l'envoi sans JavaScript. */
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        form.reportValidity();
+        return;
+      }
+
+      event.preventDefault();
+      clear();
+
+      /* Anti-double-envoi : le bouton se désactive dès le premier clic et ne
+         revient que sur échec. `aria-busy` l'annonce aux lecteurs d'écran. */
+      submit.disabled = true;
+      submit.setAttribute('aria-busy', 'true');
+      label.textContent = 'Envoi…';
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json', 'X-Requested-With': 'fetch' },
+        });
+
+        let payload: { ok?: boolean; message?: string } = {};
+        try {
+          payload = await response.json();
+        } catch {
+          /* Réponse non-JSON : serveur mal configuré, PHP absent, page
+             d'erreur de l'hébergeur. On le traite comme un échec. */
+        }
+
+        if (response.ok && payload.ok) {
+          form.reset();
+          if (stamp) stamp.value = String(Math.floor(Date.now() / 1000));
+          show(form.dataset.success || payload.message || 'Envoyé.', 'ok');
+          /* Le formulaire est masqué après succès : le laisser ouvert invite
+             à renvoyer la même demande. */
+          form.classList.add('form--sent');
+          return;
+        }
+
+        show(
+          payload.message ||
+            'L’envoi a échoué. Merci de réessayer dans un instant.',
+          'error',
+        );
+      } catch {
+        show(
+          'L’envoi a échoué — connexion interrompue. Merci de réessayer.',
+          'error',
+        );
+      } finally {
+        if (!form.classList.contains('form--sent')) {
+          submit.disabled = false;
+          submit.removeAttribute('aria-busy');
+          label.textContent = initialLabel;
+        }
+      }
+    });
+  }
+</script>
+
+<style>
+  .form {
+    /* Ancre le pot de miel, qui est en `position: absolute` : sans repère, il
+       se positionnerait par rapport au bloc conteneur initial. */
+    position: relative;
+    max-inline-size: 40rem;
+  }
+
+  /* ------------------------------------------------------------- État --- */
+  .form__status:empty {
+    display: none;
+  }
+
+  .form__status {
+    margin-block-end: var(--space-6);
+    padding: var(--space-4) var(--space-5);
+    border-inline-start: 2px solid currentColor;
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+
+  .form__status:focus {
+    outline: none;
+  }
+
+  .form__status--ok {
+    color: var(--color-forest);
+    background-color: color-mix(in srgb, var(--color-forest) 8%, transparent);
+  }
+
+  .form__status--error {
+    color: var(--color-error);
+    background-color: color-mix(in srgb, var(--color-error) 8%, transparent);
+  }
+
+  /* Après un envoi réussi, seul le message reste : le formulaire vidé
+     n'inviterait qu'à renvoyer deux fois la même demande. */
+  .form--sent .form__fields,
+  .form--sent .form__actions {
+    display: none;
+  }
+
+  .form__fields {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  /* ------------------------------------------------------ Pot de miel ---
+     Hors de l'écran plutôt que `display: none` : certains robots ignorent
+     les champs non rendus, aucun n'ignore un champ simplement décalé. */
+  .form__trap {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .form__actions {
+    margin-block-start: var(--space-7);
+  }
+
+  .form__submit[disabled] {
+    opacity: 0.55;
+    cursor: progress;
+  }
+
+  @media (max-width: 47.99rem) {
+    .form__submit {
+      inline-size: 100%;
+      justify-content: center;
+    }
+  }
+</style>

@@ -1,141 +1,147 @@
 /**
  * ============================================================================
- *  PROGRAMME ET EXPÉRIENCE IPRIG
+ *  PROGRAMME ET EXPÉRIENCE IPRIG — SOURCE UNIQUE
  * ============================================================================
- *  Deux blocs indépendants :
- *   1. `volets`   — les quatre formes que prend l’accompagnement (stable).
- *   2. `sessions` — le calendrier de séances (change chaque année).
+ *  Trois blocs indépendants :
+ *   1. `volets`         — les quatre formes que prend l’accompagnement.
+ *   2. `sessions`       — les exemples de séances.
+ *   3. `fonctionnement` — le parcours du membre.
  *
- *  Pour mettre à jour le programme, il suffit de réécrire le tableau
- *  `sessions` ci-dessous. Aucune page n’a besoin d’être retouchée.
+ *  Ces trois blocs alimentent SIMULTANÉMENT la page d’accueil et la page
+ *  /programme. Aucune de ces phrases ne doit être recopiée dans un composant :
+ *  les deux pages ne peuvent pas diverger.
  * ============================================================================
  */
 
 /* -------------------------------------------------------------------------- */
-/*  1. LES QUATRE VOLETS DE L’EXPÉRIENCE                                      */
+/*  1. LES QUATRE FORMES D’ACCOMPAGNEMENT                                     */
 /* -------------------------------------------------------------------------- */
 
 export type Volet = {
   id: string;
-  /** Numéro éditorial affiché en chiffre romain. */
+  /** Numéro éditorial affiché dans la marge. */
   numeral: string;
   title: string;
   lede: string;
+  /** Puces courtes, sans point final. */
   points: string[];
 };
 
+/** Chapô commun aux deux pages qui présentent les volets. */
+export const voletsHeading = {
+  title: 'Quatre formes d’accompagnement, une seule adhésion',
+  lede: "L’IPRIG ne se résume pas à un calendrier de séances. L’adhésion donne accès à un ensemble cohérent : travailler ses méthodes, rencontrer des milieux, saisir les occasions qui se présentent et revenir sur ce qui a été dit.",
+  /** Variante utilisée en tête de la page /programme. */
+  programmeLede:
+    "L’adhésion donne accès à quatre volets complémentaires. Ils fonctionnent ensemble : les séances donnent les méthodes, les événements ouvrent le milieu professionnel, les rediffusions permettent de revenir sur ce qui a été dit.",
+};
+
+/** Ordre validé par le client : Événements, Immersion, Sessions, Rediffusion. */
 export const volets: Volet[] = [
   {
-    id: 'sessions',
-    numeral: 'I',
-    title: 'Sessions',
-    lede: "Des séances régulières consacrées à la méthodologie universitaire et à la construction du parcours étudiant.",
-    points: [
-      'Méthodologie des exercices attendus dans le supérieur',
-      'Préparation des échéances et des examens',
-      'Construction du dossier et des candidatures',
-      'Échanges directs et questions ouvertes',
-    ],
-  },
-  {
     id: 'evenements',
-    numeral: 'II',
+    numeral: '1',
     title: 'Événements',
-    lede: "Des opportunités communiquées aux membres tout au long de l’année : conférences, rencontres, visites.",
+    lede: "Des opportunités communiquées aux membres chaque semaine : rencontres, visites, séminaires professionnels, conférences et colloques.",
     points: [
       'Conférences et colloques',
+      'Visites d’ambassades et événements institutionnels',
       'Rencontres avec des intervenants du secteur',
-      'Visites et événements institutionnels',
-      'Information transmise en priorité aux membres',
+      'Informations transmises en exclusivité aux membres',
     ],
   },
   {
     id: 'immersion',
-    numeral: 'III',
+    numeral: '2',
     title: 'Immersion',
-    lede: "Une mise en contact progressive avec le milieu académique, diplomatique et institutionnel des relations internationales.",
+    lede: "Une mise en contact progressive avec le milieu professionnel, diplomatique et institutionnel des relations internationales.",
     points: [
       'Découverte des métiers et des trajectoires réelles',
-      'Repères sur les institutions et les milieux professionnels',
-      "Compréhension des codes du secteur",
+      'Compréhension des codes du secteur',
+      'Repères sur le milieu institutionnel et professionnel',
       'Réseau construit au fil des rencontres',
     ],
   },
   {
-    id: 'rediffusions',
-    numeral: 'IV',
-    title: 'Rediffusions',
-    lede: "Les contenus réservés aux membres restent accessibles : une séance manquée peut être rattrapée.",
+    id: 'sessions',
+    numeral: '3',
+    title: 'Sessions',
+    lede: "Des sessions régulières consacrées à la méthodologie universitaire, à la construction du profil professionnel et à l’acquisition des réflexes du secteur.",
+    points: [
+      'Méthodologie des exercices attendus dans le supérieur',
+      'Construction des dossiers de candidature et préparation des échéances',
+      'Acquisition des réflexes professionnels du secteur',
+      'Compréhension des codes du monde professionnel et échanges directs',
+    ],
+  },
+  {
+    id: 'rediffusion',
+    numeral: '4',
+    title: 'Rediffusion',
+    lede: "Les contenus réservés aux membres restent accessibles indéfiniment. Une séance manquée peut ainsi être rattrapée.",
     points: [
       'Sessions accessibles en rediffusion',
-      'Contenus réservés aux membres',
       'Consultation à votre rythme',
-      "Accès depuis l’espace membre Patreon",
+      'Contenus réservés aux membres',
+      'Accès depuis l’espace prévu à cet effet',
     ],
   },
 ];
 
 /* -------------------------------------------------------------------------- */
-/*  2. LES SESSIONS                                                           */
+/*  2. LES SÉANCES                                                            */
 /* -------------------------------------------------------------------------- */
 
 export type Session = {
   /** Intitulé de la séance. */
   title: string;
-  /** Une phrase sur ce que la séance apporte concrètement. */
+  /** Ce que la séance apporte concrètement. Sans point final. */
   summary: string;
-  /** Famille de séance, utilisée comme étiquette éditoriale. */
-  category: 'Méthodologie' | 'Parcours' | 'Orientation';
+  /** Famille de séance, utilisée comme étiquette éditoriale. Sans point final. */
+  category: 'Méthodologie' | 'Professionnel' | 'Parcours' | 'Réseau';
+};
+
+/** Chapô commun aux deux pages qui présentent les séances. */
+export const sessionsHeading = {
+  title: 'Des séances qui répondent à des questions concrètes',
+  lede: "Méthodologie universitaire, construction du parcours, acquisition des compétences professionnelles. Chaque séance traite d’un sujet précis et laisse la place aux questions des membres.",
+  /** Variante utilisée sur la page /programme. Sans point final. */
+  programmeTitle: 'Des sujets précis traités en profondeur',
+  programmeLede:
+    'Chaque séance part d’une difficulté réelle rencontrée par les étudiants et se termine par un temps de questions',
 };
 
 /**
- * TODO CLIENT : remplacer par le programme IPRIG 2026-2027 définitif.
- *
- * Les intitulés ci-dessous reprennent des exemples de séances évoqués lors du
- * brief. Ils sont affichés à titre indicatif et le site le signale
- * explicitement au visiteur (voir `programmeIsProvisional`).
+ * TODO CLIENT : le programme annuel définitif n’a pas encore été communiqué.
+ * Les quatre séances ci-dessous ont été validées par le client comme exemples
+ * représentatifs et sont présentées comme telles — pas comme un calendrier.
+ * Les remplacer par le programme complet dès qu’il sera fourni.
  */
-export const programmeIsProvisional = true;
-
-export const programmeNote =
-  "Les séances ci-dessous illustrent le type d’accompagnement proposé. Le programme complet de l’année est communiqué aux membres.";
-
 export const sessions: Session[] = [
   {
     title: 'Méthodologie des exercices universitaires',
-    summary:
-      "Dissertation, commentaire, note de synthèse : les attentes réelles des correcteurs et la manière d’y répondre.",
     category: 'Méthodologie',
+    summary:
+      "Dissertation, commentaire, note de synthèse : les attentes réelles des correcteurs et la manière d’y répondre",
   },
   {
-    title: 'Réussir un partiel le jour J',
+    title: 'Comment réussir un entretien d’embauche ?',
+    category: 'Professionnel',
     summary:
-      "Gestion du temps, lecture du sujet, construction rapide d’un plan tenable et relecture efficace.",
-    category: 'Méthodologie',
+      'Préparation du dossier, compréhension des codes professionnels et formation à l’échange direct',
   },
   {
-    title: 'Renforcer et valoriser ses centres d’intérêt en relations internationales',
-    summary:
-      'Transformer une curiosité personnelle en compétence lisible sur un dossier et en sujet de discussion en entretien.',
+    title:
+      'Renforcer et valoriser ses centres d’intérêt en relations internationales',
     category: 'Parcours',
+    summary:
+      'Transformer une curiosité personnelle en compétences valorisantes et lisibles sur un dossier et en sujets de discussion lors d’un entretien',
   },
   {
-    title: 'Préparer efficacement son dossier',
+    title: 'Construire son réseau en relations internationales',
+    category: 'Réseau',
     summary:
-      'Structurer une candidature, hiérarchiser ses expériences et écrire une lettre qui tient debout.',
-    category: 'Parcours',
-  },
-  {
-    title: 'Réfléchir et préparer une césure',
-    summary:
-      'Évaluer la pertinence d’une année de césure, en définir le contenu et anticiper le retour en formation.',
-    category: 'Orientation',
-  },
-  {
-    title: 'Méthodes et conseils pour construire son parcours',
-    summary:
-      "Choisir ses spécialisations, articuler licence, master et expériences, arbitrer entre les voies possibles.",
-    category: 'Orientation',
+      'Repérer les rencontres pertinentes, apprendre à interagir avec les professionnels du secteur et valoriser ses connaissances lors des échanges',
   },
 ];
 
@@ -149,34 +155,24 @@ export type Etape = {
   text: string;
 };
 
+/** Chapô de la section « Rejoindre, en pratique ». */
+export const fonctionnementIntro =
+  "L’adhésion s’effectue sur Patreon, qui gère l’abonnement et les paiements. Aucun compte n’est créé sur ce site.";
+
 export const fonctionnement: Etape[] = [
   {
-    step: '01',
+    step: '1',
     title: 'Vous rejoignez',
     text: "L’adhésion se fait sur Patreon, qui gère l’abonnement et les paiements. Aucun compte à créer sur ce site.",
   },
   {
-    step: '02',
+    step: '2',
     title: 'Vous devenez membre',
-    text: "Vous intégrez la communauté IPRIG et recevez les communications sur les séances et les opportunités à venir.",
+    text: "Vous intégrez la communauté IPRIG et recevez les communications sur les séances et les opportunités à venir",
   },
   {
-    step: '03',
+    step: '3',
     title: 'Vous participez',
     text: "Vous suivez les sessions, accédez aux contenus réservés et aux rediffusions, et profitez des événements proposés.",
   },
 ];
-
-/* -------------------------------------------------------------------------- */
-/*  4. CERTIFICATS — NON DISPONIBLES                                          */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Des formations spécialisées sont envisagées à partir de 2027.
- * Elles ne font PAS partie de l’offre actuelle et ne doivent jamais être
- * présentées comme disponibles, ni comme une certification reconnue.
- *
- * Passer à `true` uniquement lorsque l’offre existe réellement ET que son
- * statut exact (certifiante ou non) a été validé par le client.
- */
-export const certificatsDisponibles = false;

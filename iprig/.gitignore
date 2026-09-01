@@ -1,6 +1,7 @@
 # build
 dist/
 .astro/
+iprig-production.zip
 
 # dependances
 node_modules/
@@ -11,6 +12,15 @@ node_modules/
 !.env.example
 *.pem
 *.key
+
+# configuration serveur des formulaires : contient l'adresse de destination
+# et le sel de la limitation de debit. Se cree sur le serveur a partir de
+# public/api/config.sample.php, qui reste versionne et vide de tout secret.
+public/api/config.php
+
+# tableaux prives, si jamais ils etaient copies en local pour relecture
+*.csv
+iprig-data/
 
 # systeme
 .DS_Store

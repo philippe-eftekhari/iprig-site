@@ -30,7 +30,7 @@ import { mainNav } from '../data/navigation';
             <li class="notfound__item">
               <a class="notfound__link" href={item.href}>
                 <span class="notfound__index" aria-hidden="true">
-                  {String(i + 1).padStart(2, '0')}
+                  {i + 1}
                 </span>
                 <span class="notfound__label">
                   {item.label}
@@ -93,7 +93,7 @@ import { mainNav } from '../data/navigation';
 
   .notfound__index {
     flex: none;
-    inline-size: 2rem;
+    inline-size: 1.25rem;
     font-family: var(--font-serif);
     font-size: 0.8125rem;
     letter-spacing: 0.08em;

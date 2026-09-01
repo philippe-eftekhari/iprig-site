@@ -1,5 +1,57 @@
 # Mettre `iprig.fr` en ligne chez Hostinger
 
+---
+
+## État au 25 août 2026 — déploiement bloqué en amont
+
+**Le domaine existe, l'hébergement Web n'existe pas encore.** Constaté le
+25/08/2026, à revérifier avant toute reprise.
+
+| Élément | État |
+|---|---|
+| `iprig.fr` | enregistré chez Hostinger, actif jusqu'au 07/08/2027, renouvellement automatique |
+| Serveurs de noms | `ns1.dns-parking.com` / `ns2.dns-parking.com` — système de **parking** Hostinger |
+| Enregistrement A | `2.57.91.91`, `Server: hcdn` — nœud de parking |
+| Page servie | « Parked Domain name on Hostinger DNS system » |
+| Enregistrements MX | **aucun** — pas de messagerie sur le domaine, rien à casser côté e-mail |
+| Plan d'hébergement | **aucun** — hPanel → *Sites web* ne propose que l'achat d'un plan |
+
+Tant qu'aucun plan d'hébergement n'est souscrit et que `iprig.fr` ne lui est pas
+rattaché, **il n'y a nulle part où déposer `dist/`**. Aucune autre étape de ce
+document ne peut aboutir.
+
+### Ce qui est déjà prêt
+
+- Build V3.1 validé : `astro check` 0/0/0, 84/84 tests fonctionnels,
+  49/49 contrôles responsive et accessibilité sur 7 formats, 0 erreur console,
+  0 requête en échec.
+- `iprig-production.zip` — archive de secours du **contenu** de `dist/`
+  (29 fichiers, `.htaccess` inclus, chemins POSIX). Ignorée par Git.
+  Ne sert que si le plan retenu n'offre pas d'accès SSH.
+- Paire de clés de déploiement `~/.ssh/iprig_hostinger` — **hors du dépôt**.
+  Seule la clé publique `~/.ssh/iprig_hostinger.pub` se colle dans
+  hPanel → *Avancé* → *Accès SSH* → *Gérer les clés SSH*.
+
+### Critères de choix du plan
+
+Le site est **statique** : 7 pages HTML, 540 Ko, ni PHP, ni base de données,
+ni Node. Les seuls besoins réels sont :
+
+1. Apache ou LiteSpeed lisant `.htaccess` — présent sur toutes les formules
+   mutualisées Hostinger ;
+2. certificat SSL gratuit — idem ;
+3. **accès SSH** — pas garanti sur les formules d'entrée de gamme.
+   À vérifier sur la fiche du plan avant achat. Sans SSH, le déploiement
+   passe par le ZIP et le Gestionnaire de fichiers (étape 4 ci-dessous) :
+   cela fonctionne, mais chaque mise à jour redevient manuelle.
+
+⚠ À la souscription, Hostinger propose d'installer WordPress ou de lancer son
+créateur de site. **Refuser les deux** : ils écrivent dans `public_html` et
+entreraient en conflit avec le build Astro.
+
+---
+
+
 Le site est **statique** : ni base de données, ni PHP, ni serveur Node.
 On construit un dossier de fichiers, on le copie sur l'hébergement, c'est tout.
 

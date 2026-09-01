@@ -1,0 +1,35 @@
+# ============================================================================
+#  IPRIG — accès au dossier /api
+# ----------------------------------------------------------------------------
+#  Seuls les deux points d'entrée de formulaire et le catalogue JSON doivent
+#  être joignables. Tout le reste est refusé.
+#
+#  Un fichier PHP est normalement exécuté, jamais servi : son code source
+#  n'est donc pas exposé. Cette liste est une ceinture de sécurité — si PHP
+#  venait à être désactivé sur le compte, Apache servirait le fichier en texte
+#  brut, et `config.php` livrerait l'adresse de destination et le sel.
+# ============================================================================
+
+# Tout est refusé par défaut.
+<FilesMatch ".*">
+  Require all denied
+</FilesMatch>
+
+# Sauf ce qui doit répondre.
+<FilesMatch "^(contact|preinscription)\.php$">
+  Require all granted
+</FilesMatch>
+
+<FilesMatch "^certificats\.json$">
+  Require all granted
+</FilesMatch>
+
+# Pas de listing de répertoire.
+Options -Indexes
+
+# Les points d'entrée ne doivent jamais être mis en cache.
+<IfModule mod_headers.c>
+  <FilesMatch "\.php$">
+    Header set Cache-Control "no-store"
+  </FilesMatch>
+</IfModule>

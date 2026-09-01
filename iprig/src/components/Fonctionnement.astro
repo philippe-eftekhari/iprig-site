@@ -6,10 +6,22 @@
  * il accède aux contenus et aux opportunités.
  */
 import { fonctionnement } from '../data/programme';
+
+interface Props {
+  /**
+   * Chapô affiché au-dessus des étapes. Employé sur /programme, où la section
+   * s'appelle « Rejoindre, en pratique » ; omis sur la page d'accueil, qui a
+   * déjà expliqué le principe juste au-dessus.
+   */
+  intro?: string;
+}
+
+const { intro } = Astro.props;
 ---
 
 <div class="fonctionnement">
   <h3 class="fonctionnement__title">Comment cela se passe</h3>
+  {intro && <p class="fonctionnement__intro">{intro}</p>}
   <ol class="fonctionnement__list">
     {
       fonctionnement.map((e) => (
@@ -35,6 +47,14 @@ import { fonctionnement } from '../data/programme';
     padding-block-end: var(--space-4);
     border-block-end: var(--border-hairline) solid var(--rule);
     margin-block-end: var(--space-6);
+  }
+
+  .fonctionnement__intro {
+    max-inline-size: var(--measure-wide);
+    margin-block-end: var(--space-6);
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+    color: var(--color-ink-soft);
   }
 
   .fonctionnement__list {

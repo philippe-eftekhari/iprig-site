@@ -17,6 +17,32 @@ const results = [];
 const check = (name, ok, detail = '') =>
   results.push({ name, ok, detail: ok ? '' : detail });
 
+
+/* --------------------------------------------------------------- GARDE ---
+   Ces controles doivent porter sur le SITE CONSTRUIT (`astro preview`), pas
+   sur le serveur de developpement.
+
+   Le piege est reel : `astro dev` et `astro preview` visent tous deux le port
+   4321, et un `astro dev` deja lance le garde. Les pages se ressemblent, mais
+   le serveur de developpement injecte le client Vite et la barre d'outils
+   Astro — soit plusieurs centaines de kilo-octets de JavaScript qui
+   n'existent pas en production, une barre visible sur chaque capture, et pas
+   de fichiers `sitemap-*.xml`. Une QA passee la-dessus ne mesure pas le site
+   livre.
+
+   On refuse donc de continuer plutot que de produire un rapport faux. */
+{
+  const html = await (await fetch(BASE + '/')).text();
+  if (/@vite\/client|astro-dev-toolbar/.test(html)) {
+    console.error(
+      `\n  ARRET : ${BASE} est un serveur de DEVELOPPEMENT, pas le site construit.\n` +
+        '  Lancer `npm run build` puis `npm run preview`, et relancer la QA sur\n' +
+        "  le port annonce par la prevision (un `astro dev` deja lance occupe 4321).\n",
+    );
+    process.exit(2);
+  }
+}
+
 const browser = await chromium.launch({ executablePath: CHROME, headless: true });
 
 /* ========================================================== 1. LIENS ==== */
@@ -57,6 +83,9 @@ const browser = await chromium.launch({ executablePath: CHROME, headless: true }
     'tiktok.com',
     'youtube.com',
     'linkedin.com',
+    'twitch.tv',
+    'open.spotify.com',
+    'podcasts.apple.com', // ajouté en V4.1 : URL fournie le 01/09/2026
   ];
 
   const externes = links.filter((l) => /^https?:\/\//.test(l.href ?? ''));
@@ -100,9 +129,17 @@ const browser = await chromium.launch({ executablePath: CHROME, headless: true }
   }
   check('Tous les liens internes répondent', casses.length === 0, casses.join(' | '));
 
-  // Chaque ancre de la page d'accueil existe.
+  /* Chaque ancre DE CETTE PAGE existe.
+     Une ancre vers une AUTRE page (`/certificats#preinscription`) ne peut pas
+     être vérifiée ici : la cible n'est pas dans ce document. Ces liens sont
+     couverts par le contrôle « tous les liens internes répondent » ci-dessus,
+     et par le contrôle inter-pages qui suit. */
   const ancres = [
-    ...new Set(links.map((l) => l.href).filter((h) => h && h.includes('#'))),
+    ...new Set(
+      links
+        .map((l) => l.href)
+        .filter((h) => h && (h.startsWith('#') || h.startsWith('/#'))),
+    ),
   ]
     .map((h) => h.split('#')[1])
     .filter(Boolean);
@@ -470,9 +507,34 @@ const browser = await chromium.launch({ executablePath: CHROME, headless: true }
     robotsTxt.slice(0, 80),
   );
 
-  const sitemap = await page.request.get(BASE + '/sitemap-0.xml');
-  check('sitemap accessible', sitemap.ok());
-  const xml = await sitemap.text();
+  /* Le sitemap est lu par HTTP quand c'est possible, sur le disque sinon.
+     `astro preview` le sert normalement ; c'est le serveur de DÉVELOPPEMENT
+     qui n'a pas de `sitemap-*.xml` à servir, puisque le fichier est produit
+     au build. Le repli sur le disque garde donc le contrôle utile même si
+     quelqu'un lance ce script au mauvais endroit — mais la garde en tête de
+     fichier devrait l'avoir arrêté avant. Ce qui compte est le CONTENU du
+     sitemap, identique dans les deux cas. */
+  const sitemapHttp = await page.request.get(BASE + '/sitemap-0.xml');
+  let xml = '';
+  let source = 'HTTP';
+  if (sitemapHttp.ok()) {
+    xml = await sitemapHttp.text();
+  } else {
+    source = 'dist/';
+    const { readFileSync, existsSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const { dirname, resolve } = await import('node:path');
+    const disque = resolve(
+      dirname(fileURLToPath(import.meta.url)),
+      '../dist/sitemap-0.xml',
+    );
+    if (existsSync(disque)) xml = readFileSync(disque, 'utf8');
+  }
+  check('sitemap présent (' + source + ')', xml.includes('<urlset'), xml.slice(0, 80));
+  check(
+    'sitemap : /certificats référencée',
+    xml.includes('https://iprig.fr/certificats'),
+  );
   check(
     'Les pages légales incomplètes sont hors sitemap',
     !xml.includes('mentions-legales') && !xml.includes('politique-confidentialite'),
@@ -495,7 +557,7 @@ const browser = await chromium.launch({ executablePath: CHROME, headless: true }
   const page = await browser.newPage();
   const fautes = [];
 
-  for (const chemin of ['/', '/programme', '/kevan-gafaiti', '/contact', '/mentions-legales', '/politique-confidentialite']) {
+  for (const chemin of ['/', '/programme', '/certificats', '/kevan-gafaiti', '/contact', '/mentions-legales', '/politique-confidentialite']) {
     await page.goto(BASE + chemin, { waitUntil: 'domcontentloaded' });
     const trouvees = await page.evaluate(() => {
       const out = [];

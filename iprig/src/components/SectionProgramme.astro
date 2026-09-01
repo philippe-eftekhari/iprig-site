@@ -13,7 +13,8 @@ import SessionsList from './SessionsList.astro';
 import Fonctionnement from './Fonctionnement.astro';
 import MediaSlot from './MediaSlot.astro';
 import Arrow from './Arrow.astro';
-import { sessions } from '../data/programme';
+import { sessions, sessionsHeading } from '../data/programme';
+import enseignement from '../assets/kevan/enseignement.jpg';
 
 /** Extrait montré sur la page d'accueil. */
 const APERCU = 4;
@@ -24,15 +25,9 @@ const reste = Math.max(sessions.length - APERCU, 0);
   <div class="container container--wide">
     <div class="programme__head">
       <h2 class="programme__title" data-motion="title">
-        <span class="motion-inner">
-          Des séances qui répondent à des questions concrètes
-        </span>
+        <span class="motion-inner">{sessionsHeading.title}</span>
       </h2>
-      <p class="programme__lede">
-        Méthodologie universitaire, construction du parcours, préparation des
-        candidatures : chaque séance traite d’un sujet précis, et laisse la
-        place aux questions des membres.
-      </p>
+      <p class="programme__lede">{sessionsHeading.lede}</p>
     </div>
 
     <div class="programme__grid">
@@ -49,14 +44,15 @@ const reste = Math.max(sessions.length - APERCU, 0);
       </div>
 
       <aside class="programme__aside">
-        {/* TODO CLIENT : photo d’une session IPRIG — salle, écran, échanges
-            avec les étudiants. Format vertical. */}
+        {/* Situation d'enseignement : la photographie accompagne la lecture
+            de la liste des séances, en colonne fixe. */}
         <MediaSlot
-          fallback="programme"
+          src={enseignement}
           ratio="portrait"
           mobileRatio="wide"
-          alt="Session de l’IPRIG"
-          caption="Session IPRIG"
+          objectPosition="50% 30%"
+          alt="Kevan Gafaïti en intervention devant un tableau blanc"
+          caption="Kevan Gafaïti en intervention"
         />
       </aside>
     </div>

@@ -37,6 +37,7 @@ mkdirSync(outDir, { recursive: true });
 const PAGES = [
   { name: 'accueil', path: '/' },
   { name: 'programme', path: '/programme' },
+  { name: 'certificats', path: '/certificats' },
   { name: 'kevan-gafaiti', path: '/kevan-gafaiti' },
   { name: 'contact', path: '/contact' },
   { name: 'mentions-legales', path: '/mentions-legales' },
@@ -46,7 +47,12 @@ const PAGES = [
 
 const VIEWPORTS = [
   { name: 'mobile-320', width: 320, height: 720 },
+  // 360 et 430 ajoutés en V4.1 : le premier est la largeur Android la plus
+  // répandue, le second celle des grands iPhone. Entre 320 et 390, ils
+  // encadrent le point où les vignettes d'enseignants passent en colonne.
+  { name: 'mobile-360', width: 360, height: 800 },
   { name: 'mobile-390', width: 390, height: 844 },
+  { name: 'mobile-430', width: 430, height: 932 },
   { name: 'tablet-768', width: 768, height: 1024 },
   { name: 'laptop-1024', width: 1024, height: 768 },
   // Format le plus répandu sur ordinateur portable, et le plus révélateur :

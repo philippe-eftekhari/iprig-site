@@ -1,0 +1,195 @@
+---
+/**
+ * ============================================================================
+ *  Vignette d'enseignant
+ * ============================================================================
+ *  Deux états, et un seul composant :
+ *
+ *   1. PORTRAIT DISPONIBLE — `teacher.photo` porte le nom du fichier déposé
+ *      dans `src/assets/teachers/`. Astro l'optimise et produit le srcset.
+ *
+ *   2. PAS DE PORTRAIT — un repli typographique tient la place : les initiales
+ *      en Newsreader sur le papier alterné, avec le même cadre et le même
+ *      format que la photographie. Ce n'est pas un trou en attendant mieux,
+ *      c'est une composition qui peut rester telle quelle.
+ *
+ *  ⚠ Ne JAMAIS combler le repli par un portrait généré, une image de banque
+ *  ou une photo trouvée en ligne. Un enseignant sans portrait garde ses
+ *  initiales jusqu'à ce qu'il en fournisse un.
+ *
+ *  ---------------------------------------------------------------------------
+ *  AJOUTER UN PORTRAIT
+ *  ---------------------------------------------------------------------------
+ *   1. déposer le fichier en `src/assets/teachers/<nom>.jpg`
+ *      — format 4:5, 1200 × 1500 minimum, 1600 × 2000 recommandé ;
+ *   2. renseigner `photo: '<nom>'` dans `src/data/certificats.ts`.
+ *  Rien d'autre : la résolution du fichier se fait ici, automatiquement.
+ * ============================================================================
+ */
+import { Image } from 'astro:assets';
+import type { Teacher, Certificate } from '../data/certificats';
+
+interface Props {
+  teacher: Teacher;
+  certificates: Certificate[];
+}
+
+const { teacher, certificates } = Astro.props;
+
+/**
+ * Tous les portraits du dossier sont résolus au build. Un fichier ajouté est
+ * donc trouvé sans qu'aucune liste d'imports ne soit à tenir à jour.
+ */
+const portraits = import.meta.glob<{ default: ImageMetadata }>(
+  '../assets/teachers/*.{jpg,jpeg,png,webp,avif}',
+  { eager: true },
+);
+
+const portrait = teacher.photo
+  ? Object.entries(portraits).find(([path]) =>
+      path.includes(`/${teacher.photo}.`),
+    )?.[1].default
+  : undefined;
+
+/** Initiales du repli. « Kevan Gafaïti » → « KG ». */
+const initiales = teacher.name
+  .split(/[\s-]+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((mot) => mot[0]?.toUpperCase() ?? '')
+  .join('');
+
+/**
+ * Élision devant voyelle ou h muet : « Portrait d'Alain Coppolani », et non
+ * « Portrait de Alain Coppolani ». Ce texte part dans l'arbre d'accessibilité,
+ * il est donc lu à voix haute — une élision manquante s'y entend.
+ * Le « h » de « Hayatou » est aspiré : « de Balkissou Hayatou » reste correct,
+ * et le prénom qui ouvre le nom tranche de toute façon la question.
+ */
+const alt = `Portrait ${/^[aeiouyàâäéèêëîïôöùûü]/i.test(teacher.name) ? 'd’' : 'de '}${teacher.name}`;
+---
+
+<article class="teacher">
+  <div class="teacher__portrait">
+    {
+      portrait ? (
+        <Image
+          class="teacher__img"
+          src={portrait}
+          alt={alt}
+          widths={[320, 480, 640]}
+          sizes="(max-width: 47.99rem) 45vw, 15rem"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <span class="teacher__initials" aria-hidden="true">
+          {initiales}
+        </span>
+      )
+    }
+  </div>
+
+  <div class="teacher__body">
+    <h3 class="teacher__name">{teacher.name}</h3>
+
+    {teacher.shortBio && <p class="teacher__bio">{teacher.shortBio}</p>}
+
+    <ul class="teacher__list">
+      {certificates.map((c) => <li>{c.title}</li>)}
+    </ul>
+  </div>
+</article>
+
+<style>
+  .teacher {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: start;
+    padding-block: var(--space-6);
+    border-block-end: var(--border-hairline) solid var(--rule);
+  }
+
+  /* Le cadre a le MÊME format qu'il porte une photographie ou des initiales :
+     c'est ce qui permet aux trois portraits manquants d'arriver plus tard
+     sans que la page bouge d'un pixel. */
+  .teacher__portrait {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background-color: var(--color-paper-3);
+    border: var(--border-hairline) solid var(--rule);
+  }
+
+  .teacher__img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  /* Repli : les initiales composées, pas un avatar gris. */
+  .teacher__initials {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: color-mix(in srgb, var(--color-navy) 45%, transparent);
+  }
+
+  .teacher__name {
+    font-family: var(--font-serif);
+    font-size: 1.375rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-navy);
+  }
+
+  .teacher__bio {
+    margin-block-start: var(--space-3);
+    max-inline-size: var(--measure);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--color-ink-soft);
+  }
+
+  .teacher__list {
+    display: grid;
+    gap: var(--space-2);
+    margin-block-start: var(--space-4);
+  }
+
+  .teacher__list li {
+    position: relative;
+    padding-inline-start: var(--space-5);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    color: var(--color-ink-soft);
+  }
+
+  /* Tiret laiton plutôt qu'une puce ronde : c'est la marque de liste du site. */
+  .teacher__list li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0.62em;
+    inline-size: 9px;
+    block-size: 1px;
+    background-color: var(--color-accent);
+  }
+
+  @media (min-width: 48rem) {
+    .teacher {
+      grid-template-columns: 9rem minmax(0, 1fr);
+      gap: var(--space-7);
+      padding-block: var(--space-7);
+    }
+
+    .teacher__initials {
+      font-size: 2.75rem;
+    }
+  }
+</style>

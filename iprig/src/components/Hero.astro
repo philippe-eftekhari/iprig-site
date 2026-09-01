@@ -19,6 +19,7 @@
 import MediaSlot from './MediaSlot.astro';
 import Arrow from './Arrow.astro';
 import { site, offer } from '../data/site';
+import heroImage from '../assets/kevan/hero-academie.jpg';
 ---
 
 <section class="hero">
@@ -48,7 +49,6 @@ import { site, offer } from '../data/site';
     {/* -------------------------------------------------------- ARTICLE */}
     <div class="hero__article">
       <div class="hero__text">
-        {/* TODO CLIENT : slogan définitif — celui-ci est provisoire (src/data/site.ts). */}
         <p class="hero__tagline" data-motion="soft" data-motion-now data-motion-delay="460">
           {site.tagline}
         </p>
@@ -85,15 +85,22 @@ import { site, offer } from '../data/site';
       </div>
 
       <div class="hero__media">
-        {/* TODO CLIENT : photographie principale — portrait professionnel de
-            Kevan Gafaïti en situation, ou photo d'une session IPRIG.
-            Format vertical, cadrage large. */}
+        {/* Photographie du premier écran, donc élément LCP de la page
+            d'accueil : `priority` la charge en `eager` + `fetchpriority=high`.
+
+            Le master est déjà au format 3/4 — celui du cadre sur ordinateur —
+            et déjà recadré sur le sujet (voir `scripts/prepare-assets.mjs`) :
+            sur ordinateur, aucun rognage, aucun décalage de mise en page.
+            `objectPosition` ne sert que sur téléphone, où le cadre passe en
+            4/3 : la fenêtre y remonte sur le visage plutôt que sur le bureau. */}
         <MediaSlot
-          fallback="hero"
+          src={heroImage}
           ratio="tall"
-          mobileRatio="wide"
-          alt="Photographie principale de l’IPRIG"
-          caption="Photographie principale"
+          mobileRatio="landscape"
+          objectPosition="50% 22%"
+          alt="Kevan Gafaïti sur le plateau de l’Académie diplomatique et consulaire du ministère de l’Europe et des Affaires étrangères"
+          caption="Kevan Gafaïti"
+          priority
           motionDelay={520}
           motionNow
         />
@@ -173,14 +180,35 @@ import { site, offer } from '../data/site';
     margin-block-start: -0.07em;
   }
 
-  /* Filet de masthead : il court sur toute la largeur, sous le wordmark.
-     C'est le geste qui fait basculer le hero du côté de la revue. */
+  /* Filet de masthead : il court sous le wordmark et sépare le sigle de la
+     dénomination. C'est le geste qui fait basculer le hero du côté de la revue,
+     et il reste à ce titre intouchable dans son principe.
+
+     ------------------------------------------------------- MICRO-RÉGLAGE V4
+     En V3.1 il était plein marine sur 100 % de la largeur. Sous un sigle de
+     16 rem, cette masse pleine attirait l'œil autant que le contenu : le filet
+     structurait la page, mais il se lisait comme un élément à part entière.
+
+     Deux paramètres sont abaissés d'un cran, et deux seulement :
+
+       — contraste : 55 % de marine au lieu de 100 %. Le trait reste
+         parfaitement visible sur le papier (rapport ≈ 3,5:1) mais cesse
+         d'égaler le poids du wordmark ;
+       — longueur : 92 % au lieu de 100 %. Le filet ne bute plus sur la marge
+         droite ; il s'arrête, ce qui est exactement le geste d'un filet de
+         revue.
+
+     L'épaisseur reste à 1 px : en dessous, le rendu dépend de la densité de
+     l'écran et le trait disparaît sur certains portables.
+
+     Ne PAS transformer ce filet en dégradé, en double ligne ni en halo :
+     la séparation doit rester un trait. */
   .hero__rule {
     display: block;
     block-size: 1px;
-    inline-size: 100%;
+    inline-size: 92%;
     margin-block: var(--space-4) var(--space-3);
-    background-color: var(--color-navy);
+    background-color: color-mix(in srgb, var(--color-navy) 55%, transparent);
   }
 
   .hero__full {
@@ -202,7 +230,13 @@ import { site, offer } from '../data/site';
   }
 
   .hero__tagline {
-    max-inline-size: 18ch;
+    /* 26ch et non 18ch : à 18ch, l'accroche tombait sur TROIS lignes sur
+       ordinateur. Le client la veut sur deux. La colonne de gauche fait
+       environ 700 px, l'accroche composée n'en occupe que 520 : l'élargir ne
+       coûte rien à la mise en page et `text-wrap: balance` répartit le reste.
+       Sur téléphone la contrainte ne mord pas — la colonne est plus étroite
+       que 26ch de toute façon. */
+    max-inline-size: 26ch;
     font-family: var(--font-serif);
     font-size: clamp(1.625rem, 1.1rem + 2.2vw, 2.5rem);
     font-style: italic;

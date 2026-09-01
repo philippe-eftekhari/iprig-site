@@ -1,8 +1,11 @@
 /**
  * Navigation du site — source unique.
- * Modifier ici change simultanément le menu desktop, le menu mobile et le footer.
+ * Modifier ici change simultanément le menu desktop, le menu mobile, le pied
+ * de page et la liste de secours de la page 404.
  *
- * Garder ce menu court : six entrées maximum, CTA compris.
+ * L’ordre ci-dessous est celui validé par le client en V4 : il suit le
+ * parcours de lecture (ce qu’est l’IPRIG → ce qu’il propose → les certificats
+ * → qui l’anime → les questions → écrire).
  */
 
 export type NavItem = {
@@ -13,17 +16,22 @@ export type NavItem = {
   description?: string;
 };
 
-/** Navigation principale, dans l’ordre d’apparition sur la landing page. */
+/** Navigation principale, dans l’ordre validé. */
 export const mainNav: NavItem[] = [
   {
-    label: "L’institut",
+    label: 'Institut',
     href: '/#institut',
     description: "Ce qu’est l’IPRIG et ce qu’il apporte",
   },
   {
     label: 'Programme',
     href: '/programme',
-    description: 'Sessions, événements, immersion, rediffusions',
+    description: 'Événements, immersion, sessions, rediffusion',
+  },
+  {
+    label: 'Certificats',
+    href: '/certificats',
+    description: 'Certificats semestriels de géopolitique',
   },
   {
     label: 'Kevan Gafaïti',

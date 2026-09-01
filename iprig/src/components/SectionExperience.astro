@@ -14,7 +14,7 @@
  * Pas de surtitre ici : le titre suffit, et l'enchaînement de surtitres dorés
  * d'une section à l'autre rendait la recette visible.
  */
-import { volets } from '../data/programme';
+import { volets, voletsHeading } from '../data/programme';
 import { offer } from '../data/site';
 import Arrow from './Arrow.astro';
 ---
@@ -23,16 +23,9 @@ import Arrow from './Arrow.astro';
   <div class="container container--wide">
     <header class="experience__head">
       <h2 class="experience__title" data-motion="title">
-        <span class="motion-inner">
-          Quatre formes d’accompagnement, une seule adhésion
-        </span>
+        <span class="motion-inner">{voletsHeading.title}</span>
       </h2>
-      <p class="experience__lede">
-        L’IPRIG ne se résume pas à un calendrier de séances. L’adhésion donne
-        accès à un ensemble cohérent : travailler ses méthodes, rencontrer le
-        milieu, saisir les occasions qui se présentent et revenir sur ce qui a
-        été dit.
-      </p>
+      <p class="experience__lede">{voletsHeading.lede}</p>
     </header>
 
     <ol class="chapitres">
@@ -94,7 +87,7 @@ import Arrow from './Arrow.astro';
 
   .chapitre {
     display: grid;
-    grid-template-columns: 2.5rem minmax(0, 1fr);
+    grid-template-columns: 1.75rem minmax(0, 1fr);
     column-gap: var(--space-4);
     /* Même règle que les numéros de « L'institut » : le chiffre romain
        s'assoit sur la ligne de base de son titre. */
@@ -103,7 +96,11 @@ import Arrow from './Arrow.astro';
     border-block-end: var(--border-hairline) solid var(--rule-on-dark);
   }
 
-  /* Chiffre romain : élément graphique, pas une puce d'interface. */
+  /* Numéro de chapitre : élément graphique, pas une puce d'interface.
+     V4 — les chiffres romains laissent la place aux chiffres arabes (1 à 4),
+     conformément à la numérotation retenue pour tout le site. Le traitement
+     typographique, lui, ne change pas : même serif, même laiton clair, même
+     alignement sur la ligne de base du titre. */
   .chapitre__num {
     font-family: var(--font-serif);
     font-size: 1.125rem;

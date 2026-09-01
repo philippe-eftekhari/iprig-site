@@ -4,16 +4,17 @@
  *
  * ⚠ TODO CLIENT : validation finale de la biographie et des intitulés
  * académiques avant mise en production. Toutes les informations de cette page
- * proviennent de src/data/kevan.ts et du brief client — rien n’y est ajouté.
+ * proviennent de src/data/kevan.ts et du brief client — rien n'y est ajouté.
+ *
+ * ⚠ Aucun nombre d'abonnés n'est affiché : voir la note dans src/data/kevan.ts.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import MediaSlot from '../components/MediaSlot.astro';
+import SocialLinks from '../components/SocialLinks.astro';
 import CtaPoster from '../components/CtaPoster.astro';
 import { kevan, kevanExplique, irig } from '../data/kevan';
-import { communitySize, communitySizeLabel, socialsKevanExplique } from '../data/site';
-
-const kevanLinks = socialsKevanExplique.filter((s) => s.url !== null);
+import portrait from '../assets/kevan/portrait.jpg';
 ---
 
 <BaseLayout
@@ -21,23 +22,18 @@ const kevanLinks = socialsKevanExplique.filter((s) => s.url !== null);
   description="Kevan Gafaïti, fondateur de l’IPRIG : enseignant à Sciences Po Paris, président-fondateur de l’IRIG, chercheur en relations internationales et en géopolitique du Moyen-Orient."
   path="/kevan-gafaiti"
 >
-  <PageHeader
-    eyebrow="Le fondateur"
-    title="Kevan Gafaïti"
-    lede={kevan.lede}
-  />
+  <PageHeader eyebrow="Le fondateur" title="Kevan Gafaïti" lede={kevan.pageLede} />
 
   <section class="section" aria-labelledby="bio-title">
     <div class="container container--wide">
       <div class="bio__grid">
         <aside class="bio__aside">
           <div class="bio__media">
-            {/* TODO CLIENT : portrait professionnel de Kevan Gafaïti. */}
             <MediaSlot
-              fallback="founder"
+              src={portrait}
               ratio="tall"
-              alt="Kevan Gafaïti"
-              caption="Portrait"
+              alt="Portrait de Kevan Gafaïti, en costume, dans un salon aux boiseries dorées"
+              caption="Kevan Gafaïti"
               priority
               motionNow
             />
@@ -73,8 +69,14 @@ const kevanLinks = socialsKevanExplique.filter((s) => s.url !== null);
 
         <div class="bio__main">
           <h2 id="bio-title" class="bio__title">Parcours</h2>
-          <div class="prose bio__prose">
+          <div class="prose bio__prose justify">
             {kevan.bio.map((p) => <p>{p}</p>)}
+          </div>
+
+          {/* --------------------------------------------------- Travaux */}
+          <h3 class="bio__subtitle">Travaux</h3>
+          <div class="prose justify">
+            <p>{kevan.works}</p>
           </div>
 
           {/* ------------------------------------------------- Formation */}
@@ -82,6 +84,8 @@ const kevanLinks = socialsKevanExplique.filter((s) => s.url !== null);
           <div class="diplome">
             <p class="diplome__label">{kevan.academic.doctorate.label}</p>
             <p class="diplome__inst">{kevan.academic.doctorate.institution}</p>
+            {/* Le sujet porte déjà ses propres parenthèses (les années) :
+                on ne l'enveloppe pas dans une seconde paire. */}
             <p class="diplome__subject">
               Thèse : {kevan.academic.doctorate.subject}
             </p>
@@ -98,60 +102,17 @@ const kevanLinks = socialsKevanExplique.filter((s) => s.url !== null);
                et l’établissement de rattachement de chacun. */
           }
 
-          {/* ------------------------------------------------ Kevan Explique */}
+          {/* -------------------------------------------- KevanExplique */}
           <h3 class="bio__subtitle">{kevanExplique.name}</h3>
-          <div class="prose">
-            <p>{kevanExplique.lede}</p>
+          <div class="prose justify">
+            <p>{kevanExplique.pageLede}</p>
           </div>
-
-          <div class="explique__meta">
-            {
-              communitySize && (
-                <p class="explique__community">
-                  {/* TODO CLIENT : vérifier le nombre actuel avant mise en ligne. */}
-                  <strong>{communitySize}</strong>
-                  <span>{communitySizeLabel}</span>
-                </p>
-              )
-            }
-            {
-              /* Voir SectionFondateur.astro : pas de faux liens tant que les
-                 URL ne sont pas fournies. */
-              kevanLinks.length > 0 ? (
-                <ul class="explique__platforms link-list">
-                  {kevanLinks.map((s) => (
-                    <li>
-                      <a
-                        class="link"
-                        href={s.url!}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {s.label}
-                        <span class="sr-only"> (nouvelle fenêtre)</span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p class="explique__platforms-text">
-                  Présent sur {kevanExplique.platforms.join(', ')}.
-                </p>
-              )
-            }
-          </div>
+          <SocialLinks class="explique__socials" />
 
           {/* --------------------------------------------------------- IRIG */}
-          <h3 class="bio__subtitle">{irig.name}</h3>
-          <div class="prose">
-            <p>
-              <strong>{irig.fullName}</strong> — {irig.description}
-            </p>
-            <p class="irig__note">
-              L’IRIG et l’IPRIG sont deux structures distinctes : l’IRIG est un
-              centre de recherche, l’IPRIG une structure de préparation et
-              d’accompagnement.
-            </p>
+          <h3 class="bio__subtitle">{irig.heading}</h3>
+          <div class="prose justify">
+            <p>{irig.description}</p>
           </div>
           {
             /* TODO CLIENT : URL du site de l’IRIG lorsqu’il sera en ligne
@@ -280,48 +241,11 @@ const kevanLinks = socialsKevanExplique.filter((s) => s.url !== null);
     color: var(--color-ink-soft);
   }
 
-  /* ---------------------------------------------------- Kevan Explique */
-  .explique__meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--space-4) var(--space-7);
+  /* ----------------------------------------------------- KevanExplique */
+  .explique__socials {
     margin-block-start: var(--space-5);
-  }
-
-  .explique__community {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-2);
     font-size: var(--text-sm);
-    color: var(--color-muted);
-  }
-
-  .explique__community strong {
-    font-family: var(--font-serif);
-    font-size: 1.5rem;
-    font-weight: 500;
-    letter-spacing: var(--tracking-tight);
-    color: var(--color-forest);
-  }
-
-  .explique__platforms {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-4);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
-  }
-
-  .explique__platforms-text {
-    font-size: var(--text-sm);
-    color: var(--color-muted);
-  }
-
-  .irig__note {
-    max-inline-size: var(--measure);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
+    color: var(--color-ink-soft);
   }
 
   @media (min-width: 62rem) {

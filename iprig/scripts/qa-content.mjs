@@ -1,0 +1,454 @@
+/**
+ * ============================================================================
+ *  COHÉRENCE DE CONTENU — contrôle du site construit
+ * ============================================================================
+ *      node scripts/qa-content.mjs [baseUrl]
+ *
+ *  Ce script ne juge pas la mise en page : il vérifie que le TEXTE publié dit
+ *  la même chose partout, et qu'aucune formulation retirée en V4 n'est
+ *  revenue par une porte dérobée.
+ *
+ *  Trois familles de contrôles :
+ *
+ *   1. FORMULATIONS PROSCRITES — chiffres jamais vérifiés, anciennes
+ *      formulations, numérotation « 01 », marque écrite en deux mots.
+ *      Un site institutionnel qui réaffiche « ≈ 75 000 abonnés » deux versions
+ *      après l'avoir retiré perd exactement ce qu'il essayait de gagner.
+ *
+ *   2. SOURCE UNIQUE — les blocs présents sur deux pages (quatre volets,
+ *      quatre séances) doivent y être identiques au caractère près. C'est ce
+ *      qui garantit que `src/data/` est bien la seule source.
+ *
+ *   3. FUITE D'ADRESSE — aucune adresse e-mail ne doit apparaître dans le
+ *      HTML, le JavaScript ou le JSON servis. La destination des formulaires
+ *      vit côté serveur ; si elle réapparaît ici, elle sera récoltée.
+ * ============================================================================
+ */
+import { chromium } from 'playwright-core';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve, join, extname } from 'node:path';
+
+const here = dirname(fileURLToPath(import.meta.url));
+const BASE = process.argv[2] ?? 'http://localhost:4321';
+const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+
+const results = [];
+const check = (name, ok, detail = '') =>
+  results.push({ name, ok, detail: ok ? '' : String(detail) });
+
+const PAGES = [
+  '/',
+  '/programme',
+  '/certificats',
+  '/kevan-gafaiti',
+  '/contact',
+  '/mentions-legales',
+  '/politique-confidentialite',
+];
+
+
+/* --------------------------------------------------------------- GARDE ---
+   Ces controles doivent porter sur le SITE CONSTRUIT (`astro preview`), pas
+   sur le serveur de developpement.
+
+   Le piege est reel : `astro dev` et `astro preview` visent tous deux le port
+   4321, et un `astro dev` deja lance le garde. Les pages se ressemblent, mais
+   le serveur de developpement injecte le client Vite et la barre d'outils
+   Astro — soit plusieurs centaines de kilo-octets de JavaScript qui
+   n'existent pas en production, une barre visible sur chaque capture, et pas
+   de fichiers `sitemap-*.xml`. Une QA passee la-dessus ne mesure pas le site
+   livre.
+
+   On refuse donc de continuer plutot que de produire un rapport faux. */
+{
+  const html = await (await fetch(BASE + '/')).text();
+  if (/@vite\/client|astro-dev-toolbar/.test(html)) {
+    console.error(
+      `\n  ARRET : ${BASE} est un serveur de DEVELOPPEMENT, pas le site construit.\n` +
+        '  Lancer `npm run build` puis `npm run preview`, et relancer la QA sur\n' +
+        "  le port annonce par la prevision (un `astro dev` deja lance occupe 4321).\n",
+    );
+    process.exit(2);
+  }
+}
+
+const browser = await chromium.launch({ executablePath: CHROME, headless: true });
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+
+/** Texte visible d'une page, espaces normalisés. */
+const texteDe = async (chemin) => {
+  await page.goto(BASE + chemin, { waitUntil: 'networkidle' });
+  /* ⚠ On normalise UNIQUEMENT les blancs ASCII. `\s` en JavaScript englobe
+     U+00A0 et U+202F : normaliser avec `\s` effacerait précisément les
+     espaces insécables que d'autres contrôles cherchent à vérifier. */
+  return page.evaluate(() =>
+    (document.body.innerText || '')
+      .replace(new RegExp("[ \\t\\n\\r\\f\\v]+", "g"), " ")
+      .trim(),
+  );
+};
+
+const textes = {};
+for (const p of PAGES) textes[p] = await texteDe(p);
+const tout = Object.entries(textes);
+
+/* ==================================== 1. FORMULATIONS PROSCRITES ======= */
+{
+  /**
+   * Chaque entrée : [ce qu'on cherche, pourquoi c'est proscrit].
+   * Une expression régulière permet de viser la faute sans attraper les
+   * formulations légitimes voisines.
+   */
+  const INTERDITS = [
+    [/Kevan Explique/, 'la marque s’écrit « KevanExplique », en un seul mot'],
+    [/75\u00a0?000|75 000/, 'nombre d’abonnés jamais vérifié — retiré en V4'],
+    [/stratégies? d’influence/, 'remplacé par « politique étrangère »'],
+    [/relations étrangères/, 'formulation fautive'],
+    [/passionnés de relations/, 'le hero parle des jeunes professionnels'],
+    [/Les événements sont-ils toujours garantis/, 'question retirée de la FAQ'],
+    [
+      /Institut des Relations Internationales et de Géopolitiques/,
+      '« Géopolitique » reste au singulier',
+    ],
+    [/plusieurs centaines d’étudiants/i, 'repère chiffré non vérifié'],
+    [/≈\s*40 séances|≈\s*50 événements/, 'repères chiffrés non vérifiés'],
+  ];
+
+  for (const [motif, raison] of INTERDITS) {
+    const trouve = tout.filter(([, t]) => motif.test(t)).map(([p]) => p);
+    check(
+      `Absent du site : ${motif.source.slice(0, 44)}`,
+      trouve.length === 0,
+      `${trouve.join(', ')} — ${raison}`,
+    );
+  }
+
+  /* Numérotation éditoriale : « 1 » et non « 01 ». On ne cherche un « 01 »
+     que là où il est isolé, pour ne pas attraper une date ou un tarif. */
+  const zeros = tout.filter(([, t]) => /(^|\s)0[1-9](\s|$)/.test(t)).map(([p]) => p);
+  check('Aucune numérotation « 01 » visible', zeros.length === 0, zeros.join(', '));
+}
+
+/* ==================================== 2. SOURCE UNIQUE ================= */
+{
+  const accueil = textes['/'];
+  const programme = textes['/programme'];
+  const certificats = textes['/certificats'];
+
+  /* Les quatre volets, dans l'ordre validé. */
+  const VOLETS = ['Événements', 'Immersion', 'Sessions', 'Rediffusion'];
+  const ordreDe = (t) =>
+    VOLETS.map((v) => t.indexOf(v)).every((i, k, a) => i >= 0 && (k === 0 || i > a[k - 1]));
+  check('Accueil : quatre volets dans le bon ordre', ordreDe(accueil));
+  check('Programme : quatre volets dans le bon ordre', ordreDe(programme));
+
+  /* Les quatre séances, à l'identique sur les deux pages. */
+  const SEANCES = [
+    'Méthodologie des exercices universitaires',
+    'Comment réussir un entretien d’embauche',
+    'Renforcer et valoriser ses centres d’intérêt en relations internationales',
+    'Construire son réseau en relations internationales',
+  ];
+  for (const s of SEANCES) {
+    check(
+      `Séance « ${s.slice(0, 34)}… » sur les deux pages`,
+      accueil.includes(s) && programme.includes(s),
+      `accueil:${accueil.includes(s)} programme:${programme.includes(s)}`,
+    );
+  }
+
+  /* Le hero dit bien « étudiants et les jeunes professionnels ». */
+  check(
+    'Hero : étudiants et jeunes professionnels',
+    accueil.includes('les étudiants et les jeunes professionnels'),
+  );
+
+  /* Prix mensuel et tarifs des certificats. */
+  check('Tarif mensuel 29 € présent', /29\u00a0€/.test(accueil));
+  for (const t of ['100', '175', '250', '330']) {
+    check(
+      `Tarif certificat ${t} € présent`,
+      new RegExp(`${t}\u00a0€`).test(certificats),
+    );
+  }
+
+  /* Dates, validation, absence de paiement. */
+  check('Certificats : février – avril 2027', certificats.includes('Février – avril 2027'));
+  check('Certificats : examen terminal', certificats.includes('examen terminal'));
+  check(
+    'Certificats : préinscription uniquement',
+    /Aucun paiement n’est effectué sur ce site/.test(certificats) &&
+      !/\bAcheter\b|Ajouter au panier|Payer maintenant/.test(certificats),
+  );
+  check(
+    'Certificats : avertissement « ni diplôme ni certification »',
+    certificats.includes('ne constituent pas des diplômes'),
+  );
+
+  /* Catalogue affiché == catalogue servi au serveur. */
+  const json = await (await page.request.get(BASE + '/api/certificats.json')).json();
+  const idsJson = json.certificates.map((c) => c.id);
+  check('Catalogue JSON : 10 certificats', idsJson.length === 10, idsJson.length);
+  const titresManquants = json.certificates
+    .filter((c) => !certificats.includes(c.title))
+    .map((c) => c.title);
+  check(
+    'Chaque certificat du JSON est affiché sur la page',
+    titresManquants.length === 0,
+    titresManquants.join(' | '),
+  );
+
+  /* Les cases du formulaire proposent exactement le catalogue. */
+  await page.goto(BASE + '/certificats', { waitUntil: 'networkidle' });
+  const valeurs = await page.$$eval('input[name="certificats[]"]', (els) =>
+    els.map((e) => e.value),
+  );
+  check(
+    'Formulaire : une case par certificat du catalogue',
+    valeurs.length === idsJson.length && valeurs.every((v) => idsJson.includes(v)),
+    `${valeurs.length} cases / ${idsJson.length} certificats`,
+  );
+
+  /* ------------------------------------------------------------------ *
+   *  ENSEIGNANTS — graphies arrêtées en V4.1                            *
+   * ------------------------------------------------------------------ *
+   *  Les quatre noms ci-dessous font foi. Les anciennes graphies
+   *  « Alain Kopolani », « Albert Kondemir » et « Balkisu Ayatu » ne
+   *  doivent réapparaître ni sur la page, ni dans le JSON servi au PHP.
+   *
+   *  ⚠ « Keyvan » et « Kevan Gafaïti » sont DEUX PERSONNES DIFFÉRENTES :
+   *  aucun contrôle ici ne doit conduire à retirer Kevan Gafaïti.
+   * ------------------------------------------------------------------ */
+  const ENSEIGNANTS = [
+    'Kevan Gafaïti',
+    'Alain Coppolani',
+    'Balkissou Hayatou',
+    'Albert Kandemir',
+  ];
+  for (const n of ENSEIGNANTS) {
+    check(`Enseignant affiché : ${n}`, certificats.includes(n));
+  }
+
+  const OBSOLETES = /Kopolani|Kondemir|Balkisu|Ayatu/;
+  check('Aucune ancienne graphie sur /certificats', !OBSOLETES.test(certificats));
+  check(
+    'Aucune ancienne graphie dans /api/certificats.json',
+    !OBSOLETES.test(JSON.stringify(json)),
+  );
+
+  /* Le JSON servi au PHP porte les quatre enseignants, correctement écrits. */
+  const profs = [...new Set(json.certificates.map((c) => c.teacher))];
+  check('Catalogue JSON : 4 enseignants', profs.length === 4, profs.join(' | '));
+  check(
+    'Catalogue JSON : les quatre noms attendus',
+    ENSEIGNANTS.every((n) => profs.includes(n)),
+    profs.join(' | '),
+  );
+
+  /* Kevan Gafaïti reste enseignant, avec ses deux certificats. */
+  const certifsKevan = json.certificates
+    .filter((c) => c.teacher === 'Kevan Gafaïti')
+    .map((c) => c.title);
+  check(
+    'Kevan Gafaïti : ses deux certificats sont au catalogue',
+    certifsKevan.length === 2 &&
+      certifsKevan.some((t) => t.includes('de l’Iran')) &&
+      certifsKevan.some((t) => t.includes('du golfe Persique')),
+    certifsKevan.join(' | '),
+  );
+
+  /* Chaque vignette d'enseignant porte une photographie ou des initiales,
+     jamais une image cassée. */
+  const vignettes = await page.$$eval('.teacher', (cards) =>
+    cards.map((c) => ({
+      nom: c.querySelector('.teacher__name')?.textContent?.trim() ?? '?',
+      img: !!c.querySelector('img'),
+      alt: c.querySelector('img')?.getAttribute('alt') ?? '',
+      bio: (c.querySelector('.teacher__bio')?.textContent ?? '').trim().length,
+      initiales: !!c.querySelector('.teacher__initials'),
+    })),
+  );
+  check('Page /certificats : 4 vignettes d’enseignant', vignettes.length === 4, vignettes.length);
+  check(
+    'Chaque vignette d’enseignant a une photo ou des initiales',
+    vignettes.length > 0 && vignettes.every((v) => v.img || v.initiales),
+    JSON.stringify(vignettes),
+  );
+
+  /* V4.1 : les quatre enseignants ont un portrait réel ET une biographie. */
+  check(
+    'Les quatre enseignants ont une photographie réelle',
+    vignettes.every((v) => v.img),
+    JSON.stringify(vignettes.filter((v) => !v.img)),
+  );
+  check(
+    'Les quatre enseignants ont une biographie',
+    vignettes.every((v) => v.bio > 0),
+    JSON.stringify(vignettes.map((v) => [v.nom, v.bio])),
+  );
+  check(
+    'Aucun ancien nom dans les alt des portraits',
+    vignettes.every((v) => !OBSOLETES.test(v.alt)),
+    vignettes.map((v) => v.alt).join(' | '),
+  );
+
+  /* Équilibre des vignettes : aucune biographie ne doit peser plusieurs fois
+     celle des autres — c'est le défaut corrigé en V4.1 sur Balkissou Hayatou,
+     dont la version longue faisait 487 signes contre 159 à Kevan Gafaïti.
+
+     Le seuil est calibré sur des mesures, pas choisi pour passer au vert :
+
+       V4.0  159 / 0 / 487 / 0   → rapport 3,06  (échoue, c'est voulu)
+       V4.1  159 / 333 / 321 / 277 → rapport 2,09  (passe)
+
+     2,5 laisse donc respirer la fiche du fondateur — sa biographie d'une
+     phrase est volontairement la plus courte et ne doit pas être rallongée
+     pour équilibrer un tableau — tout en rattrapant une biographie qui
+     repartirait vers le double des autres. */
+  const bios = vignettes.map((v) => v.bio).filter(Boolean);
+  const rapport = Math.max(...bios) / Math.min(...bios);
+  check(
+    'Biographies d’enseignants de longueurs comparables',
+    bios.length > 0 && rapport <= 2.5,
+    `min ${Math.min(...bios)} / max ${Math.max(...bios)} signes — rapport ${rapport.toFixed(2)}`,
+  );
+  check(
+    'Balkissou Hayatou : « docteure » au féminin',
+    /Balkissou Hayatou est docteure/.test(certificats),
+  );
+
+  /* FAQ : les huit questions validées. */
+  const QUESTIONS = [
+    'À qui s’adresse l’IPRIG',
+    'Combien coûte l’IPRIG',
+    'Y a-t-il un engagement',
+    'Comment rejoindre l’IPRIG',
+    'Où sont disponibles les contenus',
+    'Comment suis-je informé des événements',
+    'Des événements sont-ils proposés chaque semaine',
+    'L’IPRIG délivre-t-il un diplôme ou une certification',
+  ];
+  const manquantes = QUESTIONS.filter((q) => !accueil.includes(q));
+  check('FAQ : les huit questions validées', manquantes.length === 0, manquantes.join(' | '));
+
+  /* ------------------------------------------------------------------ *
+   *  LIENS SOCIAUX — les SEPT plateformes depuis la V4.1                *
+   * ------------------------------------------------------------------ *
+   *  Apple Podcasts a rejoint les six autres le 01/09/2026. Plus aucune
+   *  plateforme n'est « en attente » : la mention « lien à venir » ne
+   *  doit plus apparaître nulle part, et aucun `href="#"` non plus.
+   * ------------------------------------------------------------------ */
+  const PLATEFORMES = [
+    'instagram.com/kevanexplique',
+    'youtube.com/channel/UCPwkkIM9F2RaG37pobWw9Wg',
+    'tiktok.com/@kevanexplique',
+    'twitch.tv/kevanexplique',
+    'linkedin.com/in/kevan-gafa',
+    'open.spotify.com/show/0346qxV2YP22NpjPkdXclj',
+    'podcasts.apple.com/podcast/id6801282142',
+  ];
+
+  for (const url of ['/kevan-gafaiti', '/contact']) {
+    await page.goto(BASE + url, { waitUntil: 'networkidle' });
+    const hrefs = await page.$$eval('.socials__link', (els) =>
+      els.map((e) => e.getAttribute('href') ?? ''),
+    );
+    /* Ces pages portent DEUX blocs sociaux : celui de la page et celui du
+       pied de page. Le compte attendu est donc un multiple de sept, pas
+       sept — chaque bloc doit être complet. */
+    const absentes = PLATEFORMES.filter((p) => !hrefs.some((h) => h.includes(p)));
+    check(
+      `${url} : les sept plateformes sont des liens réels`,
+      hrefs.length > 0 && hrefs.length % 7 === 0 && absentes.length === 0,
+      `${hrefs.length} liens — manquantes : ${absentes.join(', ') || 'aucune'}`,
+    );
+    check(
+      `${url} : aucun href="#"`,
+      hrefs.every((h) => h !== '#' && h !== ''),
+      hrefs.join(' | '),
+    );
+
+    const texte = await page.evaluate(() => document.body.innerText);
+    check(`${url} : plus aucune mention « lien à venir »`, !texte.includes('lien à venir'));
+    check(
+      `${url} : Apple Podcasts nommé`,
+      (await page.$$eval('.socials__link', (els) => els.map((e) => e.textContent ?? ''))).some(
+        (t) => t.includes('Apple Podcasts'),
+      ),
+    );
+  }
+
+  /* Le pied de page porte lui aussi la liste complète. */
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  const piedHrefs = await page.$$eval('.footer .socials__link', (els) =>
+    els.map((e) => e.getAttribute('href') ?? ''),
+  );
+  check(
+    'Pied de page : les sept plateformes',
+    piedHrefs.length === 7 &&
+      piedHrefs.some((h) => h.includes('podcasts.apple.com/podcast/id6801282142')),
+    piedHrefs.join(' | '),
+  );
+}
+
+/* ==================================== 3. FUITE D'ADRESSE ============== */
+{
+  /* Contrôle sur le SITE SERVI, et pas seulement sur les sources : une
+     adresse peut apparaître dans un fichier généré. */
+  const dist = resolve(here, '../dist');
+  const EXT = new Set(['.html', '.js', '.json', '.css', '.xml', '.txt', '.svg']);
+  const ADRESSE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+  /* Les adresses de démonstration des champs de saisie sont volontaires :
+     ce sont des exemples, pas des boîtes réelles. */
+  const AUTORISEES = /^(prenom\.nom@exemple\.fr)$/;
+
+  const fuites = [];
+  const parcourir = (dir) => {
+    for (const nom of readdirSync(dir)) {
+      const chemin = join(dir, nom);
+      if (statSync(chemin).isDirectory()) {
+        parcourir(chemin);
+        continue;
+      }
+      if (!EXT.has(extname(nom))) continue;
+      const contenu = readFileSync(chemin, 'utf8');
+      for (const trouvee of contenu.match(ADRESSE) ?? []) {
+        if (!AUTORISEES.test(trouvee)) {
+          fuites.push(`${chemin.replace(dist, 'dist')} → ${trouvee}`);
+        }
+      }
+    }
+  };
+  parcourir(dist);
+
+  check(
+    'Aucune adresse e-mail dans le site servi',
+    fuites.length === 0,
+    [...new Set(fuites)].slice(0, 5).join(' | '),
+  );
+
+  /* Le fichier de configuration serveur ne doit jamais partir dans dist/
+     autrement que sous sa forme d'exemple, vide de tout secret. */
+  const modele = readFileSync(resolve(dist, 'api/config.sample.php'), 'utf8');
+  /* Le modèle DOIT rester un modèle : des marqueurs à remplacer, et aucune
+     boîte réelle. `no-reply@iprig.fr` y figure légitimement — c'est un
+     expéditeur technique documenté, pas une destination. */
+  check(
+    'config.sample.php ne contient aucun secret',
+    modele.includes('REMPLACER') &&
+      !/@(gmail|outlook|yahoo|hotmail|proton)\./i.test(modele),
+  );
+}
+
+await browser.close();
+
+/* ==================================== RÉSULTATS ======================= */
+const echecs = results.filter((r) => !r.ok);
+for (const r of results) {
+  console.log(`  ${r.ok ? 'OK  ' : 'ÉCHEC'} ${r.name}${r.detail ? '  → ' + r.detail : ''}`);
+}
+console.log(
+  `\n${results.length} contrôles — ${results.length - echecs.length} réussis, ${echecs.length} échoués`,
+);
+process.exit(echecs.length === 0 ? 0 : 1);

@@ -27,7 +27,7 @@ import { institut, publics, apports } from '../data/institut';
 
         <p class="institut__lede">{institut.lede}</p>
 
-        <div class="institut__body">
+        <div class="institut__body justify">
           {institut.body.map((p) => <p>{p}</p>)}
         </div>
 
@@ -142,7 +142,7 @@ import { institut, publics, apports } from '../data/institut';
 
   .apport {
     display: grid;
-    grid-template-columns: 3rem minmax(0, 1fr);
+    grid-template-columns: 2.25rem minmax(0, 1fr);
     column-gap: var(--space-3);
     /* Le numéro partage la ligne de base de son titre. C'est la grille qui
        l'aligne, pas un décalage réglé à la main : les deux corps changent
@@ -194,7 +194,7 @@ import { institut, publics, apports } from '../data/institut';
     }
 
     .apport {
-      grid-template-columns: 4.5rem minmax(0, 1fr);
+      grid-template-columns: 3rem minmax(0, 1fr);
       column-gap: var(--space-4);
       padding-block: var(--space-6);
     }

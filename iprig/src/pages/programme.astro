@@ -1,7 +1,14 @@
 ---
 /**
  * /programme — présentation développée du programme.
- * Reprend les mêmes composants que la page d’accueil : aucun contenu dupliqué.
+ *
+ * Reprend les MÊMES composants et les MÊMES données que la page d'accueil :
+ * les quatre volets et les quatre exemples de séances ne peuvent pas diverger
+ * entre les deux pages.
+ *
+ * ⚠ Le programme annuel définitif n'a pas encore été communiqué. Les séances
+ * affichées sont des exemples validés par le client. Ne rien inventer pour
+ * remplir la page.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
@@ -9,18 +16,24 @@ import SessionsList from '../components/SessionsList.astro';
 import Fonctionnement from '../components/Fonctionnement.astro';
 import CtaPoster from '../components/CtaPoster.astro';
 import MediaSlot from '../components/MediaSlot.astro';
-import { volets, certificatsDisponibles } from '../data/programme';
+import {
+  volets,
+  voletsHeading,
+  sessionsHeading,
+  fonctionnementIntro,
+} from '../data/programme';
+import orientation from '../assets/kevan/orientation.jpg';
 ---
 
 <BaseLayout
   title="Programme"
-  description="Sessions de méthodologie, événements, immersion et rediffusions : le contenu de l’accompagnement IPRIG et son fonctionnement."
+  description="Événements, immersion, sessions et rediffusion : le contenu de l’accompagnement IPRIG et son fonctionnement."
   path="/programme"
 >
   <PageHeader
     eyebrow="Programme & expériences"
     title="Ce que comprend l’accompagnement"
-    lede="L’adhésion donne accès à quatre volets complémentaires. Ils fonctionnent ensemble : les séances donnent les méthodes, les événements ouvrent le milieu, les rediffusions permettent de revenir sur ce qui a été dit."
+    lede={voletsHeading.programmeLede}
   />
 
   {/* ------------------------------------------------------- Les volets */}
@@ -60,20 +73,16 @@ import { volets, certificatsDisponibles } from '../data/programme';
         <div class="seances__head">
           <p class="eyebrow">Les séances</p>
           <h2 id="seances-title" class="seances__title">
-            Des sujets précis, traités en profondeur
+            {sessionsHeading.programmeTitle}
           </h2>
-          <p class="lede seances__lede">
-            Chaque séance part d’une difficulté réelle rencontrée par les
-            étudiants et se termine par un temps de questions.
-          </p>
+          <p class="lede seances__lede">{sessionsHeading.programmeLede}</p>
 
           <div class="seances__media">
-            {/* TODO CLIENT : photo d’une séance ou d’un événement IPRIG. */}
             <MediaSlot
-              fallback="events"
+              src={orientation}
               ratio="landscape"
-              alt="Séance de l’IPRIG"
-              caption="Séance ou événement IPRIG"
+              alt="Kevan Gafaïti devant une salle d’étudiants, présentant un programme sur les études en diplomatie"
+              caption="Intervention sur les études en diplomatie"
             />
           </div>
         </div>
@@ -91,22 +100,11 @@ import { volets, certificatsDisponibles } from '../data/programme';
       <h2 id="fonctionnement-title" class="fonctionnement-title">
         Rejoindre, en pratique
       </h2>
-      <Fonctionnement />
-
-      {
-        !certificatsDisponibles && (
-          <p class="disclaimer">
-            L’IPRIG est une structure d’accompagnement et de préparation. Elle
-            ne délivre ni diplôme, ni certification reconnue par l’État, et ne
-            se substitue pas à une formation universitaire.
-          </p>
-        )
-      }
-      {
-        /* TODO CLIENT : des formations spécialisées sont envisagées à partir de
-           2027. Elles ne seront ajoutées ici qu’une fois réellement disponibles,
-           et leur statut exact devra être validé (certifiante ou non). */
-      }
+      <Fonctionnement intro={fonctionnementIntro} />
+      {/* Le rappel « ni diplôme ni certification » n'est pas répété ici :
+          la FAQ de la page d'accueil le dit déjà, et la page /certificats
+          porte son propre avertissement, plus précis. Le répéter trois fois
+          l'affaiblirait. */}
     </div>
   </section>
 
@@ -138,13 +136,16 @@ import { volets, certificatsDisponibles } from '../data/programme';
     gap: var(--space-4);
   }
 
+  /* V4 — chiffre arabe au lieu du chiffre romain, conformément à la
+     numérotation retenue pour tout le site. Même traitement typographique,
+     colonne resserrée puisqu'un chiffre occupe moins de place que « III ». */
   .volet__numeral {
     font-family: var(--font-serif);
     font-size: 1rem;
     letter-spacing: 0.12em;
     color: var(--color-accent-ink);
     flex: none;
-    inline-size: 2rem;
+    inline-size: 1.25rem;
   }
 
   .volet__title {
@@ -209,16 +210,6 @@ import { volets, certificatsDisponibles } from '../data/programme';
   .fonctionnement-title {
     max-inline-size: 18ch;
     margin-block-end: var(--space-7);
-  }
-
-  .disclaimer {
-    max-inline-size: var(--measure);
-    margin-block-start: var(--space-8);
-    padding-block-start: var(--space-5);
-    border-block-start: var(--border-hairline) solid var(--rule);
-    font-size: var(--text-sm);
-    line-height: var(--leading-relaxed);
-    color: var(--color-muted);
   }
 
   @media (min-width: 48rem) {

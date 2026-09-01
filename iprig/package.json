@@ -16,8 +16,12 @@
     "qa:tests": "node scripts/qa-functional.mjs http://localhost:4321",
     "qa:perf": "node scripts/qa-perf.mjs http://localhost:4321",
     "qa:header": "node scripts/qa-header.mjs http://localhost:4321",
-    "qa": "node scripts/qa-functional.mjs http://localhost:4321 && node scripts/qa-screenshots.mjs http://localhost:4321 && node scripts/qa-perf.mjs http://localhost:4321",
-    "astro": "astro"
+    "qa": "node scripts/qa-functional.mjs http://localhost:4321 && node scripts/qa-content.mjs http://localhost:4321 && node scripts/qa-forms.mjs http://localhost:4321 && node scripts/qa-screenshots.mjs http://localhost:4321 && node scripts/qa-perf.mjs http://localhost:4321",
+    "astro": "astro",
+    "assets": "node scripts/prepare-assets.mjs",
+    "typo": "node scripts/typo-fr.mjs --check src/data/site.ts src/data/faq.ts src/data/institut.ts src/data/programme.ts src/data/kevan.ts src/data/certificats.ts src/data/navigation.ts",
+    "qa:content": "node scripts/qa-content.mjs http://localhost:4321",
+    "qa:forms": "node scripts/qa-forms.mjs http://localhost:4321"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

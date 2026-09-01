@@ -2,48 +2,30 @@
 /**
  * Liste des séances.
  *
- * Le programme définitif n’a pas encore été communiqué : tant que
- * `programmeIsProvisional` vaut `true` (src/data/programme.ts), un avertissement
- * clair indique au visiteur que ces séances sont données à titre indicatif.
- * Aucune séance n’est présentée comme un engagement contractuel.
+ * Alimentée par `sessions` (src/data/programme.ts) : la page d'accueil et la
+ * page /programme affichent donc rigoureusement les mêmes exemples.
+ *
+ * TODO CLIENT : le programme annuel définitif n'a pas encore été communiqué.
+ * Les quatre séances affichées ont été validées comme exemples représentatifs.
  */
-import { sessions, programmeIsProvisional, programmeNote } from '../data/programme';
+import { sessions } from '../data/programme';
 
 interface Props {
-  /**
-   * Nombre de séances affichées. La page d'accueil n'en montre qu'un extrait
-   * représentatif et renvoie vers /programme, qui présente l'intégralité :
-   * aucune information n'est perdue, la page d'accueil reste une synthèse.
-   */
+  /** Nombre de séances affichées. Sans limite, la liste complète. */
   limit?: number;
-  /** Masquer l'avertissement « programme indicatif » (déjà affiché ailleurs). */
-  hideNote?: boolean;
 }
 
-const { limit, hideNote = false } = Astro.props;
+const { limit } = Astro.props;
 const visibles = limit ? sessions.slice(0, limit) : sessions;
 ---
 
 <div class="sessions">
-  {
-    programmeIsProvisional && !hideNote && (
-      <p class="sessions__note">
-        <span class="sessions__note-mark" aria-hidden="true" />
-        {programmeNote}
-      </p>
-    )
-  }
-
-  {/* TODO CLIENT : remplacer par le programme IPRIG 2026-2027 définitif
-      (src/data/programme.ts → tableau `sessions`), puis passer
-      `programmeIsProvisional` à false. */}
-
   <ul class="sessions__list">
     {
       visibles.map((s, i) => (
         <li class="session">
           <span class="session__num" aria-hidden="true">
-            {String(i + 1).padStart(2, '0')}
+            {i + 1}
           </span>
           <div class="session__body">
             <h3 class="session__title">{s.title}</h3>
@@ -57,31 +39,6 @@ const visibles = limit ? sessions.slice(0, limit) : sessions;
 </div>
 
 <style>
-  /* ------------------------------------------------------ Avertissement */
-  .sessions__note {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-3);
-    max-inline-size: 60ch;
-    margin-block-end: var(--space-7);
-    padding: var(--space-4) var(--space-5);
-    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
-    border-inline-start: 2px solid var(--color-accent);
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-    font-size: var(--text-sm);
-    line-height: 1.5;
-    color: var(--color-ink-soft);
-  }
-
-  .sessions__note-mark {
-    inline-size: 6px;
-    block-size: 6px;
-    flex: none;
-    margin-block-start: 0.5em;
-    background-color: var(--color-accent-ink);
-    transform: rotate(45deg);
-  }
-
   /* -------------------------------------------------------- Les séances */
   .sessions__list {
     border-block-start: var(--border-hairline) solid var(--rule);
@@ -89,7 +46,7 @@ const visibles = limit ? sessions.slice(0, limit) : sessions;
 
   .session {
     display: grid;
-    grid-template-columns: 2.25rem minmax(0, 1fr);
+    grid-template-columns: 1.5rem minmax(0, 1fr);
     grid-template-areas:
       'num  cat'
       'num  body';

@@ -1,14 +1,27 @@
 ---
 /**
- * /politique-confidentialite — squelette.
+ * /politique-confidentialite
  *
- * État réel du site en V1 : aucun formulaire, aucun compte, aucun analytics,
- * aucun cookie déposé par le site. Cette page le dit, sans promettre plus.
+ * ⚠ CETTE PAGE A CHANGÉ DE NATURE EN V4.
  *
- * ⚠ TODO CLIENT : à faire relire, et à compléter avec l’identité du
- * responsable de traitement une fois les informations légales fournies.
- * Cette page doit être mise à jour si un outil de mesure d’audience,
- * un formulaire ou une newsletter sont ajoutés plus tard.
+ * La V3.1 affirmait « aucun formulaire » et « aucune donnée personnelle
+ * collectée ». C'était exact à l'époque ; ce ne l'est plus. Le site porte
+ * désormais deux formulaires, et cette page doit dire exactement ce qu'ils
+ * collectent, pourquoi, où cela va et pendant combien de temps.
+ *
+ * ⚠ TODO CLIENT — deux points ne peuvent pas être écrits sans lui :
+ *   1. l'identité du responsable de traitement (voir `legal` dans site.ts) ;
+ *   2. la durée de conservation exacte. En attendant, la page emploie une
+ *      formulation prudente et vraie plutôt qu'un délai inventé.
+ *
+ * ⚠ À FAIRE RELIRE PAR UN JURISTE avant la mise en ligne définitive.
+ *
+ * ⚠ Cette page doit être mise à jour si :
+ *   — un outil de mesure d'audience est ajouté ;
+ *   — une lettre d'information est mise en place ;
+ *   — `LOG_MESSAGES` passe à `false` dans la configuration serveur (la copie
+ *     des messages de contact décrite ci-dessous n'existerait alors plus) ;
+ *   — un `WEBHOOK_URL` est configuré (un destinataire supplémentaire à citer).
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
@@ -19,7 +32,7 @@ const isComplete = legal.editor !== null;
 
 <BaseLayout
   title="Politique de confidentialité"
-  description="Politique de confidentialité de l’IPRIG : ce site ne collecte aucune donnée personnelle, ne dépose aucun cookie et n’utilise aucun outil de mesure d’audience."
+  description="Politique de confidentialité de l’IPRIG : quelles données les formulaires du site collectent, pour quelle finalité, qui y accède et quels sont vos droits."
   path="/politique-confidentialite"
   noindex={!isComplete}
 >
@@ -40,78 +53,143 @@ const isComplete = legal.editor !== null;
         )
       }
 
-      <h2>Ce que ce site collecte</h2>
+      <h2>En résumé</h2>
       <p>
-        Le site iprig.fr est un site statique de présentation. Il ne comporte
-        aucun formulaire, aucun espace membre et aucun système d’inscription.
-        Il ne collecte donc aucune donnée personnelle directement.
+        Le site iprig.fr est un site de présentation. Il ne dépose aucun cookie,
+        n’utilise aucun outil de mesure d’audience et ne crée aucun compte
+        utilisateur. Il comporte en revanche <strong>deux formulaires</strong>,
+        qui recueillent uniquement les informations que vous y saisissez
+        vous-même.
       </p>
 
-      <h2>Cookies et mesure d’audience</h2>
+      <h2>Ce que le formulaire de contact collecte</h2>
       <p>
-        Aucun cookie n’est déposé par ce site. Aucun outil de mesure d’audience,
-        de suivi publicitaire ou de profilage n’y est installé. Aucune bannière
-        de consentement n’est donc nécessaire.
+        La page <a class="link" href="/contact">Contact</a> comporte un
+        formulaire à trois champs :
+      </p>
+      <ul class="legal__bullets">
+        <li>votre adresse e-mail&#8239;;</li>
+        <li>l’objet de votre demande&#8239;;</li>
+        <li>votre message.</li>
+      </ul>
+      <p>
+        <strong>Finalité&#8239;:</strong> répondre à votre demande. Ces
+        informations ne servent à rien d’autre. Elles ne sont ni revendues, ni
+        transmises à un tiers, ni utilisées pour vous adresser des messages que
+        vous n’auriez pas sollicités.
+      </p>
+      <p>
+        Chaque message est transmis par courrier électronique à la boîte de
+        l’IPRIG, et une copie en est conservée sur le serveur du site. Cette
+        copie n’est pas un usage supplémentaire&#8239;: elle garantit qu’un
+        message ne se perde pas si l’envoi de l’e-mail échoue.
+      </p>
+
+      <h2>Ce que le formulaire de préinscription collecte</h2>
+      <p>
+        La page <a class="link" href="/certificats">Certificats</a> comporte un
+        formulaire de préinscription à quatre champs&#8239;:
+      </p>
+      <ul class="legal__bullets">
+        <li>vos nom et prénom&#8239;;</li>
+        <li>votre adresse e-mail&#8239;;</li>
+        <li>le ou les certificats qui vous intéressent&#8239;;</li>
+        <li>un message facultatif.</li>
+      </ul>
+      <p>
+        <strong>Finalité&#8239;:</strong> enregistrer votre préinscription, en
+        assurer le suivi, vous recontacter et vous communiquer les horaires
+        ainsi que les modalités définitives d’inscription.
+      </p>
+      <p>
+        Une préinscription n’est ni une inscription, ni un engagement, ni un
+        achat. <strong>Aucun paiement n’est effectué sur ce site</strong> et
+        aucune coordonnée bancaire n’y est jamais demandée.
+      </p>
+
+      <h2>Ce que le site ne collecte pas</h2>
+      <p>
+        Aucun cookie n’est déposé. Aucun outil de mesure d’audience, de suivi
+        publicitaire ou de profilage n’est installé — aucune bannière de
+        consentement n’est donc nécessaire. Le site n’enregistre ni votre
+        adresse IP, ni votre navigateur, ni votre parcours de navigation.
+      </p>
+      <p>
+        Pour limiter les envois automatisés, un compteur temporaire est associé
+        à une empreinte chiffrée et tronquée de l’adresse depuis laquelle un
+        formulaire est envoyé. Cette empreinte ne permet pas de retrouver
+        l’adresse d’origine, ne contient aucune donnée saisie et est effacée
+        automatiquement au bout de quelques minutes.
+      </p>
+
+      <h2>Qui accède à ces informations</h2>
+      <p>
+        Les demandes reçues sont consultées uniquement par l’IPRIG. Elles sont
+        hébergées chez {legal.host.name}, {legal.host.address}, qui assure
+        l’hébergement du site et le service de messagerie associé, et qui
+        conserve à ce titre des journaux de connexion techniques.
+      </p>
+
+      <h2>Combien de temps elles sont conservées</h2>
+      <p>
+        Les données sont conservées pendant la durée nécessaire au traitement de
+        la demande et au suivi correspondant, puis supprimées.
       </p>
 
       <h2>Liens vers des services externes</h2>
       <p>
         Le site renvoie vers Patreon, qui gère l’adhésion, les paiements et
-        l’accès aux contenus réservés aux membres. À partir du moment où vous
-        quittez ce site pour Patreon, ce sont la politique de confidentialité et
-        les conditions d’utilisation de Patreon qui s’appliquent.
-      </p>
-
-      <h2>Hébergement et journaux serveur</h2>
-      <p>
-        Le site est hébergé par {legal.host.name}, {legal.host.address}.
-        Comme tout hébergeur, il peut conserver des journaux de connexion
-        techniques à des fins de sécurité et de bon fonctionnement du service.
+        l’accès aux contenus réservés aux membres, ainsi que vers les comptes
+        publics de KevanExplique (Instagram, YouTube, TikTok, Twitch, LinkedIn,
+        Spotify). Dès lors que vous quittez ce site, ce sont la politique de
+        confidentialité et les conditions d’utilisation de la plateforme
+        concernée qui s’appliquent.
       </p>
 
       <h2>Vos droits</h2>
       <p>
         Conformément au Règlement général sur la protection des données, vous
-        disposez de droits d’accès, de rectification, d’effacement, de
-        limitation et d’opposition sur les données vous concernant. Ce site ne
-        traitant aucune donnée personnelle, ces demandes concernent les données
-        détenues par Patreon et doivent être adressées à cette plateforme.
+        disposez d’un droit d’accès, de rectification, d’effacement, de
+        limitation et d’opposition sur les données vous concernant. Pour
+        l’exercer, il suffit d’en faire la demande via le
+        <a class="link" href="/contact">formulaire de contact</a>, en précisant
+        l’adresse e-mail utilisée lors de votre envoi précédent.
+      </p>
+      <p>
+        Les données détenues par Patreon relèvent de cette plateforme et les
+        demandes correspondantes doivent lui être adressées directement.
       </p>
 
       <h2>Modification de cette politique</h2>
       <p>
         Cette page sera mise à jour si le site évolue, en particulier si un
-        formulaire de contact, une lettre d’information ou un outil de mesure
-        d’audience venaient à être ajoutés.
+        outil de mesure d’audience, une lettre d’information ou un nouveau
+        formulaire venaient à être ajoutés.
       </p>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  .legal h2 {
-    margin-block: var(--space-8) var(--space-4);
-    font-size: var(--text-h3);
-    font-family: var(--font-serif);
-    font-weight: 500;
-    color: var(--color-navy);
+  .legal__bullets {
+    display: grid;
+    gap: var(--space-2);
+    margin-block: var(--space-4) var(--space-5);
   }
 
-  .legal h2:first-of-type {
-    margin-block-start: 0;
+  .legal__bullets li {
+    position: relative;
+    padding-inline-start: var(--space-5);
+    line-height: var(--leading-relaxed);
   }
 
-  .legal p {
-    max-inline-size: 62ch;
-    color: var(--color-ink-soft);
-  }
-
-  .legal__pending {
-    padding: var(--space-4) var(--space-5);
-    margin-block-end: var(--space-8);
-    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
-    border-inline-start: 2px solid var(--color-accent);
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-    font-size: var(--text-sm);
+  .legal__bullets li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0.72em;
+    inline-size: 10px;
+    block-size: 1px;
+    background-color: var(--color-accent);
   }
 </style>

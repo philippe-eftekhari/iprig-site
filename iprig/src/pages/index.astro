@@ -5,7 +5,7 @@
  * Parcours du visiteur :
  *   hero (qu'est-ce que c'est) → l'institut (ce que ça apporte)
  *   → l'expérience (ce qu'on y fait) → les séances (concrètement)
- *   → BANDEAU DE CONVERSION → le fondateur (crédibilité) → les repères
+ *   → BANDEAU DE CONVERSION → le fondateur (crédibilité)
  *   → questions → AFFICHE DE CLÔTURE.
  *
  * Rythme des fonds et des densités — c'est ce qui empêche la page de se lire
@@ -17,9 +17,15 @@
  *   séances     papier        dense (liste)
  *   bandeau     vert          COMPACT — une seule ligne
  *   fondateur   papier alt    aéré
- *   repères     papier        très aéré (grands chiffres)
- *   questions   papier alt    dense
+ *   questions   papier        dense
  *   clôture     marine        IMMERSIF — affiche typographique
+ *
+ * V4 — LA SECTION « EN QUELQUES REPÈRES » A ÉTÉ RETIRÉE.
+ * Elle affichait « plusieurs centaines d'étudiants accompagnés », « ≈ 40
+ * séances par an » et « ≈ 50 événements organisés ». Aucun de ces chiffres
+ * n'a jamais été vérifié. Sur un site qui engage la crédibilité académique
+ * d'une personne réelle, un chiffre invérifiable coûte plus qu'il ne
+ * rapporte. Ne pas la réintroduire sans données datées et validées.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
@@ -29,7 +35,6 @@ import SectionProgramme from '../components/SectionProgramme.astro';
 import CtaBand from '../components/CtaBand.astro';
 import CtaPoster from '../components/CtaPoster.astro';
 import SectionFondateur from '../components/SectionFondateur.astro';
-import SectionStats from '../components/SectionStats.astro';
 import SectionTemoignages from '../components/SectionTemoignages.astro';
 import SectionFaq from '../components/SectionFaq.astro';
 ---
@@ -47,13 +52,12 @@ import SectionFaq from '../components/SectionFaq.astro';
   <CtaBand id="rejoindre" />
 
   <SectionFondateur />
-  <SectionStats />
   <SectionTemoignages />
   <SectionFaq />
 
   {/* Conversion, clôture : affiche typographique. */}
   <CtaPoster
     title="Prêt à commencer ?"
-    intro="L’adhésion se fait sur Patreon, en quelques minutes. Sessions, événements, contenus réservés et rediffusions sont accessibles immédiatement — et vous pouvez l’interrompre quand vous le souhaitez."
+    intro="L’adhésion se fait sur Patreon en quelques minutes. Vous accédez aux sessions, événements et contenus réservés immédiatement, et vous pouvez l’interrompre quand vous le souhaitez."
   />
 </BaseLayout>

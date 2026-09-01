@@ -2,25 +2,21 @@
 /**
  * Section fondateur — page d'accueil.
  *
- * V2 :
- *   — la photographie occupe une vraie colonne (≈ 42 %) et n'est plus fixée :
- *     quand le portrait définitif arrivera, il deviendra l'élément dominant
- *     de la section sans rien changer d'autre ;
- *   — le bloc « Kevan Explique » perd son fond et son cadre : filet + texte ;
- *   — le contenu est resserré. La biographie développée vit sur
- *     /kevan-gafaiti — la page d'accueil pose la crédibilité, elle ne la
- *     déroule pas.
+ * La page d'accueil pose la crédibilité, elle ne la déroule pas : la
+ * biographie développée vit sur /kevan-gafaiti.
  *
- * ⚠ TODO CLIENT : validation finale de la biographie et des intitulés
- * académiques avant mise en production (src/data/kevan.ts).
+ * V4 : la photographie provisoire laisse la place à une photographie réelle
+ * (plateau de l'Académie diplomatique et consulaire), et le bloc
+ * KevanExplique affiche enfin de vrais liens — plus aucune plateforme n'est
+ * citée en toutes lettres faute d'URL.
+ *
+ * ⚠ Aucun nombre d'abonnés n'est affiché : voir la note dans src/data/kevan.ts.
  */
 import MediaSlot from './MediaSlot.astro';
+import SocialLinks from './SocialLinks.astro';
 import Arrow from './Arrow.astro';
 import { kevan, kevanExplique } from '../data/kevan';
-import { communitySize, communitySizeLabel, socialsKevanExplique } from '../data/site';
-
-/** Les plateformes ne deviennent des liens que lorsqu'une URL est fournie. */
-const kevanLinks = socialsKevanExplique.filter((s) => s.url !== null);
+import fondateur from '../assets/kevan/fondateur.jpg';
 
 /**
  * Repères typographiques affichés sous le portrait. Uniquement des éléments
@@ -33,14 +29,13 @@ const reperes = [kevan.institutions[0], ...kevan.researchAreas.slice(0, 2)];
   <div class="container container--wide">
     <div class="fondateur__grid">
       <div class="fondateur__media">
-        {/* TODO CLIENT : portrait professionnel de Kevan Gafaïti.
-            Format vertical, fond sobre, cadrage buste. */}
         <MediaSlot
-          fallback="founder"
+          src={fondateur}
           ratio="portrait"
           mobileRatio="landscape"
-          alt="Kevan Gafaïti"
-          caption="Portrait de Kevan Gafaïti"
+          objectPosition="50% 25%"
+          alt="Kevan Gafaïti prenant la parole au micro lors d’un colloque"
+          caption="Kevan Gafaïti en colloque"
         />
 
         <ul class="fondateur__reperes">
@@ -59,7 +54,7 @@ const reperes = [kevan.institutions[0], ...kevan.researchAreas.slice(0, 2)];
           {kevan.titles.map((t) => <li>{t}</li>)}
         </ul>
 
-        <p class="fondateur__lede">{kevan.lede}</p>
+        <p class="fondateur__lede justify">{kevan.lede}</p>
 
         <p class="fondateur__more">
           <a class="btn btn--ghost" href="/kevan-gafaiti">
@@ -68,52 +63,11 @@ const reperes = [kevan.institutions[0], ...kevan.researchAreas.slice(0, 2)];
           </a>
         </p>
 
-        {/* ------------------------------------------------ Kevan Explique */}
+        {/* ------------------------------------------------ KevanExplique */}
         <div class="explique">
           <h3 class="explique__title">{kevanExplique.name}</h3>
-
-          <div class="explique__meta">
-            {
-              communitySize && (
-                <p class="explique__community">
-                  {/* TODO CLIENT : vérifier le nombre actuel avant mise en ligne. */}
-                  <strong>{communitySize}</strong>
-                  <span>{communitySizeLabel}</span>
-                </p>
-              )
-            }
-
-            {
-              /* Tant qu'aucune URL n'est fournie, les plateformes sont citées
-                 en toutes lettres plutôt qu'affichées comme des liens : un
-                 faux lien est pire qu'une mention en texte. */
-              kevanLinks.length > 0 ? (
-                <ul class="explique__platforms link-list">
-                  {kevanLinks.map((s) => (
-                    <li>
-                      <a
-                        class="link"
-                        href={s.url!}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {s.label}
-                        <span class="sr-only"> (nouvelle fenêtre)</span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p class="explique__platforms-text">
-                  Présent sur {kevanExplique.platforms.join(', ')}.
-                </p>
-              )
-            }
-          </div>
-          {
-            /* TODO CLIENT : URL des comptes Kevan Explique. Une fois renseignées
-               dans src/data/site.ts, les plateformes deviennent des liens. */
-          }
+          <p class="explique__lede justify">{kevanExplique.lede}</p>
+          <SocialLinks class="explique__socials" />
         </div>
       </div>
     </div>
@@ -213,39 +167,16 @@ const reperes = [kevan.institutions[0], ...kevan.researchAreas.slice(0, 2)];
     color: var(--color-navy);
   }
 
-  .explique__meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--space-3) var(--space-7);
+  .explique__lede {
     margin-block-start: var(--space-4);
-  }
-
-  .explique__community {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-2);
+    max-inline-size: var(--measure-wide);
     font-size: var(--text-sm);
-    color: var(--color-muted);
+    line-height: var(--leading-relaxed);
+    color: var(--color-ink-soft);
   }
 
-  .explique__community strong {
-    font-family: var(--font-serif);
-    font-size: 1.625rem;
-    font-weight: 500;
-    letter-spacing: var(--tracking-tight);
-    color: var(--color-forest);
-  }
-
-  .explique__platforms {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-4);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
-  }
-
-  .explique__platforms-text {
+  .explique__socials {
+    margin-block-start: var(--space-4);
     font-size: var(--text-sm);
     color: var(--color-muted);
   }

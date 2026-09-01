@@ -128,8 +128,10 @@ const isCurrent = (href: string) =>
                 data-drawer-link
                 aria-current={isCurrent(item.href) ? 'page' : undefined}
               >
-                <span class="drawer__index">
-                  {String(i + 1).padStart(2, '0')}
+                {/* Numéro éditorial, pas une information : un lecteur d'écran
+                    annoncerait « 3 Certificats » sans que cela n'aide. */}
+                <span class="drawer__index" aria-hidden="true">
+                  {i + 1}
                 </span>
                 <span class="drawer__label">
                   {item.label}
@@ -475,7 +477,7 @@ const isCurrent = (href: string) =>
     color: var(--color-accent-bright);
     letter-spacing: 0.1em;
     flex: none;
-    inline-size: 1.5rem;
+    inline-size: 1rem;
   }
 
   .drawer__label {

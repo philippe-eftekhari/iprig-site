@@ -44,7 +44,12 @@ const {
         rester synchronisée avec `--color-navy-deep` dans global.css. */}
     <meta name="theme-color" content="#071d30" />
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* V4 : le losange provisoire laisse la place au logo IPRIG réel.
+        Les fichiers sont produits par `node scripts/prepare-assets.mjs` à
+        partir de `iprig-logo-cercle.png`. Fond transparent, sauf l'icône iOS
+        que le système pose sans arrière-plan. */}
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon-192.png" type="image/png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 

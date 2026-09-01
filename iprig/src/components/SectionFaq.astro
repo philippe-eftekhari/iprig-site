@@ -4,7 +4,7 @@
  * Accordéon natif <details>/<summary> : accessible au clavier et aux lecteurs
  * d’écran sans une seule ligne de JavaScript.
  */
-import { faq } from '../data/faq';
+import { faq, faqHeading } from '../data/faq';
 ---
 
 <section class="faq section section--lg" id="faq">
@@ -12,11 +12,9 @@ import { faq } from '../data/faq';
     <div class="faq__grid">
       <div class="faq__head">
         <h2 class="faq__title" data-motion="title">
-          <span class="motion-inner">Ce qu’il faut savoir avant de rejoindre</span>
+          <span class="motion-inner">{faqHeading.title}</span>
         </h2>
-        <p class="faq__lede">
-          Une réponse manque&#8239;? La page contact indique par où passer.
-        </p>
+        <p class="faq__lede">{faqHeading.lede}</p>
       </div>
 
       <div class="faq__list">

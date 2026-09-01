@@ -11,7 +11,7 @@ import { chromium } from 'playwright-core';
 const BASE = process.argv[2] ?? 'http://localhost:4321';
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
-const PAGES = ['/', '/programme', '/kevan-gafaiti', '/contact'];
+const PAGES = ['/', '/programme', '/certificats', '/kevan-gafaiti', '/contact'];
 const VIEWPORTS = [
   { name: 'desktop', width: 1440, height: 900 },
   { name: 'mobile', width: 390, height: 844 },
