@@ -125,7 +125,7 @@ production** (voir `iprig/src/data/kevan.ts`) :
 - recherche centrée sur la géopolitique du Moyen-Orient, en particulier
   l'Iran et sa stratégie d'influence.
 
-**Kevan Explique** : marque de diffusion sur Instagram, TikTok, YouTube et en
+**KevanExplique** : marque de diffusion sur Instagram, TikTok, YouTube et en
 podcast. Communauté d'environ 75 000 personnes indiquée au moment du brief —
 donnée volatile, centralisée dans `iprig/src/data/site.ts` (`communitySize`)
 et à vérifier avant chaque mise en ligne.

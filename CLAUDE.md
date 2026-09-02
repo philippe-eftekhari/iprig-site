@@ -25,7 +25,7 @@ confondre, ne jamais présenter l'un comme l'autre, ne jamais fusionner leurs
 contenus.
 
 **Orthographe.** « Kevan Gafaïti » — un seul « n », tréma sur le « i ».
-La marque de création de contenu s'écrit « Kevan Explique ».
+La marque de création de contenu s'écrit « KevanExplique ».
 
 **Ne rien inventer.** Ces sites engagent la crédibilité académique d'une
 personne réelle. Aucun témoignage, chiffre, diplôme, poste, publication,

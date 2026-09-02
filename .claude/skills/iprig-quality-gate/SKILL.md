@@ -80,7 +80,7 @@ Le point le plus important. Vérifier ligne à ligne.
 - [ ] **Aucune confusion IPRIG / IRIG.** Les deux sigles ne diffèrent que d'une
       lettre : relire chaque occurrence. L'IPRIG prépare, l'IRIG cherche.
 - [ ] « Kevan Gafaïti » : un seul « n », tréma sur le « i ».
-- [ ] « Kevan Explique » orthographié tel quel.
+- [ ] « KevanExplique » orthographié tel quel.
 - [ ] Identité **bleu profond / vert institutionnel** cohérente ; les couleurs
       viennent toutes des tokens de `src/styles/global.css`, aucune valeur
       hexadécimale isolée dans un composant.
