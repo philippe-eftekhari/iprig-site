@@ -44,6 +44,14 @@ interface Props {
    * Indispensable quand une page porte deux comptes Instagram distincts.
    */
   srContext?: string;
+  /**
+   * Invitation placée DEVANT le nom de la plateforme dans le libellé :
+   * « Suivre l'IPRIG sur » donne « Suivre l'IPRIG sur Instagram ». Le lien
+   * porte alors un nom accessible complet à lui seul ; `srContext` devient
+   * inutile, et répéterait l'institut.
+   * Sans valeur, le libellé reste le nom de la plateforme, comme partout.
+   */
+  labelPrefix?: string;
   /** Afficher la mention des plateformes dont l'URL n'est pas encore fournie. */
   showPending?: boolean;
   class?: string;
@@ -54,6 +62,7 @@ const {
   layout = 'wrap',
   links = activeSocialLinks,
   srContext = '',
+  labelPrefix = '',
   showPending = false,
   class: className = '',
 } = Astro.props;
@@ -61,6 +70,10 @@ const {
 /* La disposition par défaut ne porte AUCUNE classe supplémentaire : le
    balisage des blocs déjà en place reste inchangé au caractère près. */
 const layoutClass = layout === 'stack' ? ' socials--stack' : '';
+
+/* Le même libellé sert au texte visible et à la version pour lecteurs
+   d'écran : une seule formulation à relire, quelle que soit la variante. */
+const libelle = (s: SocialLink) => (labelPrefix ? `${labelPrefix} ${s.label}` : s.label);
 
 /**
  * Chemins des glyphes, sur une grille 24 × 24.
@@ -115,9 +128,9 @@ const ICONS: Partial<Record<SocialId, string>> = {
             )}
 
             {variant === 'labels' ? (
-              <span class="socials__label">{s.label}</span>
+              <span class="socials__label">{libelle(s)}</span>
             ) : (
-              <span class="sr-only">{s.label}</span>
+              <span class="sr-only">{libelle(s)}</span>
             )}
             {srContext && <span class="sr-only"> {srContext}</span>}
             <span class="sr-only"> (nouvelle fenêtre)</span>

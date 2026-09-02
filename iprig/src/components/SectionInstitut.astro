@@ -11,8 +11,16 @@
  *   — l'encart « à qui s'adresse » perd son fond et son cadre : il devient
  *     une liste sous filet, comme une note de bas de colonne ;
  *   — un seul geste de motion : le titre du manifeste.
+ *
+ * V4.3.2 :
+ *   — la colonne de gauche se termine par les deux comptes de l'INSTITUT.
+ *     Sur desktop elle s'arrête bien avant le sommaire ; ces deux lignes
+ *     ferment la colonne au lieu de la laisser ouverte sur du vide.
+ *     Ce sont les comptes de l'IPRIG, jamais ceux de KevanExplique.
  */
 import { institut, publics, apports } from '../data/institut';
+import { activeIprigSocialLinks, iprigSocialInvite } from '../data/site';
+import SocialLinks from './SocialLinks.astro';
 ---
 
 <section class="institut section section--lg section--paper-2" id="institut">
@@ -36,6 +44,19 @@ import { institut, publics, apports } from '../data/institut';
           <ul class="institut__publics-list">
             {publics.map((p) => <li>{p}</li>)}
           </ul>
+        </div>
+
+        {/* Second point d'accès aux comptes de l'institut — le pied de page
+            garde les siens. Le libellé complet (« Suivre l'IPRIG sur
+            Instagram ») suffit à nommer le lien : pas de `srContext`, qui
+            répéterait l'institut pour les lecteurs d'écran. */}
+        <div class="institut__socials">
+          <SocialLinks
+            links={activeIprigSocialLinks}
+            layout="stack"
+            labelPrefix={iprigSocialInvite}
+            class="institut__socials-list"
+          />
         </div>
       </div>
 
@@ -133,6 +154,29 @@ import { institut, publics, apports } from '../data/institut';
     inline-size: 10px;
     block-size: 1px;
     background-color: var(--color-accent);
+  }
+
+  /* --------------------------------------------------- Comptes IPRIG
+     Fin de colonne. Le filet est le plus clair des deux (`--rule` contre
+     `--rule-strong` pour « à qui s'adresse ») : même famille de notes, un
+     cran plus bas. Aucun intitulé — « Suivre l'IPRIG sur Instagram » se
+     lit seul ; un titre par-dessus en ferait une rubrique.
+
+     Le bloc reste dans le flux de la grille : sur desktop il descend avec
+     la colonne, sur mobile il s'insère entre la liste et le sommaire. Rien
+     n'est positionné, rien n'est calé sur une hauteur d'écran donnée.
+
+     Les règles portent sur ce conteneur et non sur `institut__socials-list` :
+     une feuille de style de composant ne descend pas jusqu'à la racine d'un
+     composant enfant — même raison qu'au pied de page. La taille et la
+     couleur, elles, sont héritées : c'est ce qui aligne ces deux lignes sur
+     la liste au-dessus. */
+  .institut__socials {
+    margin-block-start: var(--space-6);
+    padding-block-start: var(--space-5);
+    border-block-start: var(--border-hairline) solid var(--rule);
+    font-size: var(--text-sm);
+    color: var(--color-ink-soft);
   }
 
   /* ============================================================ Sommaire */

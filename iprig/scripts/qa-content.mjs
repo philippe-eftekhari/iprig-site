@@ -654,11 +654,16 @@ const tout = Object.entries(textes);
    *  « lien à venir » ne doit plus apparaître nulle part, et aucun
    *  `href="#"` non plus.
    *
-   *  IPRIG : les DEUX comptes de l'institut, ajoutés en V4.3.1 dans la
-   *  colonne « Rejoindre » du pied de page. Ils portent la classe
-   *  `footer__socials-iprig` — c'est ce qui les distingue du bloc
-   *  KevanExplique, avec lequel ils partagent Instagram et LinkedIn sous
-   *  des adresses différentes.
+   *  IPRIG : les DEUX comptes de l'institut. Ils apparaissent à DEUX
+   *  endroits, et c'est voulu :
+   *    — V4.3.1, colonne « Rejoindre » du pied de page — classe
+   *      `footer__socials-iprig` ;
+   *    — V4.3.2, fin de la colonne de gauche de la section « L'institut »
+   *      — classe `institut__socials-list`, libellés complets.
+   *  Ces classes sont ce qui les distingue du bloc KevanExplique, avec
+   *  lequel ils partagent Instagram et LinkedIn sous des adresses
+   *  différentes. Un contrôle qui chercherait les URL dans tout le HTML ne
+   *  dirait donc rien : chaque bloc est interrogé séparément.
    *
    *  Les sélecteurs ci-dessous écartent donc explicitement l'un ou l'autre
    *  bloc : un contrôle qui compterait les deux ne dirait rien.
@@ -677,8 +682,9 @@ const tout = Object.entries(textes);
   const IPRIG_INSTAGRAM = 'https://www.instagram.com/iprig.officiel/';
   const IPRIG_LINKEDIN = 'https://www.linkedin.com/company/iprig';
 
-  /** Tous les liens KevanExplique de la page : le bloc IPRIG est écarté. */
-  const SEL_KEVAN = '.socials:not(.footer__socials-iprig) .socials__link';
+  /** Tous les liens KevanExplique de la page : les blocs IPRIG sont écartés. */
+  const SEL_KEVAN =
+    '.socials:not(.footer__socials-iprig):not(.institut__socials-list) .socials__link';
 
   for (const url of ['/kevan-gafaiti', '/contact']) {
     await page.goto(BASE + url, { waitUntil: 'networkidle' });
@@ -842,6 +848,165 @@ const tout = Object.entries(textes);
     'Pied de page : les deux LinkedIn restent distincts',
     piedHrefs.some((h) => h.includes('linkedin.com/in/kevan-gafa')) &&
       linkedinIprig?.href === IPRIG_LINKEDIN,
+  );
+
+  /* ---- Section « L'institut » : les comptes de l'IPRIG (V4.3.2) --------
+     Second point d'accès, en fin de colonne de gauche. Le pied de page garde
+     le sien : les contrôles ci-dessus et ceux-ci portent sur des blocs
+     DIFFÉRENTS, jamais sur « quelque part dans la page ».
+
+     Le libellé est celui arrêté par le client, au caractère près. Le texte
+     VISIBLE est comparé à l'identique ; le nom accessible, lui, porte en
+     plus la mention « (nouvelle fenêtre) » commune à tous les liens
+     externes du site. */
+  const INSTITUT_LIBELLES = [
+    'Suivre l’IPRIG sur Instagram',
+    'Suivre l’IPRIG sur LinkedIn',
+  ];
+
+  const institutBloc = await page.$$eval(
+    '#institut .institut__socials-list .socials__link',
+    (els) =>
+      els.map((e) => ({
+        href: e.getAttribute('href') ?? '',
+        libelle: (e.querySelector('.socials__label')?.textContent ?? '').trim(),
+        nom: (e.textContent ?? '').replace(/\s+/g, ' ').trim(),
+        target: e.getAttribute('target') ?? '',
+        rel: e.getAttribute('rel') ?? '',
+        icone: e.querySelector('svg.socials__icon path') !== null,
+        /* Le lien doit être DANS la section, et pas ailleurs dans la page. */
+        dansInstitut: e.closest('#institut') !== null,
+        dansPied: e.closest('.footer') !== null,
+      })),
+  );
+
+  check(
+    'Institut : deux comptes IPRIG, et deux seulement',
+    institutBloc.length === 2,
+    `${institutBloc.length} liens`,
+  );
+
+  const instaInstitut = institutBloc.find((l) => l.href.includes('instagram.com'));
+  const linkedinInstitut = institutBloc.find((l) => l.href.includes('linkedin.com'));
+
+  check('Institut : lien Instagram présent', Boolean(instaInstitut));
+  check(
+    `Institut : libellé visible « ${INSTITUT_LIBELLES[0]} »`,
+    instaInstitut?.libelle === INSTITUT_LIBELLES[0],
+    instaInstitut?.libelle,
+  );
+  check(
+    'Institut : URL Instagram IPRIG exacte',
+    instaInstitut?.href === IPRIG_INSTAGRAM,
+    instaInstitut?.href,
+  );
+
+  check('Institut : lien LinkedIn présent', Boolean(linkedinInstitut));
+  check(
+    `Institut : libellé visible « ${INSTITUT_LIBELLES[1]} »`,
+    linkedinInstitut?.libelle === INSTITUT_LIBELLES[1],
+    linkedinInstitut?.libelle,
+  );
+  check(
+    'Institut : URL LinkedIn IPRIG exacte',
+    linkedinInstitut?.href === IPRIG_LINKEDIN,
+    linkedinInstitut?.href,
+  );
+
+  /* Aucun jeton de session ne doit reparaître, ici pas plus qu'ailleurs. */
+  check(
+    'Institut : aucun paramètre de session dans les liens',
+    institutBloc.every((l) => !l.href.includes('igsi=')),
+    institutBloc.map((l) => l.href).join(' | '),
+  );
+
+  check(
+    'Institut : les deux comptes portent un pictogramme',
+    institutBloc.length === 2 && institutBloc.every((l) => l.icone),
+    institutBloc.map((l) => `${l.href} : ${l.icone ? 'icône' : 'SANS ICÔNE'}`).join(' | '),
+  );
+
+  check(
+    'Institut : les liens s’ouvrent comme les autres liens externes',
+    institutBloc.length === 2 &&
+      institutBloc.every(
+        (l) =>
+          l.target === '_blank' &&
+          l.rel.includes('noopener') &&
+          l.rel.includes('noreferrer'),
+      ),
+    institutBloc.map((l) => `${l.target} / ${l.rel}`).join(' | '),
+  );
+
+  /* Le nom accessible commence par le texte visible : le pictogramme est
+     décoratif et n'ajoute rien, et aucun `srContext` ne répète l'institut. */
+  check(
+    'Institut : nom accessible = libellé visible + « (nouvelle fenêtre) »',
+    institutBloc.length === 2 &&
+      institutBloc.every((l) => l.nom === `${l.libelle} (nouvelle fenêtre)`),
+    institutBloc.map((l) => l.nom).join(' | '),
+  );
+
+  /* Placement : DANS la section « L'institut », dans la colonne de GAUCHE,
+     sous la liste « à qui s'adresse » — et pas dans la colonne des axes. */
+  check(
+    'Institut : le bloc est dans la section, pas dans le pied de page',
+    institutBloc.length === 2 &&
+      institutBloc.every((l) => l.dansInstitut && !l.dansPied),
+  );
+
+  const placementInstitut = await page.evaluate(() => {
+    const bloc = document.querySelector('#institut .institut__socials');
+    if (!bloc) return null;
+    const colonne = document.querySelector('#institut .institut__intro');
+    const publics = document.querySelector('#institut .institut__publics');
+    const axes = document.querySelector('#institut .institut__index');
+    return {
+      dansColonneGauche: Boolean(colonne && colonne.contains(bloc)),
+      dansColonneAxes: Boolean(axes && axes.contains(bloc)),
+      apresPublics: Boolean(
+        publics &&
+          publics.compareDocumentPosition(bloc) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ),
+      /* Dernier élément de la colonne : c'est ce qui en referme le bas. */
+      dernier: Boolean(colonne && colonne.lastElementChild === bloc),
+    };
+  });
+  check(
+    'Institut : le bloc est dans la colonne de gauche',
+    placementInstitut?.dansColonneGauche === true &&
+      placementInstitut?.dansColonneAxes === false,
+    JSON.stringify(placementInstitut),
+  );
+  check(
+    'Institut : le bloc suit la liste « à qui s’adresse » et ferme la colonne',
+    placementInstitut?.apresPublics === true && placementInstitut?.dernier === true,
+    JSON.stringify(placementInstitut),
+  );
+
+  /* Les sept axes n'ont pas bougé : le bloc s'ajoute, il ne déplace rien. */
+  const axesTitres = await page.$$eval('#institut .apport__title', (els) =>
+    els.map((e) => (e.textContent ?? '').trim()),
+  );
+  check(
+    'Institut : les sept axes intacts, « Un Réseau » en tête',
+    axesTitres.length === 7 && axesTitres[0] === 'Un Réseau',
+    axesTitres.join(' | '),
+  );
+
+  /* Les deux identités ne se sont pas mélangées dans la section : aucun
+     compte KevanExplique n'a suivi les comptes de l'institut. */
+  const institutTousHrefs = await page.$$eval('#institut a[href]', (els) =>
+    els.map((e) => e.getAttribute('href') ?? ''),
+  );
+  check(
+    'Institut : aucun compte KevanExplique dans la section',
+    !institutTousHrefs.some((h) =>
+      /kevanexplique|kevan-gafa%C3%AFti|open\.spotify|podcasts\.apple|twitch\.tv|tiktok\.com/.test(
+        h,
+      ),
+    ),
+    institutTousHrefs.join(' | '),
   );
 }
 

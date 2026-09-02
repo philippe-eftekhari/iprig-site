@@ -242,6 +242,20 @@ export const iprigSocialLinks: SocialLink[] = [
 /** Comptes de l’IPRIG réellement en ligne — seuls ceux-là sont rendus. */
 export const activeIprigSocialLinks = iprigSocialLinks.filter((s) => s.url !== null);
 
+/**
+ * Invitation placée DEVANT le nom de la plateforme dans la section
+ * « L’institut » : « Suivre l’IPRIG sur Instagram ».
+ *
+ * Formulation arrêtée par le client en V4.3.2, à reprendre mot pour mot :
+ * ni « Suivez-nous », ni « Nos réseaux sociaux », ni « Instagram IPRIG ».
+ * Le sigle reste en capitales, les noms de plateformes gardent leur casse
+ * propre — « Instagram », « LinkedIn ».
+ *
+ * Le pied de page, lui, n’utilise PAS cette invitation : dans une colonne
+ * intitulée « Rejoindre », le nom de la plateforme seul suffit.
+ */
+export const iprigSocialInvite = 'Suivre l’IPRIG sur';
+
 /* -------------------------------------------------------------------------- */
 /*  5. CONTACT                                                                */
 /* -------------------------------------------------------------------------- */
