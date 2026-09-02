@@ -109,10 +109,10 @@ Il n'y a jamais besoin d'aller chercher dans les composants.
 | **Le prix affiché** | `priceDisplay:` et `priceDetail:` |
 | Le texte des boutons | `ctaPrimary:` |
 | Les chiffres (étudiants, séances, événements) | `stats:` |
-| Le nombre d'abonnés Kevan Explique | `communitySize:` |
+| Le nombre d'abonnés KevanExplique | `communitySize:` |
 | L'adresse e-mail | `contact.email` |
 | Instagram / LinkedIn IPRIG | `socialsIprig` |
-| Comptes Kevan Explique | `socialsKevanExplique` |
+| Comptes KevanExplique | `socialsKevanExplique` |
 | Mentions légales | `legal` |
 
 > **Important — les champs `null`**
@@ -133,18 +133,23 @@ entrée met à jour d'un coup le menu desktop, le menu mobile et le pied de page
 
 - `volets` — les quatre formes d'accompagnement (Sessions, Événements,
   Immersion, Rediffusions).
-- `sessions` — **la liste des séances**. C'est ici qu'on colle le programme
-  définitif quand il arrive : réécrire le tableau suffit, aucune page n'est à
-  retoucher.
-- `programmeIsProvisional` — tant que c'est `true`, un encadré prévient le
-  visiteur que le programme est donné à titre indicatif. Passer à `false`
-  quand le programme définitif est en ligne.
+- `sessions` — **le programme des séances 2026-2027**, quinze entrées :
+  semestre, numéro, date et intitulé. La page d'accueil en montre les quatre
+  premières, la page `/programme` les affiche toutes, regroupées par semestre.
+  Les totaux et le décompte du lien de l'accueil se calculent : rien à
+  retoucher ailleurs quand une séance est ajoutée ou déplacée.
+- **Ajouter une date du second semestre** : remplacer le `date: null` de la
+  séance concernée par la date, dans la même forme que celles du premier
+  semestre — `'Dimanche 11 octobre 2026'`. Rien d'autre. Tant qu'un `null`
+  subsiste, la séance affiche « Date à venir » et le semestre porte sa note
+  d'attente ; les deux disparaissent d'eux-mêmes une fois toutes les dates
+  renseignées.
 - `fonctionnement` — les trois étapes de l'adhésion.
 
 ### La présentation de Kevan
 
 **Fichier : `src/data/kevan.ts`** — fonctions, biographie, établissements,
-formation, domaines de recherche, Kevan Explique, IRIG.
+formation, domaines de recherche, KevanExplique, IRIG.
 
 ### Les questions fréquentes
 

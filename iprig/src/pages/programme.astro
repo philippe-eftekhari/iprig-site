@@ -3,12 +3,12 @@
  * /programme — présentation développée du programme.
  *
  * Reprend les MÊMES composants et les MÊMES données que la page d'accueil :
- * les quatre volets et les quatre exemples de séances ne peuvent pas diverger
- * entre les deux pages.
+ * les quatre volets et le programme des séances ne peuvent pas diverger entre
+ * les deux pages. L'accueil n'en montre qu'un extrait ; ici, le programme
+ * complet, semestre par semestre.
  *
- * ⚠ Le programme annuel définitif n'a pas encore été communiqué. Les séances
- * affichées sont des exemples validés par le client. Ne rien inventer pour
- * remplir la page.
+ * ⚠ Les dates du second semestre ne sont pas arrêtées. Elles s'affichent
+ * « Date à venir » — ne rien inventer pour remplir la colonne.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
@@ -71,7 +71,7 @@ import orientation from '../assets/kevan/orientation.jpg';
     <div class="container container--wide">
       <div class="seances__grid">
         <div class="seances__head">
-          <p class="eyebrow">Les séances</p>
+          <p class="eyebrow">{sessionsHeading.programmeEyebrow}</p>
           <h2 id="seances-title" class="seances__title">
             {sessionsHeading.programmeTitle}
           </h2>

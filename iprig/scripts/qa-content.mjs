@@ -151,20 +151,156 @@ const tout = Object.entries(textes);
   check('Accueil : quatre volets dans le bon ordre', ordreDe(accueil));
   check('Programme : quatre volets dans le bon ordre', ordreDe(programme));
 
-  /* Les quatre séances, à l'identique sur les deux pages. */
-  const SEANCES = [
+  /* ------------------------------------------------------------------ *
+   *  LE PROGRAMME 2026-2027 — quinze séances, deux semestres            *
+   * ------------------------------------------------------------------ *
+   *  Il a remplacé en V4.3 les quatre séances d'exemple de la V2. Les
+   *  contrôles portent sur la STRUCTURE — combien de séances, dans quel
+   *  semestre, avec quelle date — autant que sur les intitulés : un
+   *  programme qui perd une séance en cours de route ne se voit pas à
+   *  l'œil nu.
+   *
+   *  ⚠ Les dates du second semestre ne sont pas arrêtées. Le jour où le
+   *  client les communiquera, le contrôle « Date à venir » devra être
+   *  ajusté — jamais supprimé pour obtenir un PASS.
+   * ------------------------------------------------------------------ */
+  await page.goto(BASE + '/programme', { waitUntil: 'networkidle' });
+
+  const seances = await page.$$eval('.session', (els) =>
+    els.map((e) => ({
+      num: e.querySelector('.session__num')?.textContent?.trim() ?? '',
+      date: e.querySelector('.session__date')?.textContent?.trim() ?? '',
+      titre: e.querySelector('.session__title')?.textContent?.trim() ?? '',
+    })),
+  );
+  const blocsSemestre = await page.$$eval('.semestre', (els) =>
+    els
+      .filter((e) => e.querySelector('.semestre__title'))
+      .map((e) => ({
+        label: e.querySelector('.semestre__title').textContent.trim(),
+        meta: e.querySelector('.semestre__meta')?.textContent?.trim() ?? '',
+        seances: e.querySelectorAll('.session').length,
+      })),
+  );
+
+  check('Programme : 15 séances', seances.length === 15, seances.length);
+  check(
+    'Programme : deux semestres, 6 puis 9 séances',
+    blocsSemestre.length === 2 &&
+      blocsSemestre[0].label === 'Semestre 1' &&
+      blocsSemestre[0].seances === 6 &&
+      blocsSemestre[1].label === 'Semestre 2' &&
+      blocsSemestre[1].seances === 9,
+    JSON.stringify(blocsSemestre),
+  );
+  /* Le compteur annoncé est déduit de la liste : s'il s'en écarte, c'est
+     qu'il a été écrit en dur quelque part. */
+  check(
+    'Programme : les compteurs annoncés suivent les séances',
+    blocsSemestre.every((s) => s.meta === `${s.seances} séances`),
+    blocsSemestre.map((s) => s.meta).join(' | '),
+  );
+  check(
+    'Programme : numérotation continue de 1 à 15',
+    seances.length === 15 && seances.every((s, i) => s.num === String(i + 1)),
+    seances.map((s) => s.num).join(','),
+  );
+
+  /* Les six dates du premier semestre, au caractère près. Elles ont été
+     vérifiées : ce sont bien six dimanches. */
+  const S1_DATES = [
+    'Dimanche 11 octobre 2026',
+    'Dimanche 25 octobre 2026',
+    'Dimanche 8 novembre 2026',
+    'Dimanche 22 novembre 2026',
+    'Dimanche 6 décembre 2026',
+    'Dimanche 20 décembre 2026',
+  ];
+  check(
+    'Programme : les six dates du premier semestre',
+    S1_DATES.every((d, i) => seances[i]?.date === d),
+    seances
+      .slice(0, 6)
+      .map((s) => s.date)
+      .join(' | '),
+  );
+
+  /* Les neuf du second : une seule formulation, et pas une variante. */
+  const enAttente = seances.slice(6).map((s) => s.date);
+  check(
+    'Programme : les neuf séances du second semestre affichent « Date à venir »',
+    enAttente.length === 9 && enAttente.every((d) => d === 'Date à venir'),
+    enAttente.join(' | '),
+  );
+  check(
+    'Programme : aucune autre formulation d’attente',
+    !/À définir|Prochainement|\bTBC\b|Bientôt|Date non communiquée/i.test(programme),
+  );
+
+  /* Les quinze intitulés, tels que communiqués par le client, dans l'ordre. */
+  const INTITULES = [
+    'Réussir son année universitaire',
+    'Maîtriser les exercices universitaires',
+    'Construire son parcours géopolitique',
+    'Cartographier les métiers en relations internationales',
+    'Préparer et réussir ses examens',
+    'Session Bilan et échanges',
+    'Développer sa culture générale internationale',
+    'Se préparer aux concours de la haute fonction publique',
+    'Préparer son CV et sa lettre de motivation',
+    'Réussir ses candidatures universitaires et ses admissions',
+    'Construire son projet professionnel',
+    'Trouver un stage ou un poste en relations internationales',
+    'Réussir son entretien d’embauche et ses expériences professionnelles',
+    'Construire et développer son réseau professionnel',
+    'Session Bilan et échanges',
+  ];
+  check(
+    'Programme : les quinze intitulés exacts, dans l’ordre',
+    INTITULES.every((t, i) => seances[i]?.titre === t),
+    seances
+      .map((s, i) => (s.titre === INTITULES[i] ? '' : `${i + 1} : ${s.titre}`))
+      .filter(Boolean)
+      .join(' | '),
+  );
+
+  /* Coquille du brief client, corrigée à l'intégration. Cette garde existe
+     pour qu'elle ne soit jamais publiée. */
+  check(
+    'Programme : la coquille « aux les concours » est absente',
+    !/aux les concours/i.test(programme),
+  );
+
+  /* L'extrait de la page d'accueil sort de la MÊME source : les quatre
+     premières séances, et un décompte du reste qui se calcule. */
+  check(
+    'Accueil : les quatre premières séances du programme',
+    INTITULES.slice(0, 4).every((t) => accueil.includes(t)),
+    INTITULES.slice(0, 4)
+      .filter((t) => !accueil.includes(t))
+      .join(' | '),
+  );
+  check(
+    'Accueil : le lien annonce les onze séances restantes',
+    accueil.includes('11 autres séances'),
+  );
+
+  /* Les quatre séances d'exemple de la V2 ont disparu : les laisser à côté
+     du programme réel afficherait deux calendriers concurrents. */
+  const EXEMPLES_V2 = [
     'Méthodologie des exercices universitaires',
     'Comment réussir un entretien d’embauche',
     'Renforcer et valoriser ses centres d’intérêt en relations internationales',
     'Construire son réseau en relations internationales',
   ];
-  for (const s of SEANCES) {
-    check(
-      `Séance « ${s.slice(0, 34)}… » sur les deux pages`,
-      accueil.includes(s) && programme.includes(s),
-      `accueil:${accueil.includes(s)} programme:${programme.includes(s)}`,
-    );
-  }
+  const restants = EXEMPLES_V2.filter(
+    (s) => accueil.includes(s) || programme.includes(s),
+  );
+  check(
+    'Les quatre séances d’exemple de la V2 ont disparu',
+    restants.length === 0,
+    restants.join(' | '),
+  );
 
   /* Le hero dit bien « étudiants et les jeunes professionnels ». */
   check(

@@ -124,12 +124,20 @@ Cocher au fur et à mesure. **État au 01/09/2026 (V4.2).**
 
 ## Contenu
 
-- [ ] **Programme annuel définitif**
-      La liste des séances, avec pour chacune : un intitulé, une phrase de
-      description, et sa catégorie (Méthodologie / Professionnel / Parcours /
-      Réseau).
-      *En attendant : les quatre séances validées lors du brief V4, présentées
-      comme des exemples.*
+- [x] **Programme annuel définitif** — reçu, intégré en V4.3. ✅
+      Quinze séances en deux semestres : six au premier, neuf au second. Les
+      quatre séances d'exemple de la V2 ont disparu — le calendrier réel les
+      remplace.
+      *Le client n'a fourni ni horaire, ni durée, ni lieu, ni intervenant, ni
+      objectif pédagogique par séance : rien de tout cela n'est affiché.*
+
+- [ ] **Dates du second semestre**
+      Les neuf séances du semestre 2 affichent « Date à venir ». Il faut une
+      date par séance, dans la même forme que celles du premier semestre —
+      « Dimanche 11 octobre 2026 ».
+      *Où les mettre : `src/data/programme.ts`, remplacer le `date: null`
+      de la séance concernée. Rien d'autre n'est à toucher — totaux, compteurs
+      et note d'attente se recalculent seuls.*
 
 - [x] **Biographie d'Alain Coppolani** — reçue le 01/09/2026, intégrée. ✅
 - [x] **Biographie d'Albert Kandemir** — reçue le 01/09/2026, intégrée. ✅
