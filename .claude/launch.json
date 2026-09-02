@@ -4,14 +4,44 @@
     {
       "name": "iprig",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--prefix", "iprig", "--", "--port", "4321"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "iprig",
+        "--",
+        "--port",
+        "4321"
+      ],
       "port": 4321
     },
     {
       "name": "iprig-preview",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "preview", "--prefix", "iprig", "--", "--port", "4321"],
+      "runtimeArgs": [
+        "run",
+        "preview",
+        "--prefix",
+        "iprig",
+        "--",
+        "--port",
+        "4321"
+      ],
       "port": 4321
+    },
+    {
+      "name": "iprig-release-check",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "preview",
+        "--prefix",
+        "iprig",
+        "--",
+        "--port",
+        "4399"
+      ],
+      "port": 4399
     }
   ]
 }

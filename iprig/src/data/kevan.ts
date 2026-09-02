@@ -55,11 +55,23 @@ export const kevan = {
   /** Parcours académique. */
   academic: {
     doctorate: {
-      label: 'Doctorant en science politique et relations internationales',
+      /*
+       * V4.2 — LA THÈSE EST SOUTENUE. Le client a confirmé le 01/09/2026 que
+       * Kevan Gafaïti est désormais DOCTEUR, et non plus doctorant. Toute
+       * formulation au présent qui le décrirait encore comme doctorant est
+       * fausse : `qa-content.mjs` échoue si elle réapparaît dans le site
+       * construit.
+       */
+      label: 'Docteur en sciences politiques et relations internationales',
       institution: 'Université Paris-Panthéon-Assas',
-      /** Sujet tel que décrit par le client. */
+      /*
+       * Titre complet et définitif, fourni par le client le 01/09/2026. Il
+       * remplace la forme abrégée de la V4.1, « La France face à la politique
+       * étrangère de l’Iran (1995-2022) ». Ne pas l’abréger, ne pas le
+       * résumer, ne pas « corriger » « golfe Persique ».
+       */
       subject:
-        "La France face à la politique étrangère de l’Iran (1995-2022)",
+        "La France face à la politique étrangère de l’Iran, 1995-2022 : rivalité d’influence au Moyen-Orient, programme nucléaire iranien et sécurité dans le golfe Persique",
     },
     /** TODO CLIENT : confirmer les intitulés exacts des trois Master 2. */
     masters: {

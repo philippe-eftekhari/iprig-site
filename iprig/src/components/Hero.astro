@@ -19,7 +19,7 @@
 import MediaSlot from './MediaSlot.astro';
 import Arrow from './Arrow.astro';
 import { site, offer } from '../data/site';
-import heroImage from '../assets/kevan/hero-academie.jpg';
+import heroImage from '../assets/kevan/hero-enseignement.jpg';
 ---
 
 <section class="hero">
@@ -88,17 +88,22 @@ import heroImage from '../assets/kevan/hero-academie.jpg';
         {/* Photographie du premier écran, donc élément LCP de la page
             d'accueil : `priority` la charge en `eager` + `fetchpriority=high`.
 
+            V4.2 — la photographie assise du plateau de l'Académie a laissé la
+            place à une situation de prise de parole. Le premier écran montre
+            désormais le geste d'enseignement, pas une pose.
+
             Le master est déjà au format 3/4 — celui du cadre sur ordinateur —
             et déjà recadré sur le sujet (voir `scripts/prepare-assets.mjs`) :
             sur ordinateur, aucun rognage, aucun décalage de mise en page.
             `objectPosition` ne sert que sur téléphone, où le cadre passe en
-            4/3 : la fenêtre y remonte sur le visage plutôt que sur le bureau. */}
+            4/3 : la fenêtre y reste sur le buste et les mains, qui portent le
+            geste, plutôt que de descendre sur le bas du costume. */}
         <MediaSlot
           src={heroImage}
           ratio="tall"
           mobileRatio="landscape"
           objectPosition="50% 22%"
-          alt="Kevan Gafaïti sur le plateau de l’Académie diplomatique et consulaire du ministère de l’Europe et des Affaires étrangères"
+          alt="Kevan Gafaïti debout, en train de s’adresser à un auditoire devant un tableau"
           caption="Kevan Gafaïti"
           priority
           motionDelay={520}

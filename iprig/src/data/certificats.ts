@@ -71,17 +71,23 @@ export type Teacher = {
 
 /**
  * ============================================================================
- *  QUATRE ENSEIGNANTS — ORTHOGRAPHES ARRÊTÉES EN V4.1
+ *  CINQ ENSEIGNANTS — ORDRE ET ORTHOGRAPHES ARRÊTÉS EN V4.2
  * ============================================================================
- *  Les graphies ci-dessous sont celles confirmées par le client. Elles closent
- *  l’hésitation de la V4.0, qui affichait encore « Alain Kopolani » et
- *  « Albert Kondemir » d’après le brief initial :
+ *  L’ORDRE de ce tableau est celui de la page : Kevan, Albert, Valentin,
+ *  Balkissou, Alain. Il a été fixé par le client et ne doit pas être
+ *  réarrangé — ni ici, ni dans le catalogue plus bas, qui le suit.
  *
- *      Alain Coppolani   (et non « Kopolani »)
+ *  Les graphies ci-dessous sont celles confirmées par le client. Elles closent
+ *  les hésitations des briefs successifs, qui ont écrit tour à tour
+ *  « Alain Kopolani », « Alain Kopolani », « Alan Kopelany », « Albert
+ *  Kondemir » et « Balkisu Ayatu » :
+ *
+ *      Alain Coppolani   (et non « Kopolani », ni « Kopelany », ni « Alan »)
  *      Albert Kandemir   (et non « Kondemir »)
  *      Balkissou Hayatou (et non « Balkisu Ayatu ») — prénom puis nom
+ *      Valentin Blondiau
  *
- *  Ces trois anciennes graphies ne doivent plus réapparaître nulle part :
+ *  Ces anciennes graphies ne doivent plus réapparaître nulle part :
  *  `qa-content.mjs` échoue si l’une d’elles revient dans le site construit.
  *
  *  ---------------------------------------------------------------------------
@@ -93,10 +99,10 @@ export type Teacher = {
  *  bloc KevanExplique et dans le bloc IRIG. Ne jamais le supprimer, ne jamais
  *  transformer automatiquement l’un en l’autre.
  *
- *  Les quatre enseignants ont désormais un portrait réel et une biographie
- *  fournie par le client : plus aucun `null` dans ce tableau. Le repli
- *  typographique de `TeacherCard` reste néanmoins en place pour un enseignant
- *  qui viendrait s’ajouter sans portrait.
+ *  Les cinq enseignants ont un portrait réel et une biographie fournie par le
+ *  client : plus aucun `null` dans ce tableau. Le repli typographique de
+ *  `TeacherCard` reste néanmoins en place pour un enseignant qui viendrait
+ *  s’ajouter sans portrait.
  * ============================================================================
  */
 export const teachers: Teacher[] = [
@@ -111,12 +117,36 @@ export const teachers: Teacher[] = [
       "Enseignant-chercheur en relations internationales, spécialiste de la géopolitique du Moyen-Orient et de la politique étrangère de l’Iran. Fondateur de l’IPRIG.",
   },
   {
-    id: 'alain-coppolani',
-    name: 'Alain Coppolani',
-    photo: 'alain-coppolani',
+    id: 'albert-kandemir',
+    name: 'Albert Kandemir',
+    photo: 'albert-kandemir',
     // Biographie fournie et validée par le client le 01/09/2026.
     shortBio:
-      "Alain Coppolani est docteur en Économie et Sociétés et consultant en finance islamique. Il est également Certified Shari’ah Auditor and Advisor (CSAA) auprès de l’AAOIFI. Sa thèse de doctorat porte sur l’évolution du système financier en Afghanistan et sa transformation vers un modèle conforme aux principes de la finance islamique.",
+      "Albert Kandemir finalise une thèse de doctorat en science politique consacrée à la trajectoire de la puissance turque au Centre Thucydide de l’Université Paris-Panthéon-Assas. Il enseigne les relations internationales à l’Université Paris-Panthéon-Assas et à Sciences Po Paris.",
+  },
+  {
+    id: 'valentin-blondiau',
+    name: 'Valentin Blondiau',
+    /*
+     * Portrait fourni par le client le 01/09/2026. Il est carré et de faible
+     * définition (400 × 400) : `scripts/prepare-assets.mjs` en tire un master
+     * de 640 × 800, exactement la plus grande taille que la vignette affiche.
+     * TODO CLIENT : une source plus définie rendrait cette vignette aussi
+     * nette que les quatre autres. Rien d’autre ne serait à changer.
+     */
+    photo: 'valentin-blondiau',
+    /*
+     * Biographie réécrite par le client le 02/09/2026, en remplacement de la
+     * version du 01/09 qui citait le titre de thèse in extenso. Le titre n’est
+     * plus affiché : c’est un choix éditorial du client, pas un oubli — ne pas
+     * le réintroduire. La fiche raconte désormais le parcours plutôt que
+     * l’intitulé académique, et se lit en deux phrases au lieu de trois.
+     *
+     * L’écriture inclusive « dirigeant·es » est celle du client : point médian,
+     * sans second point. Ne pas l’« harmoniser ».
+     */
+    shortBio:
+      "Valentin Blondiau a travaillé pendant cinq ans dans la communication des organisations avant de s’orienter vers la recherche dans le cadre d’une thèse en sciences de l’information et de la communication. Ce changement de perspective lui permet aujourd’hui d’étudier les impacts des crises internationales sur les discours, les postures et le rôle des dirigeant·es économiques.",
   },
   {
     id: 'balkissou-hayatou',
@@ -148,12 +178,12 @@ export const teachers: Teacher[] = [
       "Balkissou Hayatou est docteure en science politique de l’Université de Poitiers. Spécialiste de l’Afrique et du multilatéralisme, ses travaux portent notamment sur la politique étrangère, la diplomatie et la géopolitique du golfe de Guinée. Elle exerce également des missions de conseil au sein du cabinet Hbalconsulting.",
   },
   {
-    id: 'albert-kandemir',
-    name: 'Albert Kandemir',
-    photo: 'albert-kandemir',
+    id: 'alain-coppolani',
+    name: 'Alain Coppolani',
+    photo: 'alain-coppolani',
     // Biographie fournie et validée par le client le 01/09/2026.
     shortBio:
-      "Albert Kandemir finalise une thèse de doctorat en science politique consacrée à la trajectoire de la puissance turque au Centre Thucydide de l’Université Paris-Panthéon-Assas. Il enseigne les relations internationales à l’Université Paris-Panthéon-Assas et à Sciences Po Paris.",
+      "Alain Coppolani est docteur en Économie et Sociétés et consultant en finance islamique. Il est également Certified Shari’ah Auditor and Advisor (CSAA) auprès de l’AAOIFI. Sa thèse de doctorat porte sur l’évolution du système financier en Afghanistan et sa transformation vers un modèle conforme aux principes de la finance islamique.",
   },
 ];
 
@@ -166,6 +196,14 @@ export const teachersHeading = {
 /* -------------------------------------------------------------------------- */
 /*  3. CATALOGUE                                                              */
 /* -------------------------------------------------------------------------- */
+/*
+ *  ⚠ L’ORDRE DE CE TABLEAU EST CELUI DU FORMULAIRE.
+ *  `certificatesOf()` et `openCertificates` le conservent tel quel : les cases
+ *  à cocher de la préinscription apparaissent donc dans cet ordre, qui doit
+ *  rester celui des enseignants — Kevan, Albert, Valentin, Balkissou, Alain.
+ *  Insérer un certificat ailleurs qu’au bon endroit désaligne le formulaire de
+ *  la page sans qu’aucun test ne s’en plaigne.
+ */
 
 export type Certificate = {
   id: string;
@@ -209,30 +247,6 @@ export const certificates: Certificate[] = [
     ...SESSION_2027,
   },
   {
-    id: 'geopolitique-afghanistan',
-    title: 'Introduction à la géopolitique de l’Afghanistan',
-    teacherId: 'alain-coppolani',
-    ...SESSION_2027,
-  },
-  {
-    id: 'finance-islamique',
-    title: 'Introduction à la finance islamique',
-    teacherId: 'alain-coppolani',
-    ...SESSION_2027,
-  },
-  {
-    id: 'geopolitique-afrique-ouest',
-    title: 'Introduction à la géopolitique de l’Afrique de l’Ouest',
-    teacherId: 'balkissou-hayatou',
-    ...SESSION_2027,
-  },
-  {
-    id: 'geopolitique-afrique-centrale',
-    title: 'Introduction à la géopolitique de l’Afrique centrale',
-    teacherId: 'balkissou-hayatou',
-    ...SESSION_2027,
-  },
-  {
     id: 'geopolitique-turquie',
     title: 'Introduction à la géopolitique de la Turquie',
     teacherId: 'albert-kandemir',
@@ -254,6 +268,36 @@ export const certificates: Certificate[] = [
     id: 'concept-de-puissance',
     title: 'Introduction au concept de puissance en relations internationales',
     teacherId: 'albert-kandemir',
+    ...SESSION_2027,
+  },
+  {
+    id: 'communication-de-crise',
+    title: 'Introduction à la Communication de crise',
+    teacherId: 'valentin-blondiau',
+    ...SESSION_2027,
+  },
+  {
+    id: 'geopolitique-afrique-ouest',
+    title: 'Introduction à la géopolitique de l’Afrique de l’Ouest',
+    teacherId: 'balkissou-hayatou',
+    ...SESSION_2027,
+  },
+  {
+    id: 'geopolitique-afrique-centrale',
+    title: 'Introduction à la géopolitique de l’Afrique centrale',
+    teacherId: 'balkissou-hayatou',
+    ...SESSION_2027,
+  },
+  {
+    id: 'geopolitique-afghanistan',
+    title: 'Introduction à la géopolitique de l’Afghanistan',
+    teacherId: 'alain-coppolani',
+    ...SESSION_2027,
+  },
+  {
+    id: 'finance-islamique',
+    title: 'Introduction à la finance islamique',
+    teacherId: 'alain-coppolani',
     ...SESSION_2027,
   },
 ];

@@ -327,7 +327,7 @@ const simuler = async (page, motif, reponse, recues) => {
   await page.goto(BASE + '/certificats', { waitUntil: 'networkidle' });
 
   const cases = await page.$$('#preinscription-form input[name="certificats[]"]');
-  check('Préinscription — cases à cocher présentes', cases.length === 10, cases.length);
+  check('Préinscription — cases à cocher présentes', cases.length === 11, cases.length);
 
   /* a) nom vide */
   await page.click('#preinscription-form [data-submit]');

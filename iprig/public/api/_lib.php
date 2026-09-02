@@ -34,6 +34,14 @@ declare(strict_types=1);
 /* -------------------------------------------------------------------------- */
 
 /**
+ * Expéditeur technique de dernier recours, si `MAIL_FROM` est absent ou
+ * invalide dans `config.php`. Ce n'est PAS un secret : c'est l'adresse
+ * publique d'envoi du domaine. Elle est écrite en dur, et non déduite de
+ * l'en-tête `Host`, qui est fourni par le client.
+ */
+const MAIL_FROM_DEFAUT = 'no-reply@iprig.fr';
+
+/**
  * `config.php` n'est PAS versionné : il est créé sur le serveur à partir de
  * `config.sample.php`. Voir `.env.example` et `V4_HANDOFF.md`.
  */
@@ -289,11 +297,34 @@ function iprig_email(string $key): ?string
  */
 function iprig_storage_dir(): string
 {
-    $configured = (string) iprig_setting('STORAGE_DIR', '');
-    if ($configured !== '') {
+    $configured = trim((string) iprig_setting('STORAGE_DIR', ''));
+
+    /* Un chemin RELATIF serait résolu contre le dossier de travail du
+       processus PHP — que l'hébergeur choisit, pas nous. Selon la
+       configuration, `iprig-data` atterrirait alors dans `public_html`, donc
+       en libre téléchargement. Une valeur relative est donc ignorée : on
+       retombe sur le défaut, qui est sûr par construction. */
+    if ($configured !== '' && iprig_is_absolute_path($configured)) {
         return rtrim($configured, '/\\');
     }
+    if ($configured !== '') {
+        error_log('IPRIG : STORAGE_DIR doit être un chemin absolu — valeur ignorée.');
+    }
+
+    /* `__DIR__` vaut `<racine web>/api` : on remonte donc DEUX crans pour se
+       placer juste au-dessus de la racine web, quel que soit l'endroit où
+       l'hébergeur a monté le domaine. Aucun chemin de développement, aucun
+       chemin de la machine locale n'intervient. */
     return dirname(__DIR__, 2) . '/iprig-data';
+}
+
+/** Chemin absolu POSIX (`/var/...`) ou Windows (`C:\...`, `\\serveur\...`). */
+function iprig_is_absolute_path(string $path): bool
+{
+    return $path !== ''
+        && ($path[0] === '/'
+        || $path[0] === '\\'
+        || (bool) preg_match('#^[A-Za-z]:[\\\\/]#', $path));
 }
 
 /**
@@ -373,8 +404,18 @@ function iprig_send_mail(string $subject, string $body, ?string $replyTo = null)
         return false;
     }
 
-    $host = $_SERVER['HTTP_HOST'] ?? 'iprig.fr';
-    $from = (string) iprig_setting('MAIL_FROM', 'no-reply@' . preg_replace('/^www\./', '', $host));
+    /* L'expéditeur ne doit JAMAIS être dérivé de l'en-tête `Host` : celui-ci
+       vient du client, et se retrouverait ici dans `From:` et dans l'enveloppe
+       `-f`. Une valeur vide ou invalide dans `config.php` — oubli d'exploitant
+       tout à fait plausible — casserait par ailleurs silencieusement TOUS les
+       envois. On retombe donc sur une adresse littérale du domaine. */
+    $from = trim((string) iprig_setting('MAIL_FROM', ''));
+    if ($from === '' || !filter_var($from, FILTER_VALIDATE_EMAIL)) {
+        if ($from !== '') {
+            error_log('IPRIG : MAIL_FROM invalide dans config.php — repli sur ' . MAIL_FROM_DEFAUT . '.');
+        }
+        $from = MAIL_FROM_DEFAUT;
+    }
 
     $headers = [
         'From: IPRIG <' . $from . '>',

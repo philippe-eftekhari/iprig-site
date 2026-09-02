@@ -14,7 +14,7 @@ import Fonctionnement from './Fonctionnement.astro';
 import MediaSlot from './MediaSlot.astro';
 import Arrow from './Arrow.astro';
 import { sessions, sessionsHeading } from '../data/programme';
-import enseignement from '../assets/kevan/enseignement.jpg';
+import evenement from '../assets/kevan/evenement-institutionnel.jpg';
 
 /** Extrait montré sur la page d'accueil. */
 const APERCU = 4;
@@ -44,15 +44,24 @@ const reste = Math.max(sessions.length - APERCU, 0);
       </div>
 
       <aside class="programme__aside">
-        {/* Situation d'enseignement : la photographie accompagne la lecture
-            de la liste des séances, en colonne fixe. */}
+        {/* V4.2 — la situation d'enseignement qui occupait cet emplacement
+            est montée au hero ; la montrer deux fois sur la même page aurait
+            été une répétition. À sa place, le CONTEXTE : une salle, un public,
+            un cadre institutionnel. C'est ce qui donne son rythme à la suite
+            des visuels — Kevan, puis la salle, puis Kevan.
+
+            La légende dit ce que l'image montre et rien de plus : ce n'est pas
+            une séance de l'IPRIG, et rien ici ne le laisse entendre.
+
+            Le cadre passe en 16/9 sous 62rem : `objectPosition` y garde les
+            drapeaux et la tribune dans la bande visible. */}
         <MediaSlot
-          src={enseignement}
+          src={evenement}
           ratio="portrait"
           mobileRatio="wide"
           objectPosition="50% 30%"
-          alt="Kevan Gafaïti en intervention devant un tableau blanc"
-          caption="Kevan Gafaïti en intervention"
+          alt="Étudiants réunis dans un salon d’apparat lors d’un événement institutionnel"
+          caption="Événement institutionnel"
         />
       </aside>
     </div>

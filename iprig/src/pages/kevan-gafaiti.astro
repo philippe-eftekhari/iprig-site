@@ -84,10 +84,19 @@ import portrait from '../assets/kevan/portrait.jpg';
           <div class="diplome">
             <p class="diplome__label">{kevan.academic.doctorate.label}</p>
             <p class="diplome__inst">{kevan.academic.doctorate.institution}</p>
-            {/* Le sujet porte déjà ses propres parenthèses (les années) :
-                on ne l'enveloppe pas dans une seconde paire. */}
+            {/* V4.2 — le titre complet a remplacé la forme abrégée. Il fait
+                cent soixante signes : il occupe donc trois à cinq lignes selon
+                le format, et c'est très bien ainsi. On le laisse se replier
+                naturellement plutôt que de réduire le corps pour le faire
+                tenir sur moins de lignes.
+
+                L'italique le distingue de l'intitulé du diplôme sans ajouter
+                de guillemets. La Newsreader italique n'est pas préchargée sur
+                cette page — elle n'est pas au-dessus de la ligne de flottaison
+                — mais elle est déclarée dans global.css : elle arrive avec le
+                reste de la page, sans saut de composition visible. */}
             <p class="diplome__subject">
-              Thèse : {kevan.academic.doctorate.subject}
+              Thèse : <em class="diplome__these">{kevan.academic.doctorate.subject}</em>
             </p>
           </div>
 
@@ -239,6 +248,16 @@ import portrait from '../assets/kevan/portrait.jpg';
     font-size: var(--text-sm);
     line-height: var(--leading-relaxed);
     color: var(--color-ink-soft);
+  }
+
+  /* Le titre de thèse est long : la césure française du site s'applique, et
+     `overflow-wrap` garantit qu'un mot composé très long ne déborde jamais
+     de la colonne sur un écran de 320 px. */
+  .diplome__these {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--color-ink);
+    overflow-wrap: break-word;
   }
 
   /* ----------------------------------------------------- KevanExplique */
