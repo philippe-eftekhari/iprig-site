@@ -16,17 +16,51 @@
  *  marine, sans variante à maintenir.
  * ============================================================================
  */
-import { activeSocialLinks, pendingSocialLinks, type SocialId } from '../data/site';
+import {
+  activeSocialLinks,
+  pendingSocialLinks,
+  type SocialId,
+  type SocialLink,
+} from '../data/site';
 
 interface Props {
   /** `labels` : icône + nom. `icons` : icône seule, nom réservé aux lecteurs d'écran. */
   variant?: 'labels' | 'icons';
+  /**
+   * `wrap` : les comptes s'alignent et passent à la ligne — c'est le
+   * comportement historique. `stack` : un compte par ligne, pour une colonne
+   * étroite où les liens prolongent une liste déjà verticale.
+   */
+  layout?: 'wrap' | 'stack';
+  /**
+   * Liste à afficher. Par défaut, les comptes KevanExplique. Le pied de page
+   * s'en sert pour rendre, avec le MÊME mécanisme, les comptes de l'IPRIG :
+   * `activeIprigSocialLinks`. Les deux listes ne se mélangent jamais.
+   */
+  links?: SocialLink[];
+  /**
+   * Précision réservée aux lecteurs d'écran, ajoutée après le nom de la
+   * plateforme : « Instagram de l'IPRIG ». Rien de visible n'est ajouté.
+   * Indispensable quand une page porte deux comptes Instagram distincts.
+   */
+  srContext?: string;
   /** Afficher la mention des plateformes dont l'URL n'est pas encore fournie. */
   showPending?: boolean;
   class?: string;
 }
 
-const { variant = 'labels', showPending = false, class: className = '' } = Astro.props;
+const {
+  variant = 'labels',
+  layout = 'wrap',
+  links = activeSocialLinks,
+  srContext = '',
+  showPending = false,
+  class: className = '',
+} = Astro.props;
+
+/* La disposition par défaut ne porte AUCUNE classe supplémentaire : le
+   balisage des blocs déjà en place reste inchangé au caractère près. */
+const layoutClass = layout === 'stack' ? ' socials--stack' : '';
 
 /**
  * Chemins des glyphes, sur une grille 24 × 24.
@@ -55,9 +89,9 @@ const ICONS: Partial<Record<SocialId, string>> = {
 ---
 
 {
-  activeSocialLinks.length > 0 && (
-    <ul class={`socials socials--${variant} ${className}`}>
-      {activeSocialLinks.map((s) => (
+  links.length > 0 && (
+    <ul class={`socials socials--${variant}${layoutClass} ${className}`}>
+      {links.map((s) => (
         <li>
           <a
             class="socials__link"
@@ -85,6 +119,7 @@ const ICONS: Partial<Record<SocialId, string>> = {
             ) : (
               <span class="sr-only">{s.label}</span>
             )}
+            {srContext && <span class="sr-only"> {srContext}</span>}
             <span class="sr-only"> (nouvelle fenêtre)</span>
           </a>
         </li>
@@ -116,6 +151,23 @@ const ICONS: Partial<Record<SocialId, string>> = {
 
   .socials--icons {
     gap: var(--space-2);
+  }
+
+  /* « stack » — un compte par ligne. Le pas vertical reprend celui des listes
+     du pied de page (`--space-2`) pour que le bloc prolonge la colonne au lieu
+     de s'y ajouter comme un encart. */
+  .socials--stack {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
+  }
+
+  /* La cible descend de 2.75rem à 2.25rem : trente-six pixels, très au-dessus
+     du minimum WCAG 2.2 AA (24 px, critère 2.5.8), sans alourdir la colonne
+     qu'elle prolonge. Le glyphe, lui, garde ses 18 px — mêmes dimensions que
+     les autres réseaux du pied de page. */
+  .socials--stack .socials__link {
+    min-block-size: 2.25rem;
   }
 
   .socials__link {

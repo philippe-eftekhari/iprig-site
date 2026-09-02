@@ -207,6 +207,41 @@ export const activeSocialLinks = socialLinks.filter((s) => s.url !== null);
 export const pendingSocialLinks = socialLinks.filter((s) => s.url === null);
 
 /* -------------------------------------------------------------------------- */
+/*  4 bis. LIENS SOCIAUX DE L’IPRIG — À NE PAS CONFONDRE AVEC LES PRÉCÉDENTS   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Comptes officiels de l’INSTITUT, ouverts par le client et communiqués le
+ * 02/09/2026 (V4.3.1).
+ *
+ * ⚠ Deux identités distinctes, deux listes distinctes. `socialLinks`
+ * ci-dessus, ce sont les comptes de la marque de contenu KevanExplique ;
+ * ici, ce sont ceux de l’IPRIG. Instagram et LinkedIn existent des deux
+ * côtés avec des adresses différentes : ne jamais fusionner les deux
+ * listes, ne jamais remplacer une URL de l’une par une URL de l’autre.
+ *
+ * L’adresse Instagram est conservée TELLE QUE TRANSMISE, paramètre `igsi`
+ * compris. C’est une exception assumée à la mise en forme canonique
+ * appliquée plus haut aux liens Spotify et LinkedIn de KevanExplique : le
+ * client a fourni cette URL exacte, elle n’est pas réécrite.
+ */
+export const iprigSocialLinks: SocialLink[] = [
+  {
+    id: 'instagram',
+    label: 'Instagram',
+    url: 'https://www.instagram.com/iprig.officiel?igsi=MThzaHdlc2x5dnRicA==',
+  },
+  {
+    id: 'linkedin',
+    label: 'LinkedIn',
+    url: 'https://www.linkedin.com/company/iprig',
+  },
+];
+
+/** Comptes de l’IPRIG réellement en ligne — seuls ceux-là sont rendus. */
+export const activeIprigSocialLinks = iprigSocialLinks.filter((s) => s.url !== null);
+
+/* -------------------------------------------------------------------------- */
 /*  5. CONTACT                                                                */
 /* -------------------------------------------------------------------------- */
 
