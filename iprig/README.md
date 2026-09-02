@@ -109,10 +109,10 @@ Il n'y a jamais besoin d'aller chercher dans les composants.
 | **Le prix affiché** | `priceDisplay:` et `priceDetail:` |
 | Le texte des boutons | `ctaPrimary:` |
 | Les chiffres (étudiants, séances, événements) | `stats:` |
-| Le nombre d'abonnés Kevan Explique | `communitySize:` |
+| Le nombre d'abonnés KevanExplique | `communitySize:` |
 | L'adresse e-mail | `contact.email` |
 | Instagram / LinkedIn IPRIG | `socialsIprig` |
-| Comptes Kevan Explique | `socialsKevanExplique` |
+| Comptes KevanExplique | `socialsKevanExplique` |
 | Mentions légales | `legal` |
 
 > **Important — les champs `null`**
@@ -149,7 +149,7 @@ entrée met à jour d'un coup le menu desktop, le menu mobile et le pied de page
 ### La présentation de Kevan
 
 **Fichier : `src/data/kevan.ts`** — fonctions, biographie, établissements,
-formation, domaines de recherche, Kevan Explique, IRIG.
+formation, domaines de recherche, KevanExplique, IRIG.
 
 ### Les questions fréquentes
 
