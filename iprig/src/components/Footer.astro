@@ -2,9 +2,16 @@
 /**
  * Pied de page institutionnel.
  *
- * Les liens sociaux viennent de `socialLinks` (src/data/site.ts) via
- * `SocialLinks` : une URL corrigée dans le fichier de données l'est ici aussi.
- * Une plateforme sans URL n'est jamais rendue — aucun lien mort.
+ * Les liens sociaux viennent de src/data/site.ts via `SocialLinks` : une URL
+ * corrigée dans le fichier de données l'est ici aussi. Une plateforme sans URL
+ * n'est jamais rendue — aucun lien mort.
+ *
+ * ⚠ DEUX listes distinctes, deux colonnes distinctes :
+ *   — colonne « Rejoindre » : `activeIprigSocialLinks`, comptes de l'INSTITUT ;
+ *   — colonne « KevanExplique » : `activeSocialLinks`, comptes de la MARQUE
+ *     de contenu de Kevan Gafaïti.
+ * Instagram et LinkedIn figurent des deux côtés avec des adresses différentes.
+ * Ne jamais les fusionner ni intervertir.
  *
  * ⚠ Aucune adresse e-mail n'est publiée : la page Contact porte un formulaire,
  * dont la destination reste côté serveur.
@@ -12,7 +19,7 @@
 import Wordmark from './Wordmark.astro';
 import SocialLinks from './SocialLinks.astro';
 import { mainNav, footerNav } from '../data/navigation';
-import { site, offer, legal } from '../data/site';
+import { site, offer, legal, activeIprigSocialLinks } from '../data/site';
 import { kevanExplique } from '../data/kevan';
 ---
 
@@ -72,6 +79,16 @@ import { kevanExplique } from '../data/kevan';
               <a class="footer__link" href="/certificats">Certificats</a>
             </li>
           </ul>
+
+          {/* Comptes officiels de l'IPRIG — pas ceux de KevanExplique, qui
+              gardent leur colonne. Mêmes glyphes, même survol, même pas
+              vertical que la liste ci-dessus : le bloc la prolonge. */}
+          <SocialLinks
+            links={activeIprigSocialLinks}
+            layout="stack"
+            srContext="de l’IPRIG"
+            class="footer__socials-iprig"
+          />
         </div>
 
         <div class="footer__col">
@@ -189,6 +206,16 @@ import { kevanExplique } from '../data/kevan';
     gap: 0 var(--space-4);
     color: var(--color-on-dark);
   }
+
+  /* `footer__socials-iprig` ne porte AUCUNE règle ici, et c'est délibéré.
+     Une feuille de style de composant ne descend pas jusqu'à la racine d'un
+     composant enfant : la règle `.footer__socials` juste au-dessus est, pour
+     la même raison, sans effet depuis toujours — les deux blocs sociaux
+     prennent la couleur du pied de page, ce qui est précisément le rendu
+     validé. La mise en pile des comptes IPRIG est donc portée par
+     `socials--stack`, dans SocialLinks.astro. La classe reste un point
+     d'accroche : elle distingue les comptes de l'institut de ceux de
+     KevanExplique, pour la QA comme pour un futur ajustement. */
 
   .footer__bottom {
     display: flex;

@@ -49,14 +49,15 @@ export type Apport = {
  * « des Événements ». La V4.1 capitalisait le mot clé et laissait
  * l’article en bas de casse ; le client a tranché dans l’autre sens.
  *
- * L’axe 1 est le seul sans article — « Réseau », et non « Un réseau ».
- * C’est la liste transmise par le client, reprise mot pour mot. Si
- * l’article devait revenir, il n’y a que cette ligne à réécrire.
+ * L’axe 1 fait EXCEPTION à cette règle — arrêté EN V4.3.1 : le client a
+ * tranché pour « Un Réseau », avec la majuscule sur les DEUX mots. C’est la
+ * formulation transmise, reprise mot pour mot : ni « Réseau » seul (V4.2),
+ * ni « Un réseau ». La casse exacte est contrôlée par qa-content.mjs.
  */
 export const apports: Apport[] = [
   {
     index: '1',
-    title: 'Réseau',
+    title: 'Un Réseau',
     text: "Les membres construisent progressivement leur réseau dans les milieux liés aux relations internationales et à la géopolitique, au fil des sessions et des rencontres.",
   },
   {

@@ -337,15 +337,24 @@ const tout = Object.entries(textes);
   );
 
   /* ------------------------------------------------------------------ *
-   *  LES SEPT AXES — casse arrêtée en V4.2                              *
+   *  LES SEPT AXES — libellés et casse                                   *
    * ------------------------------------------------------------------ *
-   *  Le premier mot porte la majuscule, et lui seul. La V4.1 capitalisait
-   *  le mot clé (« un Réseau », « des Événements ») ; le client a tranché
-   *  dans l'autre sens. Les deux listes sont contrôlées : celle qui doit
-   *  être là, et celle qui ne doit plus l'être.
+   *  Règle V4.2 : le premier mot porte la majuscule, et lui seul. La V4.1
+   *  capitalisait le mot clé (« un Réseau », « des Événements ») ; le
+   *  client a tranché dans l'autre sens.
+   *
+   *  EXCEPTION V4.3.1, arrêtée par le client : l'axe 1 s'écrit
+   *  « Un Réseau », avec deux majuscules. Ni « Réseau » seul (V4.2), ni
+   *  « Un réseau », ni « un Réseau » (V4.1).
+   *
+   *  Le contrôle porte sur les TITRES eux-mêmes, relevés dans le document,
+   *  et pas sur le texte de la page : « Réseau » est un sous-mot de
+   *  « Un Réseau », une recherche dans la prose ne saurait pas les
+   *  distinguer. C'est une égalité stricte, chaîne par chaîne, dans
+   *  l'ordre — la casse ne peut pas y passer inaperçue.
    * ------------------------------------------------------------------ */
   const AXES = [
-    'Réseau',
+    'Un Réseau',
     'Des événements',
     'Une immersion',
     'Un accompagnement',
@@ -353,8 +362,39 @@ const tout = Object.entries(textes);
     'Une méthodologie',
     'Des réflexes',
   ];
+
+  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  const titresAxes = await page.$$eval('.apport__title', (els) =>
+    els.map((e) => (e.textContent ?? '').trim()),
+  );
+  check(
+    'Sept axes : les sept titres, dans l’ordre et à la casse exacte',
+    titresAxes.length === AXES.length && titresAxes.every((t, i) => t === AXES[i]),
+    titresAxes.join(' | '),
+  );
+
+  /* Axe 1 — contrôle nominal. La casse est le point de la V4.3.1 : on
+     échoue explicitement sur chacune des trois formes rejetées. */
+  check(
+    'Axe 1 : « Un Réseau », U et R majuscules',
+    titresAxes[0] === 'Un Réseau',
+    titresAxes[0],
+  );
+  const AXE1_REJETES = ['Réseau', 'Un réseau', 'un Réseau', 'un réseau', 'Un reseau'];
+  check(
+    'Axe 1 : aucune des formulations abandonnées',
+    !AXE1_REJETES.includes(titresAxes[0]),
+    titresAxes[0],
+  );
+
+  /* La liste reste lisible dans le texte de la page, pas seulement dans le
+     balisage : un titre masqué visuellement passerait le contrôle ci-dessus. */
   const axesAbsents = AXES.filter((a) => !accueil.includes(a));
-  check('Sept axes : la casse V4.2', axesAbsents.length === 0, axesAbsents.join(' | '));
+  check(
+    'Sept axes : tous présents dans le texte de la page',
+    axesAbsents.length === 0,
+    axesAbsents.join(' | '),
+  );
 
   const AXES_V41 = [
     'un Réseau',
@@ -606,11 +646,22 @@ const tout = Object.entries(textes);
   check('FAQ : les huit questions validées', manquantes.length === 0, manquantes.join(' | '));
 
   /* ------------------------------------------------------------------ *
-   *  LIENS SOCIAUX — les SEPT plateformes depuis la V4.1                *
+   *  LIENS SOCIAUX — DEUX identités, à ne jamais confondre               *
    * ------------------------------------------------------------------ *
-   *  Apple Podcasts a rejoint les six autres le 01/09/2026. Plus aucune
-   *  plateforme n'est « en attente » : la mention « lien à venir » ne
-   *  doit plus apparaître nulle part, et aucun `href="#"` non plus.
+   *  KevanExplique : les SEPT plateformes de la marque de contenu, depuis
+   *  la V4.1 (Apple Podcasts a rejoint les six autres le 01/09/2026).
+   *  Plus aucune plateforme n'est « en attente » : la mention
+   *  « lien à venir » ne doit plus apparaître nulle part, et aucun
+   *  `href="#"` non plus.
+   *
+   *  IPRIG : les DEUX comptes de l'institut, ajoutés en V4.3.1 dans la
+   *  colonne « Rejoindre » du pied de page. Ils portent la classe
+   *  `footer__socials-iprig` — c'est ce qui les distingue du bloc
+   *  KevanExplique, avec lequel ils partagent Instagram et LinkedIn sous
+   *  des adresses différentes.
+   *
+   *  Les sélecteurs ci-dessous écartent donc explicitement l'un ou l'autre
+   *  bloc : un contrôle qui compterait les deux ne dirait rien.
    * ------------------------------------------------------------------ */
   const PLATEFORMES = [
     'instagram.com/kevanexplique',
@@ -622,13 +673,21 @@ const tout = Object.entries(textes);
     'podcasts.apple.com/podcast/id6801282142',
   ];
 
+  /** Comptes officiels de l'IPRIG — URL exactes transmises par le client. */
+  const IPRIG_INSTAGRAM =
+    'https://www.instagram.com/iprig.officiel?igsi=MThzaHdlc2x5dnRicA==';
+  const IPRIG_LINKEDIN = 'https://www.linkedin.com/company/iprig';
+
+  /** Tous les liens KevanExplique de la page : le bloc IPRIG est écarté. */
+  const SEL_KEVAN = '.socials:not(.footer__socials-iprig) .socials__link';
+
   for (const url of ['/kevan-gafaiti', '/contact']) {
     await page.goto(BASE + url, { waitUntil: 'networkidle' });
-    const hrefs = await page.$$eval('.socials__link', (els) =>
+    const hrefs = await page.$$eval(SEL_KEVAN, (els) =>
       els.map((e) => e.getAttribute('href') ?? ''),
     );
-    /* Ces pages portent DEUX blocs sociaux : celui de la page et celui du
-       pied de page. Le compte attendu est donc un multiple de sept, pas
+    /* Ces pages portent DEUX blocs KevanExplique : celui de la page et celui
+       du pied de page. Le compte attendu est donc un multiple de sept, pas
        sept — chaque bloc doit être complet. */
     const absentes = PLATEFORMES.filter((p) => !hrefs.some((h) => h.includes(p)));
     check(
@@ -636,32 +695,146 @@ const tout = Object.entries(textes);
       hrefs.length > 0 && hrefs.length % 7 === 0 && absentes.length === 0,
       `${hrefs.length} liens — manquantes : ${absentes.join(', ') || 'aucune'}`,
     );
+
+    /* Aucun lien mort — bloc IPRIG compris, cette fois. */
+    const tousHrefs = await page.$$eval('.socials__link', (els) =>
+      els.map((e) => e.getAttribute('href') ?? ''),
+    );
     check(
       `${url} : aucun href="#"`,
-      hrefs.every((h) => h !== '#' && h !== ''),
-      hrefs.join(' | '),
+      tousHrefs.every((h) => h !== '#' && h !== ''),
+      tousHrefs.join(' | '),
     );
 
     const texte = await page.evaluate(() => document.body.innerText);
     check(`${url} : plus aucune mention « lien à venir »`, !texte.includes('lien à venir'));
     check(
       `${url} : Apple Podcasts nommé`,
-      (await page.$$eval('.socials__link', (els) => els.map((e) => e.textContent ?? ''))).some(
+      (await page.$$eval(SEL_KEVAN, (els) => els.map((e) => e.textContent ?? ''))).some(
         (t) => t.includes('Apple Podcasts'),
       ),
     );
   }
 
-  /* Le pied de page porte lui aussi la liste complète. */
+  /* -------- Pied de page : le bloc KevanExplique reste complet -------- */
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  const piedHrefs = await page.$$eval('.footer .socials__link', (els) =>
+  const piedHrefs = await page.$$eval('.footer__socials .socials__link', (els) =>
     els.map((e) => e.getAttribute('href') ?? ''),
   );
   check(
-    'Pied de page : les sept plateformes',
+    'Pied de page : les sept plateformes KevanExplique',
     piedHrefs.length === 7 &&
       piedHrefs.some((h) => h.includes('podcasts.apple.com/podcast/id6801282142')),
     piedHrefs.join(' | '),
+  );
+  const kevanManquantes = PLATEFORMES.filter((p) => !piedHrefs.some((h) => h.includes(p)));
+  check(
+    'Pied de page : aucun compte KevanExplique perdu en V4.3.1',
+    kevanManquantes.length === 0,
+    kevanManquantes.join(' | '),
+  );
+
+  /* -------- Pied de page : les DEUX comptes de l'IPRIG (V4.3.1) ------- */
+  const iprigBloc = await page.$$eval('.footer__socials-iprig .socials__link', (els) =>
+    els.map((e) => ({
+      href: e.getAttribute('href') ?? '',
+      texte: (e.textContent ?? '').trim(),
+      target: e.getAttribute('target') ?? '',
+      rel: e.getAttribute('rel') ?? '',
+      icone: e.querySelector('svg.socials__icon') !== null,
+    })),
+  );
+
+  check(
+    'Pied de page : deux comptes IPRIG, et deux seulement',
+    iprigBloc.length === 2,
+    `${iprigBloc.length} liens`,
+  );
+
+  const instaIprig = iprigBloc.find((l) => l.href.includes('instagram.com'));
+  const linkedinIprig = iprigBloc.find((l) => l.href.includes('linkedin.com'));
+
+  check('Pied de page : Instagram de l’IPRIG présent', Boolean(instaIprig));
+  check(
+    'Pied de page : URL Instagram IPRIG exacte',
+    instaIprig?.href === IPRIG_INSTAGRAM,
+    instaIprig?.href,
+  );
+  check(
+    'Pied de page : libellé visible « Instagram »',
+    instaIprig?.texte.startsWith('Instagram'),
+    instaIprig?.texte,
+  );
+
+  check('Pied de page : LinkedIn de l’IPRIG présent', Boolean(linkedinIprig));
+  check(
+    'Pied de page : URL LinkedIn IPRIG exacte',
+    linkedinIprig?.href === IPRIG_LINKEDIN,
+    linkedinIprig?.href,
+  );
+  check(
+    'Pied de page : libellé visible « LinkedIn »',
+    linkedinIprig?.texte.startsWith('LinkedIn'),
+    linkedinIprig?.texte,
+  );
+
+  check(
+    'Pied de page : les deux comptes IPRIG portent un pictogramme',
+    iprigBloc.length === 2 && iprigBloc.every((l) => l.icone),
+    iprigBloc.map((l) => `${l.href} : ${l.icone ? 'icône' : 'SANS ICÔNE'}`).join(' | '),
+  );
+  check(
+    'Pied de page : les comptes IPRIG s’ouvrent comme les autres liens externes',
+    iprigBloc.length === 2 &&
+      iprigBloc.every(
+        (l) =>
+          l.target === '_blank' &&
+          l.rel.includes('noopener') &&
+          l.rel.includes('noreferrer'),
+      ),
+    iprigBloc.map((l) => `${l.target} / ${l.rel}`).join(' | '),
+  );
+
+  /* Les comptes IPRIG vivent dans la colonne « Rejoindre », sous
+     « Certificats », et pas dans celle de KevanExplique. C'est la demande du
+     client, et c'est aussi ce qui donne son sens au libellé « Instagram »
+     sans autre précision. */
+  const placement = await page.evaluate(() => {
+    const bloc = document.querySelector('.footer__socials-iprig');
+    if (!bloc) return null;
+    const colonne = bloc.closest('.footer__col');
+    if (!colonne) return null;
+    const certificats = colonne.querySelector('a[href="/certificats"]');
+    return {
+      titre: (colonne.querySelector('.footer__title')?.textContent ?? '').trim(),
+      apresCertificats: Boolean(
+        certificats &&
+          certificats.compareDocumentPosition(bloc) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+      ),
+    };
+  });
+  check(
+    'Pied de page : les comptes IPRIG sont dans la colonne « Rejoindre »',
+    placement?.titre === 'Rejoindre',
+    placement?.titre,
+  );
+  check(
+    'Pied de page : les comptes IPRIG suivent le lien « Certificats »',
+    placement?.apresCertificats === true,
+  );
+
+  /* Les deux identités ne se sont pas mélangées : le compte Instagram de
+     l'institut n'a pas remplacé celui de la marque, et réciproquement. */
+  check(
+    'Pied de page : les deux Instagram restent distincts',
+    piedHrefs.some((h) => h.includes('instagram.com/kevanexplique')) &&
+      instaIprig?.href === IPRIG_INSTAGRAM,
+  );
+  check(
+    'Pied de page : les deux LinkedIn restent distincts',
+    piedHrefs.some((h) => h.includes('linkedin.com/in/kevan-gafa')) &&
+      linkedinIprig?.href === IPRIG_LINKEDIN,
   );
 }
 
