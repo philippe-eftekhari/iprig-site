@@ -49,7 +49,7 @@ npm run og       # régénère public/og-image.png
 | Nom, accroche, description, SEO, prix, Patreon, **liens sociaux**, points d'entrée des formulaires, mentions légales | `src/data/site.ts` |
 | Menu et ancres | `src/data/navigation.ts` |
 | Section « L'institut » et ses sept apports | `src/data/institut.ts` |
-| Volets, séances, étapes d'adhésion | `src/data/programme.ts` |
+| Volets, **programme des séances 2026-2027**, étapes d'adhésion | `src/data/programme.ts` |
 | Biographie, formation, KevanExplique, IRIG | `src/data/kevan.ts` |
 | Catalogue des certificats, enseignants, modalités, tarifs, validation | `src/data/certificats.ts` |
 | Questions fréquentes | `src/data/faq.ts` |
@@ -110,6 +110,31 @@ Gafaïti, fondateur de l'IPRIG. Il doit rester présent : accueil, page
 `/kevan-gafaiti`, bloc KevanExplique, bloc IRIG, et **enseignant des
 certificats** avec ses deux certificats (Iran, golfe Persique). Ne jamais
 transformer automatiquement l'un en l'autre, ne jamais le supprimer.
+
+### Le programme se compte
+
+**Quinze séances, deux semestres** — six au premier, neuf au second. Le
+programme 2026-2027 a remplacé en V4.3 les quatre séances d'exemple de la V2 :
+il n'en reste rien, et `qa-content.mjs` échoue si l'une d'elles réapparaît.
+Faire coexister un calendrier réel et des exemples afficherait deux programmes
+concurrents.
+
+Aucun total n'est écrit en dur. Les compteurs de semestre, le décompte du lien
+de la page d'accueil (« 11 autres séances ») et le regroupement se déduisent
+tous de `sessions` dans `src/data/programme.ts`. `qa-content.mjs` vérifie à
+chaque passage les quinze intitulés, la numérotation continue de 1 à 15, les
+six dates du premier semestre et la répartition 6 / 9.
+
+⚠ **Les dates du second semestre ne sont pas arrêtées.** Elles valent `null`
+dans la source et s'affichent « Date à venir » — une seule formulation, définie
+par `DATE_A_VENIR`. Ne jamais écrire une date plausible en attendant, ne jamais
+la remplacer par « à définir », « prochainement » ou « bientôt » : le contrôle
+qualité refuse ces variantes. Le jour où le client les communique, on remplace
+le `null` de la séance concernée et rien d'autre.
+
+⚠ Le client n'a fourni **ni horaire, ni durée, ni lieu, ni lien de connexion,
+ni intervenant, ni objectif pédagogique par séance**. Rien de tout cela ne
+s'affiche, et rien de tout cela ne s'invente.
 
 ### Les certificats se comptent
 
