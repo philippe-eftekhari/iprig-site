@@ -4,20 +4,30 @@ Liste des éléments manquants pour finaliser `iprig.fr`.
 Le site fonctionne déjà sans eux : les zones concernées sont soit masquées,
 soit remplacées par un repli soigné. Rien n'a été inventé.
 
-Cocher au fur et à mesure. **État au 01/09/2026 (V4.1).**
+Cocher au fur et à mesure. **État au 01/09/2026 (V4.2).**
 
 > **Réglé en V4.1 — ne plus redemander :** l'orthographe *Alain Coppolani* et
 > *Albert Kandemir*, leurs deux biographies, la biographie et le portrait de
 > *Balkissou Hayatou*, et l'URL *Apple Podcasts*. Tout est intégré et vérifié.
+
+> **Réglé en V4.2 — ne plus redemander :** *Valentin Blondiau* (nom, biographie,
+> titre de thèse, portrait, certificat « Introduction à la Communication de
+> crise »), l'ordre des cinq enseignants, la casse des sept axes, les trois
+> formulations de la section « L'institut », le statut de **docteur** de Kevan
+> Gafaïti et le titre complet de sa thèse, et l'adresse de destination des
+> formulaires. Tout est intégré et vérifié.
 
 ---
 
 ## Bloquant — à avoir avant la mise en ligne
 
 - [ ] **Validation de la biographie de Kevan Gafaïti**
-      Relire et valider chaque intitulé : fonctions, établissements, doctorat,
-      sujet de thèse, les trois Master 2.
+      Relire et valider chaque intitulé : fonctions, établissements et les
+      trois Master 2.
       *Rien n'a été ajouté au-delà du brief, mais tout doit être confirmé.*
+      **Le doctorat, lui, est réglé** : la V4.2 a intégré la qualification
+      « Docteur en sciences politiques et relations internationales » et le
+      titre complet de la thèse, tous deux fournis le 01/09/2026.
 
 - [ ] **Validation du prix — mention tarifaire opposable**
       Le site affiche « 29 € / mois ». Il ne dit plus rien d'autre sur le
@@ -60,7 +70,11 @@ Cocher au fur et à mesure. **État au 01/09/2026 (V4.1).**
 
 - [x] **Logo IPRIG** — reçu le 31/08/2026, intégré : en-tête, tiroir mobile,
       pied de page, favicons. ✅
-- [x] **Favicon** — dérivé du logo, en 32 / 180 / 192 / 512 px. ✅
+- [x] **Favicon** — dérivé du logo officiel, en 32 / 180 / 192 / 512 px. ✅
+      *V4.2 : `favicon.svg`, le losange dessiné de la V3.1, a été supprimé du
+      dépôt et interdit dans le paquet de déploiement. Un navigateur garde les
+      favicons longtemps — contrôler l'onglet en navigation privée après la
+      mise en ligne, sinon c'est le cache que l'on regarde.*
 - [x] **Accroche** — « Votre partenaire pour votre carrière en géopolitique »,
       validée en V4 (sans point final). ✅
 
@@ -79,16 +93,32 @@ Cocher au fur et à mesure. **État au 01/09/2026 (V4.1).**
 - [x] **Portrait d'Alain Coppolani** — reçu, intégré. ✅
 - [x] **Portrait d'Albert Kandemir** — reçu, intégré. ✅
 - [x] **Portrait de Balkissou Hayatou** — reçu le 31/08/2026, intégré. ✅
+- [x] **Portrait de Valentin Blondiau** — reçu le 01/09/2026, intégré. ✅
+      *Réserve technique, non bloquante : la source fait 400 × 400 px, la plus
+      faible du lot. Sa vignette est donc légèrement moins nette que les quatre
+      autres. Une source de 1200 × 1500 ou plus la rendrait identique — une
+      seule ligne à changer dans `scripts/prepare-assets.mjs`.*
 
 > ⚠ **Droits d'usage.** Chaque photo doit être libre d'utilisation pour le
 > site. Pour celles où apparaissent des étudiants ou des tiers — visites
 > d'ambassade, salles de cours — leur accord est nécessaire. Aucune photo n'a
 > été récupérée ailleurs, aucune n'a été générée.
 
-- [ ] **Confirmer les droits sur les photographies de groupe**
-      Aucune photographie où des étudiants sont reconnaissables n'a été
-      publiée en V4, précisément pour cette raison. À rouvrir si l'on veut
-      employer `Kevan-07`, `Kevan-10` ou `Kevan-11`.
+- [ ] **⚠ Confirmer les droits sur `Kevan-10` — DÉSORMAIS PUBLIÉE**
+      La V4.2 emploie `Kevan-10` sur la page d'accueil, à l'aperçu du
+      programme : un salon d'apparat où des étudiants sont assis, vus
+      majoritairement de dos. Le client a explicitement demandé une image de
+      salle plutôt qu'un troisième portrait de Kevan Gafaïti.
+      **C'est la première photographie du site où des tiers apparaissent.**
+      Aucun visage n'est au premier plan et aucun n'est nommé, mais quelques
+      personnes restent identifiables sur le bord gauche du cadre.
+      **Question à poser :** l'accord des personnes présentes est-il acquis
+      pour une publication sur `iprig.fr` ?
+      *Si la réponse est non, le remplacement le plus proche est `Kevan-12`
+      (escalier d'honneur, drapeaux européen et français, aucun tiers) — une
+      seule ligne à changer dans `scripts/prepare-assets.mjs`.*
+      Les autres photographies de groupe (`Kevan-07`, `Kevan-08`, `Kevan-11`)
+      ne sont toujours pas publiées.
 
 ---
 
@@ -103,11 +133,31 @@ Cocher au fur et à mesure. **État au 01/09/2026 (V4.1).**
 
 - [x] **Biographie d'Alain Coppolani** — reçue le 01/09/2026, intégrée. ✅
 - [x] **Biographie d'Albert Kandemir** — reçue le 01/09/2026, intégrée. ✅
+- [x] **Biographie de Valentin Blondiau** — reçue le 01/09/2026, **réécrite
+      par le client le 02/09/2026**, intégrée. ✅
+      *La version en ligne raconte son parcours — cinq ans en communication
+      des organisations, puis la recherche — et ne cite plus le titre de sa
+      thèse. C'est un choix éditorial du client, pas un oubli : ne pas le
+      réintroduire.*
 - [x] **Biographie de Balkissou Hayatou** — reçue le 31/08/2026, intégrée. ✅
       *La version affichée est une version courte : à 487 signes, sa vignette
       pesait le triple de celle de Kevan Gafaïti. La version source complète
       est conservée mot pour mot en commentaire dans `src/data/certificats.ts`
       — rien n'est perdu, et c'est là qu'il faut aller la rechercher.*
+
+- [ ] **Légende de la photographie du fondateur**
+      La légende disait « Kevan Gafaïti en colloque » ; le client a signalé
+      que la mention n'était pas vérifiée. Elle est devenue « Kevan Gafaïti »,
+      formulation neutre et vraie. **Question à poser :** s'agit-il d'un
+      colloque, d'une conférence, d'une table ronde ? Et faut-il nommer
+      l'événement ? Sans réponse, la légende neutre reste correcte.
+
+- [ ] **Calendrier du certificat de Valentin Blondiau**
+      « Introduction à la Communication de crise » est affiché avec les mêmes
+      modalités que les dix autres — février à avril 2027, dix séances d'une
+      heure, à distance. Confirmer que c'est bien le cas, ou fournir le sien.
+      *Rien n'a été inventé : le certificat hérite simplement des modalités
+      communes déclarées dans `src/data/certificats.ts`.*
 
 - [ ] **Créneaux horaires des certificats**
       La page indique qu'ils seront communiqués ultérieurement en tenant
@@ -166,12 +216,26 @@ Il n'y a donc plus d'adresse à afficher, et plus rien à récolter.
 - [ ] **Renseigner la configuration des formulaires sur le serveur**
       Adresse de destination, sel de la limitation de débit, dossier des
       données. Procédure complète dans `.env.example`.
-      **À ne jamais écrire dans le dépôt, ni envoyer par message.**
+      *L'adresse de destination est arrêtée depuis le 01/09/2026, mais elle
+      n'est écrite nulle part dans le dépôt : celui-ci est public, une adresse
+      versionnée est récoltée par les robots, et elle resterait dans
+      l'historique Git même effacée ensuite. La reprendre du brief au moment
+      de renseigner `config.php`.*
+      **Le sel de la limitation de débit ne doit pas non plus être écrit dans
+      le dépôt, ni envoyé par message.**
 
-- [ ] **Tester les formulaires une fois en ligne**
+- [ ] **Tester les formulaires une fois en ligne — TOUJOURS NON TESTÉ**
       Ils n'ont jamais été exécutés : aucun interpréteur PHP n'existe sur la
-      machine de développement. Procédure de test en cinq points dans
+      machine de développement, et le domaine n'a pas encore d'hébergement.
+      La revue statique est passée à chaque version, mais **une revue statique
+      n'est pas un e-mail reçu**. Procédure de test en cinq points dans
       `V4_HANDOFF.md`, section 12.
+      À vérifier au premier déploiement :
+      - contact → un e-mail arrive bien à l'adresse de destination ;
+      - préinscription → un e-mail arrive, et la ligne est écrite dans
+        `preinscriptions.csv` avec ses six colonnes ;
+      - un certificat de Valentin Blondiau est accepté par la validation
+        serveur comme les dix autres.
 
 - [ ] **Accès Hostinger** — à transmettre par un canal sécurisé,
       **jamais par e-mail ou message**, et jamais enregistré dans le dépôt.

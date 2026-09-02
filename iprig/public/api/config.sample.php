@@ -27,8 +27,11 @@ return [
 
     /**
      * Expéditeur technique. DOIT appartenir au domaine du site, sinon SPF et
-     * DKIM échouent et les messages partent en indésirable. Par défaut :
-     * `no-reply@` + le domaine servi.
+     * DKIM échouent et les messages partent en indésirable.
+     *
+     * Laissée vide ou invalide, cette valeur est ignorée et remplacée par
+     * `no-reply@iprig.fr` (constante `MAIL_FROM_DEFAUT` de `_lib.php`) : un
+     * oubli ici ne casse donc pas silencieusement tous les envois.
      */
     'MAIL_FROM' => 'no-reply@iprig.fr',
 
@@ -40,8 +43,15 @@ return [
      * ⚠ IL DOIT ÊTRE HORS DE `public_html`. Placé dedans, le fichier des
      * préinscriptions serait téléchargeable par quiconque devine son nom.
      *
+     * ⚠ CHEMIN ABSOLU UNIQUEMENT (`/home/uXXXXXXX/domains/iprig.fr/iprig-data`).
+     * Un chemin relatif serait résolu contre le dossier de travail du
+     * processus PHP, que l'hébergeur choisit : il est donc ignoré, avec une
+     * ligne dans le journal PHP, et le défaut ci-dessous reprend la main.
+     *
      * Laisser vide pour utiliser le défaut : le dossier `iprig-data` situé
-     * juste au-dessus de la racine web.
+     * juste au-dessus de la racine web. C'est le réglage recommandé — il est
+     * correct sur les deux dispositions Hostinger (domaine principal et
+     * domaine additionnel) sans rien avoir à saisir.
      */
     'STORAGE_DIR' => '',
 

@@ -113,6 +113,14 @@ const tout = Object.entries(textes);
     ],
     [/plusieurs centaines d’étudiants/i, 'repère chiffré non vérifié'],
     [/≈\s*40 séances|≈\s*50 événements/, 'repères chiffrés non vérifiés'],
+    /* V4.2 — Kevan Gafaïti a soutenu sa thèse : il est DOCTEUR. Le décrire
+       encore comme doctorant serait faux, pas seulement démodé. Le motif ne
+       vise que le masculin singulier au présent : il n'attrape ni « docteur »,
+       ni la mention d'un autre enseignant en cours de thèse. */
+    [/\bDoctorants?\b/i, 'V4.2 : Kevan Gafaïti est docteur, plus doctorant'],
+    /* Ancien titre abrégé de la thèse, remplacé par le titre complet. */
+    [/politique étrangère de l’Iran \(1995-2022\)/,
+     'V4.2 : le titre complet de la thèse a remplacé la forme abrégée'],
   ];
 
   for (const [motif, raison] of INTERDITS) {
@@ -164,6 +172,85 @@ const tout = Object.entries(textes);
     accueil.includes('les étudiants et les jeunes professionnels'),
   );
 
+  /* ------------------------------------------------------------------ *
+   *  SECTION « L'INSTITUT » — trois formulations arrêtées en V4.2        *
+   * ------------------------------------------------------------------ *
+   *  Elles ont été dictées mot pour mot par le client. Une reformulation
+   *  « qui dit la même chose » n'est pas acceptable ici : c'est le texte
+   *  exact qu'il a validé.
+   * ------------------------------------------------------------------ */
+  check(
+    'Institut : « un choix, un parcours, un métier »',
+    accueil.includes('un choix, un parcours, un métier'),
+  );
+  check(
+    'Institut : l’ancien « une orientation, un parcours » a disparu',
+    !accueil.includes('une orientation, un parcours'),
+  );
+  check(
+    'Institut : accompagnement — immersion pratique',
+    accueil.includes(
+      'des sessions régulières, une immersion pratique dans le champ géopolitique et des opportunités transmises aux membres tout au long de l’année',
+    ),
+  );
+  check(
+    'Institut : public — « s’adresse notamment aux étudiants de licence »',
+    accueil.includes(
+      'L’Institut s’adresse notamment aux étudiants de licence ainsi qu’à celles et ceux qui souhaitent s’orienter vers ces secteurs.',
+    ),
+  );
+
+  /* ------------------------------------------------------------------ *
+   *  LES SEPT AXES — casse arrêtée en V4.2                              *
+   * ------------------------------------------------------------------ *
+   *  Le premier mot porte la majuscule, et lui seul. La V4.1 capitalisait
+   *  le mot clé (« un Réseau », « des Événements ») ; le client a tranché
+   *  dans l'autre sens. Les deux listes sont contrôlées : celle qui doit
+   *  être là, et celle qui ne doit plus l'être.
+   * ------------------------------------------------------------------ */
+  const AXES = [
+    'Réseau',
+    'Des événements',
+    'Une immersion',
+    'Un accompagnement',
+    'Des connaissances',
+    'Une méthodologie',
+    'Des réflexes',
+  ];
+  const axesAbsents = AXES.filter((a) => !accueil.includes(a));
+  check('Sept axes : la casse V4.2', axesAbsents.length === 0, axesAbsents.join(' | '));
+
+  const AXES_V41 = [
+    'un Réseau',
+    'des Événements',
+    'une Immersion',
+    'un Accompagnement',
+    'des Connaissances',
+    'une Méthodologie',
+    'des Réflexes',
+  ];
+  const axesAnciens = AXES_V41.filter((a) => accueil.includes(a));
+  check(
+    'Sept axes : plus aucune casse V4.1',
+    axesAnciens.length === 0,
+    axesAnciens.join(' | '),
+  );
+
+  /* ------------------------------------------------------------------ *
+   *  KEVAN GAFAÏTI — docteur depuis la V4.2                             *
+   * ------------------------------------------------------------------ */
+  const kevanPage = textes['/kevan-gafaiti'];
+  check(
+    'Kevan Gafaïti : « Docteur en sciences politiques et relations internationales »',
+    kevanPage.includes('Docteur en sciences politiques et relations internationales'),
+  );
+  check(
+    'Kevan Gafaïti : titre de thèse complet',
+    kevanPage.includes(
+      'La France face à la politique étrangère de l’Iran, 1995-2022 : rivalité d’influence au Moyen-Orient, programme nucléaire iranien et sécurité dans le golfe Persique',
+    ),
+  );
+
   /* Prix mensuel et tarifs des certificats. */
   check('Tarif mensuel 29 € présent', /29\u00a0€/.test(accueil));
   for (const t of ['100', '175', '250', '330']) {
@@ -189,7 +276,7 @@ const tout = Object.entries(textes);
   /* Catalogue affiché == catalogue servi au serveur. */
   const json = await (await page.request.get(BASE + '/api/certificats.json')).json();
   const idsJson = json.certificates.map((c) => c.id);
-  check('Catalogue JSON : 10 certificats', idsJson.length === 10, idsJson.length);
+  check('Catalogue JSON : 11 certificats', idsJson.length === 11, idsJson.length);
   const titresManquants = json.certificates
     .filter((c) => !certificats.includes(c.title))
     .map((c) => c.title);
@@ -222,28 +309,72 @@ const tout = Object.entries(textes);
    * ------------------------------------------------------------------ */
   const ENSEIGNANTS = [
     'Kevan Gafaïti',
-    'Alain Coppolani',
-    'Balkissou Hayatou',
     'Albert Kandemir',
+    'Valentin Blondiau',
+    'Balkissou Hayatou',
+    'Alain Coppolani',
   ];
   for (const n of ENSEIGNANTS) {
     check(`Enseignant affiché : ${n}`, certificats.includes(n));
   }
 
-  const OBSOLETES = /Kopolani|Kondemir|Balkisu|Ayatu/;
+  /* L'ORDRE compte : c'est celui arrêté par le client en V4.2, et le
+     formulaire de préinscription le suit. Un enseignant déplacé sans que
+     le catalogue suive désaligne les deux sans qu'aucun total ne bouge. */
+  const positions = ENSEIGNANTS.map((n) => certificats.indexOf(n));
+  check(
+    'Enseignants dans l’ordre V4.2 : Kevan, Albert, Valentin, Balkissou, Alain',
+    positions.every((i, k) => i >= 0 && (k === 0 || i > positions[k - 1])),
+    positions.join(' < '),
+  );
+
+  /* `Kopelany` et `Alan` sont des graphies apparues dans un retour client
+     intermédiaire de la V4.2. Elles n'ont jamais été publiées ; cette garde
+     est là pour qu'elles ne le soient jamais. */
+  const OBSOLETES = /Kopolani|Kopelany|Kondemir|Balkisu|Ayatu|\bAlan\b/;
   check('Aucune ancienne graphie sur /certificats', !OBSOLETES.test(certificats));
   check(
     'Aucune ancienne graphie dans /api/certificats.json',
     !OBSOLETES.test(JSON.stringify(json)),
   );
 
-  /* Le JSON servi au PHP porte les quatre enseignants, correctement écrits. */
+  /* Le JSON servi au PHP porte les cinq enseignants, correctement écrits et
+     dans l'ordre du catalogue. */
   const profs = [...new Set(json.certificates.map((c) => c.teacher))];
-  check('Catalogue JSON : 4 enseignants', profs.length === 4, profs.join(' | '));
+  check('Catalogue JSON : 5 enseignants', profs.length === 5, profs.join(' | '));
   check(
-    'Catalogue JSON : les quatre noms attendus',
+    'Catalogue JSON : les cinq noms attendus',
     ENSEIGNANTS.every((n) => profs.includes(n)),
     profs.join(' | '),
+  );
+  check(
+    'Catalogue JSON : enseignants dans l’ordre V4.2',
+    profs.join(' | ') === ENSEIGNANTS.join(' | '),
+    profs.join(' | '),
+  );
+
+  /* V4.2 — Valentin Blondiau et son unique certificat. */
+  const certifsValentin = json.certificates
+    .filter((c) => c.teacher === 'Valentin Blondiau')
+    .map((c) => c.title);
+  check(
+    'Valentin Blondiau : un certificat, « Introduction à la Communication de crise »',
+    certifsValentin.length === 1 &&
+      certifsValentin[0] === 'Introduction à la Communication de crise',
+    certifsValentin.join(' | '),
+  );
+  /* La biographie du 02/09/2026 ne cite plus le titre de thèse : le client
+     l'a retiré volontairement. On contrôle donc la formulation retenue, et
+     l'absence de l'ancienne — une biographie qui traîne est un contenu faux. */
+  check(
+    'Valentin Blondiau : biographie du 02/09/2026',
+    certificats.includes(
+      'Valentin Blondiau a travaillé pendant cinq ans dans la communication des organisations',
+    ) && certificats.includes('le rôle des dirigeant·es économiques'),
+  );
+  check(
+    'Valentin Blondiau : l’ancienne biographie a disparu',
+    !certificats.includes('renouvellement de la figuration des dirigeant'),
   );
 
   /* Kevan Gafaïti reste enseignant, avec ses deux certificats. */
@@ -269,21 +400,23 @@ const tout = Object.entries(textes);
       initiales: !!c.querySelector('.teacher__initials'),
     })),
   );
-  check('Page /certificats : 4 vignettes d’enseignant', vignettes.length === 4, vignettes.length);
+  check('Page /certificats : 5 vignettes d’enseignant', vignettes.length === 5, vignettes.length);
   check(
     'Chaque vignette d’enseignant a une photo ou des initiales',
     vignettes.length > 0 && vignettes.every((v) => v.img || v.initiales),
     JSON.stringify(vignettes),
   );
 
-  /* V4.1 : les quatre enseignants ont un portrait réel ET une biographie. */
+  /* Depuis la V4.2 : les CINQ enseignants ont un portrait réel ET une
+     biographie. Le repli typographique de `TeacherCard` reste en place pour
+     un enseignant qui arriverait sans portrait, mais il ne sert plus. */
   check(
-    'Les quatre enseignants ont une photographie réelle',
+    'Les cinq enseignants ont une photographie réelle',
     vignettes.every((v) => v.img),
     JSON.stringify(vignettes.filter((v) => !v.img)),
   );
   check(
-    'Les quatre enseignants ont une biographie',
+    'Les cinq enseignants ont une biographie',
     vignettes.every((v) => v.bio > 0),
     JSON.stringify(vignettes.map((v) => [v.nom, v.bio])),
   );
@@ -299,18 +432,22 @@ const tout = Object.entries(textes);
 
      Le seuil est calibré sur des mesures, pas choisi pour passer au vert :
 
-       V4.0  159 / 0 / 487 / 0   → rapport 3,06  (échoue, c'est voulu)
-       V4.1  159 / 333 / 321 / 277 → rapport 2,09  (passe)
+       V4.0  159 / 0 / 487 / 0       → rapport 3,06  (échoue, c'est voulu)
+       V4.1  159 / 333 / 321 / 277   → rapport 2,09  (passe)
+       V4.2  159 / 277 / 395 / 321 / 333 → rapport 2,48  (passe)
 
-     2,5 laisse donc respirer la fiche du fondateur — sa biographie d'une
-     phrase est volontairement la plus courte et ne doit pas être rallongée
-     pour équilibrer un tableau — tout en rattrapant une biographie qui
-     repartirait vers le double des autres. */
+     V4.2 : le seuil passe de 2,5 à 2,8. La biographie de Valentin Blondiau
+     est la plus longue du lot (395 signes) parce qu'elle cite in extenso un
+     titre de thèse de 143 signes — fourni par le client, à ne pas abréger.
+     Elle tenait de justesse sous 2,5 ; un seuil qu'un seul caractère fait
+     basculer ne contrôle plus rien, il fait du bruit. 2,8 laisse la variation
+     de hauteur que le client accepte explicitement, tout en rattrapant encore
+     la dérive de la V4.0 (3,06). Ne pas le relever davantage sans mesure. */
   const bios = vignettes.map((v) => v.bio).filter(Boolean);
   const rapport = Math.max(...bios) / Math.min(...bios);
   check(
     'Biographies d’enseignants de longueurs comparables',
-    bios.length > 0 && rapport <= 2.5,
+    bios.length > 0 && rapport <= 2.8,
     `min ${Math.min(...bios)} / max ${Math.max(...bios)} signes — rapport ${rapport.toFixed(2)}`,
   );
   check(

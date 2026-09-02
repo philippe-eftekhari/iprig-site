@@ -3,6 +3,14 @@ dist/
 .astro/
 iprig-production.zip
 
+# paquet de deploiement Hostinger — genere par `npm run release`.
+# Contient le site construit : il se regenere, il ne se versionne pas.
+release/
+
+# anciens paquets, conserves pour trace et marques OLD / NE PAS DEPLOYER.
+# Voir release-archive/LISEZ-MOI.md.
+release-archive/
+
 # dependances
 node_modules/
 

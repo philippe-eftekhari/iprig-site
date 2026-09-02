@@ -44,10 +44,20 @@ const {
         rester synchronisée avec `--color-navy-deep` dans global.css. */}
     <meta name="theme-color" content="#071d30" />
 
-    {/* V4 : le losange provisoire laisse la place au logo IPRIG réel.
-        Les fichiers sont produits par `node scripts/prepare-assets.mjs` à
-        partir de `iprig-logo-cercle.png`. Fond transparent, sauf l'icône iOS
-        que le système pose sans arrière-plan. */}
+    {/* Le logo officiel de l'IPRIG, et lui seul. Les fichiers sont produits
+        par `node scripts/prepare-assets.mjs` à partir de
+        `iprig-logo-cercle.png` : colonne blanche, arc vert, étoile bleue sur
+        le rond marine. Fond transparent, sauf l'icône iOS que le système
+        pose sans arrière-plan.
+
+        V4.2 — `favicon.svg`, le losange laiton dessiné pour la V3.1, a été
+        SUPPRIMÉ du dépôt. Il n'était plus référencé ici depuis la V4.0 mais
+        continuait de partir dans le paquet de déploiement ; le script de
+        release le refuse désormais.
+
+        ⚠ Un navigateur garde les favicons longtemps. Après mise en ligne,
+        contrôler l'onglet en navigation privée ou après un rechargement
+        forcé — sinon c'est le cache, pas le site, que l'on regarde. */}
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="icon" href="/favicon-192.png" type="image/png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

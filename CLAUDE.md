@@ -67,5 +67,6 @@ kevan-gafaiti-digital/
     ├── CLAUDE.md                règles propres au projet IPRIG
     ├── README.md                installation et où modifier quoi
     ├── CONTENT_TODO.md          ce que Kevan doit encore fournir
-    └── DEPLOY_HOSTINGER.md      procédure de mise en ligne
+    ├── DEPLOY_HOSTINGER.md      phases B et C de la mise en ligne, retour arrière
+    └── RELEASE_PHASE_A.md       audit de préparation du paquet Hostinger
 ```

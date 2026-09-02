@@ -1,7 +1,7 @@
 {
   "name": "iprig-site",
   "type": "module",
-  "version": "1.0.0",
+  "version": "4.2.0",
   "private": true,
   "description": "Site officiel de l'IPRIG — Institut de preparation aux relations internationales et a la geopolitique",
   "scripts": {
@@ -9,6 +9,8 @@
     "start": "astro dev",
     "build": "astro check && astro build",
     "build:fast": "astro build",
+    "release": "npm run build && node scripts/package-release.mjs",
+    "release:only": "node scripts/package-release.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "og": "node scripts/build-og-image.mjs",

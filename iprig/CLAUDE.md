@@ -82,20 +82,27 @@ Reprendre `content-integrity` intégralement. En résumé :
   d'étudiants », « ≈ 75 000 abonnés ») ont été retirés en V4. Ne les
   réintroduire qu'avec une mesure datée.
 
-### Noms propres — arrêtés en V4.1, ne plus les rouvrir
+### Noms propres — arrêtés en V4.1, complétés en V4.2, ne plus les rouvrir
 
 Ce sont des personnes réelles. Les graphies ci-dessous ont été confirmées par
 le client et closent les hésitations des briefs antérieurs :
 
 | Graphie correcte | Anciennes graphies, à ne jamais réintroduire |
 |---|---|
-| **Alain Coppolani** | ~~Alain Kopolani~~ |
+| **Alain Coppolani** | ~~Alain Kopolani~~, ~~Alan Kopelany~~ |
 | **Albert Kandemir** | ~~Albert Kondemir~~ |
+| **Valentin Blondiau** | — |
 | **Balkissou Hayatou** | ~~Balkisu Ayatu~~, ~~Hayatou Balkissou~~ |
 | **Kevan Gafaïti** | — |
 
-`qa-content.mjs` échoue si `Kopolani`, `Kondemir`, `Balkisu` ou `Ayatu`
-réapparaît dans le site construit ou dans `/api/certificats.json`.
+`qa-content.mjs` échoue si `Kopolani`, `Kopelany`, `Kondemir`, `Balkisu`,
+`Ayatu` ou `Alan` réapparaît dans le site construit ou dans
+`/api/certificats.json`.
+
+**L'ORDRE des enseignants est lui aussi arrêté** — Kevan Gafaïti, Albert
+Kandemir, Valentin Blondiau, Balkissou Hayatou, Alain Coppolani. Il vaut pour
+les vignettes, le catalogue et les cases du formulaire de préinscription, qui
+lisent tous les trois `src/data/certificats.ts`. `qa-content.mjs` le vérifie.
 
 ⚠ **« Keyvan » et « Kevan Gafaïti » sont DEUX PERSONNES DIFFÉRENTES.**
 Une consigne demandant de retirer « Keyvan » ne concerne **jamais** Kevan
@@ -106,10 +113,28 @@ transformer automatiquement l'un en l'autre, ne jamais le supprimer.
 
 ### Les certificats se comptent
 
-Quatre enseignants, dix certificats — Kevan 2, Alain 2, Balkissou 2,
-Albert 4. La page affiche « 10 certificats au catalogue » : ce nombre est
-juste et se déduit de `src/data/certificats.ts`. `qa-content.mjs` vérifie
-les deux totaux à chaque passage.
+**Cinq enseignants, onze certificats** — Kevan 2, Albert 4, Valentin 1,
+Balkissou 2, Alain 2. La page affiche « 11 certificats au catalogue » : ce
+nombre n'est écrit nulle part, il se déduit de `src/data/certificats.ts`.
+`qa-content.mjs` vérifie les deux totaux à chaque passage, et `qa-forms.mjs`
+que le formulaire propose bien onze cases.
+
+⚠ **Onze certificats au catalogue ne crée aucune tranche tarifaire.** Les
+tarifs restent 1 → 100 €, 2 → 175 €, 3 → 250 €, 4 → 330 €. Ne pas extrapoler
+un cinquième palier : il n'a jamais été validé.
+
+### Kevan Gafaïti est DOCTEUR, plus doctorant
+
+Depuis la V4.2 : « **Docteur en sciences politiques et relations
+internationales** », Université Paris-Panthéon-Assas. Le titre de sa thèse
+s'affiche en entier, en italique, et ne doit être ni abrégé ni résumé :
+
+> La France face à la politique étrangère de l'Iran, 1995-2022 : rivalité
+> d'influence au Moyen-Orient, programme nucléaire iranien et sécurité dans
+> le golfe Persique
+
+`qa-content.mjs` échoue si le mot « doctorant » réapparaît dans le site
+construit, ou si l'ancien titre abrégé « (1995-2022) » y revient.
 
 ## Direction artistique
 
@@ -289,12 +314,31 @@ npm run assets   # après tout ajout ou changement de source
   emplacements passent en horizontal.
 - `showPendingMediaLabels` (`src/data/site.ts`) vaut `false` depuis la V4 :
   plus aucun emplacement n'est vide.
+- **Le rythme visuel de l'accueil compte autant que les images.** Depuis la
+  V4.2 : Kevan (hero) → une salle et son public (aperçu du programme) → Kevan
+  (fondateur). Ne pas remplacer l'image du milieu par un troisième portrait —
+  c'est précisément ce que le client a demandé de corriger.
+- `Kevan-10`, employée à l'aperçu du programme, est **la première photographie
+  du site où des tiers apparaissent**. Les droits ne sont pas encore confirmés
+  (`CONTENT_TODO.md`). Repli sans tiers : `Kevan-12`.
 - Les vignettes d'enseignants (`TeacherCard.astro`) résolvent leur portrait par
   `import.meta.glob` : déposer le fichier et renseigner `photo` suffit. Sans
   portrait, les initiales tiennent le même cadre — la page ne bouge pas d'un
   pixel quand la photographie arrive.
 
 Sélection retenue, non retenues et raisons : `V4_HANDOFF.md`, section 4.
+
+### Favicon
+
+Les onglets affichent le **logo officiel de l'IPRIG** : colonne blanche, arc
+vert et étoile bleue sur le rond marine, dérivé de `iprig-logo-cercle.png` par
+`prepare-assets.mjs` en 32 / 180 / 192 / 512 px.
+
+⚠ `favicon.svg` — le losange laiton dessiné pour la V3.1 — a été **supprimé en
+V4.2** et figure désormais dans la liste des fichiers interdits de
+`package-release.mjs`. Ne pas le recréer. Un navigateur garde les favicons
+longtemps : contrôler l'onglet en navigation privée après une mise en ligne,
+sinon c'est le cache que l'on regarde, pas le site.
 
 ## QA
 
@@ -331,5 +375,20 @@ en cinq points dans `V4_HANDOFF.md`, section 12.
 
 ## Déploiement
 
-Hostinger, statique, `dist/` → `public_html/`. Voir `DEPLOY_HOSTINGER.md`.
-Le `.htaccess` livré est dans `public/`. Aucun identifiant dans le dépôt.
+Hostinger. **Le site n'est plus purement statique** : `dist/` → `public_html/`,
+plus un `config.php` créé sur le serveur et un dossier `iprig-data/` **hors de
+la racine web**. Le `.htaccess` livré est dans `public/` — sans lui, 7 pages sur
+8 renvoient 404. Aucun identifiant dans le dépôt.
+
+```bash
+npm run release   # build + vérification + release/iprig-v<version>-public_html.zip
+```
+
+Le script refuse de produire l'archive si un fichier requis manque, si un
+fichier interdit s'y trouve (`src/`, `.env`, `config.php`, `*.csv`, `*.md`…),
+si une adresse e-mail non tolérée y apparaît, ou si un PHP porte un BOM.
+
+| Document | Contenu |
+|---|---|
+| `DEPLOY_HOSTINGER.md` | procédure phase B (mise en place), phase C (tests), retour arrière |
+| `RELEASE_PHASE_A.md` | audit : cartographie public/privé, endpoints, chemins, inventaire |

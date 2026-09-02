@@ -63,6 +63,32 @@ npm run preview
 
 Sert le contenu de `dist/` exactement comme le fera l'hébergeur.
 
+### 5. Fabriquer le paquet à mettre en ligne
+
+```bash
+npm run release
+```
+
+Construit le site **et** vérifie son contenu, puis écrit dans `release/` :
+
+- `iprig-v<version>-public_html.zip` — à extraire à la racine de `public_html` ;
+- `MANIFEST.txt` — inventaire exact, avec la taille et l'empreinte SHA-256 de
+  chaque fichier ;
+- `private/` — le garde-fou du dossier de données privé.
+
+Le script **refuse d'écrire l'archive** si un fichier requis manque, si un
+fichier qui n'a rien à faire sur un serveur public s'y trouve (`src/`, `.env`,
+`config.php`, un `.csv`, un `.md`…), si une adresse e-mail non tolérée y
+apparaît, ou si un fichier PHP porte un BOM UTF-8.
+
+La suite — souscription, téléversement, configuration serveur, tests de
+production et retour arrière — est dans **`DEPLOY_HOSTINGER.md`**.
+
+> ⚠ Le site n'est plus purement statique depuis la V4 : deux formulaires sont
+> servis par des fichiers PHP. Le déploiement demande donc, en plus des
+> fichiers, un `config.php` créé sur le serveur et un dossier de données placé
+> **hors de la racine web**.
+
 ---
 
 ## Où modifier quoi
@@ -163,7 +189,15 @@ Quand le logo définitif arrivera :
 Le logo est utilisé dans l'en-tête, le pied de page et le menu mobile : le
 changer à un seul endroit suffit.
 
-Le favicon (petite icône dans l'onglet) est dans `public/favicon.svg`.
+Le favicon (petite icône dans l'onglet) n'est pas un fichier à éditer : il
+est **dérivé du logo officiel** par `npm run assets`, qui écrit
+`public/favicon-32.png`, `favicon-192.png`, `favicon-512.png` et
+`apple-touch-icon.png`. Changer le logo change donc le favicon, sans rien
+faire de plus.
+
+⚠ `public/favicon.svg` — le losange dessiné des premières versions — a été
+supprimé en V4.2 et ne doit pas être recréé : `npm run release` refuse
+désormais tout paquet qui en contiendrait un.
 
 ---
 
