@@ -220,16 +220,17 @@ export const pendingSocialLinks = socialLinks.filter((s) => s.url === null);
  * côtés avec des adresses différentes : ne jamais fusionner les deux
  * listes, ne jamais remplacer une URL de l’une par une URL de l’autre.
  *
- * L’adresse Instagram est conservée TELLE QUE TRANSMISE, paramètre `igsi`
- * compris. C’est une exception assumée à la mise en forme canonique
- * appliquée plus haut aux liens Spotify et LinkedIn de KevanExplique : le
- * client a fourni cette URL exacte, elle n’est pas réécrite.
+ * L’adresse Instagram est sous sa forme CANONIQUE, comme les liens Spotify
+ * et LinkedIn de KevanExplique plus haut. Le client avait d’abord transmis
+ * une adresse de partage portant un paramètre de session (`?igsi=…`) ; il a
+ * demandé sa forme canonique le 02/09/2026. Même compte, même destination,
+ * sans le jeton de session — qui n’a rien à faire dans un lien publié.
  */
 export const iprigSocialLinks: SocialLink[] = [
   {
     id: 'instagram',
     label: 'Instagram',
-    url: 'https://www.instagram.com/iprig.officiel?igsi=MThzaHdlc2x5dnRicA==',
+    url: 'https://www.instagram.com/iprig.officiel/',
   },
   {
     id: 'linkedin',

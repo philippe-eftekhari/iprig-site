@@ -673,9 +673,8 @@ const tout = Object.entries(textes);
     'podcasts.apple.com/podcast/id6801282142',
   ];
 
-  /** Comptes officiels de l'IPRIG — URL exactes transmises par le client. */
-  const IPRIG_INSTAGRAM =
-    'https://www.instagram.com/iprig.officiel?igsi=MThzaHdlc2x5dnRicA==';
+  /** Comptes officiels de l'IPRIG — adresses canoniques validées par le client. */
+  const IPRIG_INSTAGRAM = 'https://www.instagram.com/iprig.officiel/';
   const IPRIG_LINKEDIN = 'https://www.linkedin.com/company/iprig';
 
   /** Tous les liens KevanExplique de la page : le bloc IPRIG est écarté. */
@@ -764,6 +763,14 @@ const tout = Object.entries(textes);
     'Pied de page : libellé visible « Instagram »',
     instaIprig?.texte.startsWith('Instagram'),
     instaIprig?.texte,
+  );
+  /* L'adresse de partage d'origine portait un paramètre de session `igsi`.
+     Le client a demandé la forme canonique : ce jeton ne doit plus reparaître
+     nulle part sur le site, ni dans ce lien ni ailleurs. */
+  check(
+    'Pied de page : plus aucun paramètre de session dans le lien Instagram',
+    !instaIprig?.href.includes('igsi='),
+    instaIprig?.href,
   );
 
   check('Pied de page : LinkedIn de l’IPRIG présent', Boolean(linkedinIprig));
