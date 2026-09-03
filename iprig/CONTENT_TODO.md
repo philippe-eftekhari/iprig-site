@@ -41,9 +41,10 @@ Cocher au fur et à mesure. **État au 01/09/2026 (V4.2).**
       *La réponse se pose dans `src/data/site.ts → offer.priceDetail`, et dans
       la réponse « Combien coûte l'IPRIG ? » de `src/data/faq.ts`.*
 
-- [ ] **Validation de l'URL Patreon**
-      Confirmer que `patreon.com/KevanExplique` est bien la page d'adhésion à
-      utiliser pour tous les boutons du site.
+- [x] **Validation de l'URL Patreon** ✅
+      Le client a confirmé le 03/09/2026 que l'adhésion se fait désormais sur
+      `patreon.com/IPRIG`. L'ancienne adresse `patreon.com/KevanExplique` ne
+      répond plus et a été retirée du site en V4.3.3.
 
 - [ ] **Informations légales**
       Nom de l'éditeur, forme juridique (association, société, auto-entreprise…),

@@ -11,7 +11,28 @@ import { chromium } from 'playwright-core';
 
 const BASE = process.argv[2] ?? 'http://localhost:4321';
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const PATREON = 'https://www.patreon.com/KevanExplique';
+const PATREON = 'https://www.patreon.com/IPRIG';
+
+/* V4.3.3 — l’adhésion a changé de compte Patreon. L’ancienne adresse ne
+   répond plus : un seul bouton oublié enverrait un visiteur sur une page
+   « introuvable ». On la traque donc par son identifiant, sans casse, pour
+   attraper aussi bien un href qu’un `preconnect` ou un JSON-LD.
+
+   ⚠ Ne vise QUE le compte Patreon. Les comptes sociaux KevanExplique
+   (instagram.com/kevanexplique, tiktok, twitch…) sont ceux de la marque de
+   contenu : ils restent en place et ne sont pas concernés. */
+const PATREON_ANCIEN = /patreon\.com\/kevanexplique/i;
+
+/** Les sept pages publiques du site, dans l’ordre du plan. */
+const PAGES_PUBLIQUES = [
+  '/',
+  '/programme',
+  '/certificats',
+  '/kevan-gafaiti',
+  '/contact',
+  '/mentions-legales',
+  '/politique-confidentialite',
+];
 
 const results = [];
 const check = (name, ok, detail = '') =>
@@ -152,6 +173,38 @@ const browser = await chromium.launch({ executablePath: CHROME, headless: true }
     ancresManquantes.length === 0,
     ancresManquantes.join(', '),
   );
+
+  await page.close();
+}
+
+/* ======================================== 1 bis. PATREON PARTOUT ====
+   La section 1 ne regarde que l’accueil. Le CTA Patreon, lui, est repris
+   par le header, le pied de page et l’affiche de clôture : il apparaît donc
+   sur les sept pages. Un changement d’adresse doit être vérifié sur toutes,
+   sans quoi une page oubliée continue d’envoyer vers un compte mort. */
+{
+  const page = await browser.newPage();
+  const mauvais = [];
+  const residus = [];
+  let total = 0;
+
+  for (const chemin of PAGES_PUBLIQUES) {
+    const reponse = await page.goto(BASE + chemin, { waitUntil: 'domcontentloaded' });
+
+    const liens = await page.evaluate(() =>
+      [...document.querySelectorAll('a[href*="patreon.com"]')].map((a) => a.href),
+    );
+    total += liens.length;
+    for (const href of liens) if (href !== PATREON) mauvais.push(`${chemin} → ${href}`);
+
+    // Le HTML brut, pas seulement les ancres : `preconnect`, JSON-LD et
+    // métadonnées passeraient sinon entre les mailles.
+    if (PATREON_ANCIEN.test(await reponse.text())) residus.push(chemin);
+  }
+
+  check('Un CTA Patreon sur chacune des sept pages', total >= PAGES_PUBLIQUES.length, `${total} liens`);
+  check('Tous les CTA Patreon pointent vers le compte IPRIG', mauvais.length === 0, mauvais.join(' | '));
+  check("Plus aucune trace de l'ancien compte Patreon", residus.length === 0, residus.join(' | '));
 
   await page.close();
 }
@@ -557,7 +610,7 @@ const browser = await chromium.launch({ executablePath: CHROME, headless: true }
   const page = await browser.newPage();
   const fautes = [];
 
-  for (const chemin of ['/', '/programme', '/certificats', '/kevan-gafaiti', '/contact', '/mentions-legales', '/politique-confidentialite']) {
+  for (const chemin of PAGES_PUBLIQUES) {
     await page.goto(BASE + chemin, { waitUntil: 'domcontentloaded' });
     const trouvees = await page.evaluate(() => {
       const out = [];

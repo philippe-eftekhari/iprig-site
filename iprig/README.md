@@ -304,7 +304,7 @@ installé sur la machine, aucun téléchargement) :
 
 | Commande | Ce qu'elle vérifie |
 |---|---|
-| `npm run qa:tests` | 81 tests : liens Patreon, liens internes, ancres, menu mobile au clavier, Échap, FAQ, skip link, barre de progression, métadonnées, sitemap, JSON-LD, site sans JavaScript |
+| `npm run qa:tests` | 88 tests : liens Patreon (toutes pages, ancien compte interdit), liens internes, ancres, menu mobile au clavier, Échap, FAQ, skip link, barre de progression, métadonnées, sitemap, JSON-LD, site sans JavaScript |
 | `npm run qa:screens` | captures pleine page de 7 pages en 6 formats dans `screenshots/`, plus débordement horizontal, erreurs console, `alt` manquants, hiérarchie des titres, cibles tactiles |
 | `npm run qa:perf` | poids réel des pages, nombre de requêtes, poids du JavaScript, temps de chargement |
 | `npm run qa:header` | rendu de l'en-tête à différentes positions de défilement, et menu mobile ouvert |

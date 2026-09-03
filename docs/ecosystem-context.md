@@ -36,7 +36,7 @@ du site.
 
 ### Modèle économique
 
-L'adhésion passe **entièrement par Patreon** : `patreon.com/KevanExplique`.
+L'adhésion passe **entièrement par Patreon** : `patreon.com/IPRIG`.
 Tarif : 28,80 € + TVA, soit environ 29 € par mois. Une seule formule.
 Aucun engagement de durée.
 

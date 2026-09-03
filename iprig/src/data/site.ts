@@ -70,8 +70,13 @@ export const offer = {
   /**
    * Destination de TOUS les boutons d’inscription du site.
    * Une seule ligne à changer si l’adresse Patreon évolue.
+   *
+   * V4.3.3 — le client a déplacé l’adhésion sur le compte « IPRIG ».
+   * L’ancienne adresse « KevanExplique » ne répond plus côté Patreon. Elle
+   * n’a rien à voir avec les comptes sociaux KevanExplique plus bas dans ce
+   * fichier, qui restent ceux de la marque de contenu et ne changent pas.
    */
-  patreonUrl: 'https://www.patreon.com/KevanExplique',
+  patreonUrl: 'https://www.patreon.com/IPRIG',
 
   /** Prix affiché au visiteur, arrondi. */
   priceDisplay: '29 €',
